@@ -1,0 +1,22 @@
+$body-bg: #000;
+$body-color: #111;
+
+$theme-colors: (
+  'custom-color': rgb(32, 28, 28),
+  'secret': #100c2a,
+  'selected': #5e30af,
+);
+
+@function color($key: 'blue') {
+  @return map-get($colors, $key);
+}
+
+@function theme-color($key: 'primary') {
+  @return map-get($theme-colors, $key);
+}
+
+@function gray($key: '100') {
+  @return map-get($grays, $key);
+}
+
+@import '../node_modules/bootstrap/scss/bootstrap';

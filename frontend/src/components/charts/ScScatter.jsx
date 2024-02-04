@@ -1,0 +1,1600 @@
+import React, { useRef, useState, useEffect } from 'react'
+import * as echarts from 'echarts'
+import PropTypes from 'prop-types'
+import '../theme/dark'
+import '../theme/vintage'
+import {
+  GraphicComponent,
+  GridComponent,
+  LegendComponent,
+  TooltipComponent,
+} from 'echarts/components'
+import { LineChart } from 'echarts/charts'
+import { UniversalTransition } from 'echarts/features'
+import { CanvasRenderer } from 'echarts/renderers'
+import axios from 'axios'
+import saveAs from 'file-saver'
+import * as hdf5 from 'jsfive'
+import {
+  ConfigProvider,
+  Button,
+  Card,
+  Space,
+  Popconfirm,
+  Input,
+  Select,
+  notification,
+  Popover,
+  Upload,
+  Segmented,
+  InputNumber,
+  Slider,
+  Switch,
+  Col,
+  Row,
+  Form,
+} from 'antd'
+import {
+  CheckOutlined,
+  CloseOutlined,
+  CloudDownloadOutlined,
+  DeleteOutlined,
+  FormOutlined,
+  ReloadOutlined,
+  SettingOutlined,
+  SlidersOutlined,
+  UploadOutlined,
+  InboxOutlined,
+} from '@ant-design/icons'
+import SeriesGallery from '../utils/SeriesGallery'
+echarts.use([
+  GraphicComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  LineChart,
+  CanvasRenderer,
+  UniversalTransition,
+])
+const { Dragger } = Upload
+
+const ScScatter = ({ theme, height, width, margin }) => {
+  const [api, contextHolder] = notification.useNotification()
+  const [isInit, setInit] = useState(false) // whether echart object is inited
+  const chartRef = useRef(null) // current DOM container
+  const [_data, _setData] = useState(
+    require('../../assets/data/CID4971-umap-sc.json')
+  )
+  const [seriesArray, setSeriesArray] = useState([])
+  const [nameArray, setNameArray] = useState([])
+  const snumRef = useRef()
+  const datasetRef = useRef()
+  const seriesRef = useRef()
+  const commandRef = useRef()
+  const nameRef = useRef()
+  const brushRef = useRef([])
+  const [brushArray, setBrushArray] = useState([])
+  const [inputValue, setInputValue] = useState('')
+  const [allowConfirm, setAllowConfirm] = useState(false)
+  const [action, setAction] = useState(0)
+  const [deleteValue, setDeleteValue] = useState([])
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [refineValue, setRefineValue] = useState([])
+  const [refineOpen, setRefineOpen] = useState(false)
+  const itemGroupRef = useRef([])
+  const [title, setTitle] = useState('CID4971-umap-sc')
+  const FileLoaderRef = useRef('')
+  const symbolSizeRef = useRef('')
+  const [Uploading, setUploading] = useState(false)
+  const brushMode = useRef('Select')
+  const [brushModeState, setBrushModeState] = useState('Select')
+  const [itemSize, setItemSize] = useState(2)
+  const [itemOpacity, setItemOpacity] = useState(0.8)
+  const prevCluster = useRef('')
+  const [clusterCur, setClusterCur] = useState({})
+  const [embedCur, setEmbedCur] = useState('')
+  const [embedCur1, setEmbedCur1] = useState('')
+  const [clusterOps, setClusterOps] = useState({})
+  const [embedOps, setEmbedOps] = useState({})
+  const [xInv, setxInv] = useState(false)
+  const [yInv, setyInv] = useState(false)
+  const [cellNum, setCellNum] = useState(0)
+  const [refineOption, setRefineOption] = useState([
+    { value: 0, label: 'Eager Refiner'},
+    { value: 1, label: 'Lazy Refiner' },
+    { value: 2, label: 'LabelPropagation'},
+    { value: 3, label: 'LabelSpreading'},
+  ])
+
+  var vega_20 = [
+    '#1f77b4',
+    '#aec7e8',
+    '#ff7f0e',
+    '#ffbb78',
+    '#2ca02c',
+    '#98df8a',
+    '#d62728',
+    '#ff9896',
+    '#9467bd',
+    '#c5b0d5',
+    '#8c564b',
+    '#c49c94',
+    '#e377c2',
+    '#f7b6d2',
+    '#7f7f7f',
+    '#c7c7c7',
+    '#bcbd22',
+    '#dbdb8d',
+    '#17becf',
+    '#9edae5',
+  ]
+
+  vega_20 = [...vega_20, ...vega_20]
+  //var VisualColors = JSON.parse(JSON.stringify(vega_20)).reverse()
+
+  const setItemGroup = (source, annoIdx, type = 'categories') => {
+    let itemGroup = []
+    let annotations = []
+    if (type === 'categories') {
+      annotations = [
+        ...new Set(
+          source.map((item) => {
+            return item[annoIdx]
+          })
+        ),
+      ]
+
+      annotations = annotations.sort()
+      for (let anno of annotations) {
+        itemGroup.push(
+          source
+            .filter((item) => {
+              return item[annoIdx] === anno
+            })
+            .map((item) => item[item.length - 1])
+        )
+      }
+    } else {
+      itemGroup.push(source.map((item) => item[item.length - 1]))
+    }
+
+    itemGroupRef.current = itemGroup
+    return annotations
+  }
+
+  const setBrushedMap = (option, brushed, doPop = true, mode) => {
+    let __datasets = option.dataset
+    let __series = option.series
+    let __encode = __series[0].encode
+    let brushedNum = snumRef.current + 1
+    let popDataset = {}
+    if (doPop) {
+      popDataset = __datasets.pop()
+    } else {
+      // default name for first brush
+      nameRef.current = `annotation ${brushedNum - itemGroupRef.current.length}`
+      seriesRef.current = {
+        type: 'scatter',
+        xAxisIndex: 1,
+        yAxisIndex: 1,
+        symbolSize: symbolSizeRef.current,
+        name: nameRef.current,
+        encode: __encode,
+        large: true,
+        largeThreshold: 5000,
+        datasetIndex: brushedNum,
+      }
+      __series.push(seriesRef.current)
+    }
+    let newBrushed = brushed
+    if (mode === 'Erase') {
+      let prevBrushed = popDataset.transform.config.or.map((item) => {
+        return item['=']
+      })
+      newBrushed = prevBrushed.filter((item) => !brushed.includes(item))
+    } else if (mode === 'Draw' && doPop) {
+      let prevBrushed = popDataset.transform.config.or.map((item) => {
+        return item['=']
+      })
+      newBrushed = [...new Set([...prevBrushed, ...brushed])]
+    } else {
+      newBrushed = brushed
+    }
+    brushRef.current = newBrushed
+    datasetRef.current = {
+      transform: {
+        type: 'filter',
+        config: {
+          or: newBrushed.map((item) => ({
+            dimension: 'id',
+            '=': item,
+          })),
+        },
+      },
+    }
+    __datasets.push(datasetRef.current)
+
+    if (doPop) {
+      return {
+        dataset: __datasets,
+      }
+    } else {
+      return {
+        dataset: __datasets,
+        series: __series,
+      }
+    }
+  }
+
+  const setAxis = (
+    source,
+    dims,
+    xName0,
+    yName0,
+    xName1 = null,
+    yName1 = null
+  ) => {
+    // the axis of left chart
+    let xIdx0 = dims.indexOf(xName0)
+    let yIdx0 = dims.indexOf(yName0)
+    let embd0_x = source.map((item) => {
+      return item[xIdx0]
+    })
+    let embd0_y = source.map((item) => {
+      return item[yIdx0]
+    })
+
+    // the axis of right chart. By default it's as same as the axis in left chart.
+    let xIdx1 = xIdx0
+    let yIdx1 = yIdx0
+    let embd1_x = embd0_x
+    let embd1_y = embd0_y
+    if (xName1 !== null && yName1 !== null) {
+      xIdx1 = dims.indexOf(xName1)
+      yIdx1 = dims.indexOf(yName1)
+      embd1_x = source.map((item) => {
+        return item[xIdx1]
+      })
+      embd1_y = source.map((item) => {
+        return item[yIdx1]
+      })
+    }
+
+    return {
+      xAxis: [
+        {
+          id: 0,
+          gridIndex: 0,
+          name: xName0,
+          nameLocation: 'middle',
+          nameGap: 23,
+          nameTextStyle: {
+            fontSize: 16,
+          },
+          axisLine: {
+            onZero: false,
+          },
+          axisLabel: {
+            fontSize: 14,
+          },
+          position: 'bottom',
+          inverse: xInv,
+          min: Math.ceil(Math.min.apply(null, embd0_x) - 1.5),
+          max: Math.ceil(Math.max.apply(null, embd0_x) + 1.5),
+        },
+        {
+          id: 1,
+          gridIndex: 1,
+          name: xName1,
+          nameLocation: 'middle',
+          nameGap: 23,
+          nameTextStyle: {
+            fontSize: 16,
+          },
+          axisLine: {
+            onZero: false,
+          },
+          axisLabel: {
+            fontSize: 14,
+          },
+          position: 'bottom',
+          inverse: xInv,
+          min: Math.ceil(Math.min.apply(null, embd1_x) - 1.5),
+          max: Math.ceil(Math.max.apply(null, embd1_x) + 1.5),
+        },
+      ],
+      yAxis: [
+        {
+          id: 0,
+          gridIndex: 0,
+          name: yName0,
+          nameLocation: yInv ? 'start' : 'end',
+          nameTextStyle: {
+            fontSize: 16,
+          },
+          axisLine: {
+            onZero: false,
+          },
+          axisLabel: {
+            fontSize: 14,
+          },
+          position: 'left',
+          inverse: yInv,
+          min: Math.ceil(Math.min.apply(null, embd0_y) - 1.5),
+          max: Math.ceil(Math.max.apply(null, embd0_y) + 1.5),
+        },
+        {
+          id: 1,
+          gridIndex: 1,
+          name: yName1,
+          nameLocation: yInv ? 'start' : 'end',
+          nameTextStyle: {
+            fontSize: 16,
+          },
+          axisLine: {
+            onZero: false,
+          },
+          axisLabel: {
+            fontSize: 14,
+          },
+          position: 'left',
+          inverse: yInv,
+          min: Math.ceil(Math.min.apply(null, embd1_y) - 1.5),
+          max: Math.ceil(Math.max.apply(null, embd1_y) + 1.5),
+        },
+      ],
+    }
+  }
+
+  const setDataset = (source, dims, annoName, annotations) => {
+    let _datasets = []
+    _datasets.push({
+      dimensions: dims,
+      source: source,
+    })
+    if (annotations.length === 0) {
+      // if no annotations, all the data are annotated by a label.
+      _datasets.push({
+        // 这个 dataset 的 index 是 `1`。
+        transform: {
+          type: 'sort',
+          config: { dimension: annoName, order: 'desc' },
+        },
+      })
+    } else {
+      for (let anno of annotations) {
+        _datasets.push({
+          // 这个 dataset 的 index 是 `1`。
+          transform: {
+            type: 'filter',
+            config: { dimension: annoName, value: anno },
+          },
+        })
+      }
+    }
+    return _datasets
+  }
+
+  useEffect(() => {
+    if (isInit) {
+      // get the echart container
+      var myChart = echarts.getInstanceByDom(chartRef.current)
+      let _series = seriesArray
+      if (commandRef.current === 'Upload') {
+        let _dims = [...Object.keys(_data[0]), 'id']
+        let source = _data.map((item, id) => {
+          return [...Object.entries(item).map(([_, value]) => value), id]
+        })
+        setCellNum(source.length)
+        symbolSizeRef.current = source.length > 5000 ? 2 : 4
+        setItemSize(symbolSizeRef.current)
+        // set annoataions or clusters
+        let defaultAnno = clusterOps[0]
+        setClusterCur(defaultAnno)
+        let annotations = setItemGroup(source, _dims.indexOf(defaultAnno.label))
+
+        // set embeddings and axis
+        let defaultEmbd = embedOps.map((item) => item.label).includes('X_umap')
+          ? 'X_umap'
+          : embedOps[0].label
+        setEmbedCur(defaultEmbd)
+        setEmbedCur1(defaultEmbd)
+        let xName = `${defaultEmbd}_0`
+        let yName = `${defaultEmbd}_1`
+        let axis = setAxis(source, _dims, xName, yName, xName, yName)
+
+        // set Dataset
+        let _datasets = setDataset(
+          source,
+          _dims,
+          defaultAnno.label,
+          annotations
+        )
+
+        // set Series
+        let _series = []
+        let _snum = 0
+        _series.push({
+          type: 'scatter',
+          symbolSize: symbolSizeRef.current,
+          xAxisIndex: 1,
+          yAxisIndex: 1,
+          encode: {
+            x: xName,
+            y: yName,
+          },
+          tooltip: { show: false },
+          itemStyle: {
+            color: 'gray',
+            opacity: 0.3,
+          },
+          large: true,
+          largeThreshold: 0,
+          datasetIndex: _snum,
+        })
+        for (let anno of annotations) {
+          // seperate the _data into subgroups by cell-types
+          _snum = _snum + 1
+          _series.push({
+            type: 'scatter',
+            symbolSize: symbolSizeRef.current,
+            name: anno,
+            encode: {
+              x: xName,
+              y: yName,
+              tooltip: [0, 1, 2, 3],
+              itemName: anno,
+            },
+            emphasis: {
+              focus: 'series',
+            },
+            large: true,
+            largeThreshold: 5000,
+            datasetIndex: _snum,
+          })
+        }
+        snumRef.current = _snum
+
+        myChart.setOption(
+          {
+            title: [
+              {
+                text: title,
+                left: 'center',
+                textStyle: {
+                  fontSize: 24,
+                },
+              },
+            ],
+            xAxis: axis.xAxis,
+            yAxis: axis.yAxis,
+            dataset: _datasets,
+            series: _series,
+            toolbox: {
+              top: yInv ? '2%' : '5%',
+            },
+          },
+          {
+            replaceMerge: ['dataset', 'series'],
+          }
+        )
+        setSeriesArray(_series)
+        setBrushArray([])
+        setAllowConfirm(false)
+        setNameArray([])
+        nameRef.current = null
+        brushRef.current = []
+        datasetRef.current = null
+        seriesRef.current = null
+      }
+      if (commandRef.current === 'Setting') {
+        let option = myChart.getOption()
+        let _source = option.dataset[0].source
+        let _dims = option.dataset[0].dimensions
+        let clusterIdx = _dims.indexOf(clusterCur.label)
+
+        // set axis
+        let xName0 = embedCur + '_0'
+        let yName0 = embedCur + '_1'
+        let xName1 = embedCur1 + '_0'
+        let yName1 = embedCur1 + '_1'
+        let axis = setAxis(_source, _dims, xName0, yName0, xName1, yName1)
+
+        // set datasets if cluster changes
+        if (prevCluster.current.label !== clusterCur.label) {
+          let prevAnnoLen = itemGroupRef.current.length
+          let annotations = setItemGroup(_source, clusterIdx, clusterCur.attr)
+          let annoLenOffset = prevAnnoLen - annotations.length
+          let _datasets = setDataset(
+            _source,
+            _dims,
+            clusterCur.label,
+            annotations
+          )
+          let prevDatasets = option.dataset
+          let myVisualMap = []
+          _datasets = [..._datasets, ...prevDatasets.slice(prevAnnoLen + 1)]
+          let prevSeries = option.series
+          let _snum = 0
+          let _series = [
+            // first series are displayed in right chart
+            {
+              type: 'scatter',
+              xAxisIndex: 1,
+              yAxisIndex: 1,
+              symbolSize: itemSize,
+              encode: {
+                x: xName1,
+                y: yName1,
+              },
+              tooltip: { show: false }, // no tooltip
+              itemStyle: {
+                color: 'gray',
+                opacity: itemOpacity,
+              },
+              large: true,
+              largeThreshold: 0, //default for large mode
+              datasetIndex: 0,
+            },
+          ]
+          if (clusterCur.attr === 'categories') {
+            for (let anno of annotations) {
+              // seperate the _data into subgroups by cell-types
+              _snum = _snum + 1
+              _series.push({
+                type: 'scatter',
+                xAxisIndex: 0,
+                yAxisIndex: 0,
+                symbolSize: itemSize,
+                name: anno,
+                encode: {
+                  // annotations are displayed in left chart
+                  x: xName0,
+                  y: yName0,
+                  tooltip: [
+                    0,
+                    _dims.indexOf(xName0),
+                    _dims.indexOf(yName0),
+                    clusterIdx,
+                    _dims[_dims.length - 1],
+                  ],
+                  itemName: anno,
+                },
+                emphasis: {
+                  focus: 'series',
+                },
+                itemStyle: {
+                  opacity: itemOpacity,
+                },
+                large: true,
+                largeThreshold: 5000,
+                datasetIndex: _snum,
+              })
+            }
+          } else {
+            _series.push({
+              type: 'scatter',
+              name: clusterCur.label,
+              symbolSize: itemSize,
+              encode: {
+                // annotations are displayed in left chart
+                x: xName0,
+                y: yName0,
+                tooltip: [
+                  0,
+                  _dims.indexOf(xName0),
+                  _dims.indexOf(yName0),
+                  clusterIdx,
+                  _dims[_dims.length - 1],
+                ],
+              },
+              itemStyle: {
+                opacity: itemOpacity,
+              },
+              datasetIndex: _snum,
+            })
+            myVisualMap.push({
+              show: true,
+              id: clusterCur.label + '_visual',
+              calculable: true,
+              dimension: clusterCur.label,
+              seriesIndex: 1,
+              left: '10%',
+              top: '5%',
+              orient: 'horizontal',
+              precision: 2,
+              calculable: true,
+              min: Math.min.apply(
+                null,
+                _source.map((item) => item[clusterIdx])
+              ),
+              max: Math.max.apply(
+                null,
+                _source.map((item) => item[clusterIdx])
+              ),
+              text: ['', clusterCur.label],
+              textGap: 20,
+              textStyle: {
+                fontSize: 16,
+              },
+            })
+          }
+          // append annoated clusters
+          let manualSeries = prevSeries.slice(prevAnnoLen + 1)
+          for (let i = 0; i < manualSeries.length; i++) {
+            manualSeries[i].datasetIndex =
+              manualSeries[i].datasetIndex - annoLenOffset
+            manualSeries[i].symbolSize = itemSize
+            manualSeries[i].itemStyle = { opacity: itemOpacity }
+            manualSeries[i].encode = {
+              // manual annotations are displayed in right chart
+              x: xName1,
+              y: yName1,
+              tooltip: [
+                0,
+                _dims.indexOf(xName1),
+                _dims.indexOf(yName1),
+                clusterIdx,
+                _dims[_dims.length - 1],
+              ],
+            }
+          }
+          _series = [..._series, ...manualSeries]
+          snumRef.current = _datasets.length - 1 // the sum of default and manual annotation
+
+          myChart.setOption(
+            {
+              xAxis: axis.xAxis,
+              yAxis: axis.yAxis,
+              dataset: _datasets,
+              series: _series,
+              visualMap: myVisualMap,
+            },
+            {
+              replaceMerge: ['dataset', 'series', 'visualMap'],
+            }
+          )
+          console.log(myChart.getOption())
+          prevCluster.current = clusterCur
+        } else {
+          // set series only
+          let _len = option.series.length
+          let defAnnolen = itemGroupRef.current.length
+          let _series = Array(_len)
+            .fill()
+            .map((_, id) => ({
+              symbolSize: itemSize,
+              itemStyle: { opacity: itemOpacity },
+              encode: {
+                x: id > 0 && id <= defAnnolen ? xName0 : xName1,
+                y: id > 0 && id <= defAnnolen ? yName0 : yName1,
+              },
+            }))
+          myChart.setOption({
+            xAxis: axis.xAxis,
+            yAxis: axis.yAxis,
+            series: _series,
+          })
+          console.log(myChart.getOption())
+        }
+      }
+      if (commandRef.current === 'Confirm') {
+        snumRef.current = snumRef.current + 1
+        console.log(`seriesNum ${snumRef.current}`)
+        _series.push(seriesRef.current)
+        setSeriesArray(_series)
+        setBrushArray([
+          ...brushArray,
+          {
+            name: nameRef.current,
+            data: brushRef.current,
+            value: snumRef.current - itemGroupRef.current.length,
+          },
+        ])
+        setNameArray([
+          ...nameArray,
+          {
+            value: snumRef.current - itemGroupRef.current.length,
+            label: nameRef.current,
+          },
+        ])
+        setAllowConfirm(false)
+        api['success']({
+          message: 'Annotation Confirmed',
+          description: `Your Annotation \'${nameRef.current}\' is confirmed.`,
+          placement: 'topRight',
+        })
+        datasetRef.current = null
+        seriesRef.current = null
+        commandRef.current = null
+        brushRef.current = []
+        setBrushModeState('Select')
+        brushMode.current = 'Select'
+      }
+      if (commandRef.current === 'Rename') {
+        seriesRef.current.name = inputValue
+        let prevName = nameRef.current
+        nameRef.current = inputValue
+        _series.push(seriesRef.current)
+        myChart.setOption({
+          series: _series,
+        })
+        setInputValue('')
+        api.info({
+          message: 'Annotation Renamed',
+          description: `Previous Annotation \'${prevName}\' is changed to \'${nameRef.current}\'.`,
+          placement: 'topRight',
+        })
+        commandRef.current = null
+      }
+      if (commandRef.current === 'Refine') {
+        axios
+          .post('http://192.168.60.116:5001/refine', {
+            data: {
+              name: 'resources/V1-Mouse-Brain.h5ad',
+              anno: brushRef.current,
+              refiner: refineValue.value,
+            },
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+          .then((response) => {
+            if (response.data.success) {
+              let refScatter = response.data.refined
+              let option = myChart.getOption()
+              let newOption = setBrushedMap(option, refScatter, true, 'Select')
+              myChart.setOption(newOption)
+              api.info({
+                message: 'Annotation Refined',
+                description: response.data.message,
+                placement: 'topRight',
+              })
+            } else {
+              api.warning({
+                message: 'Annotation does not Refined',
+                description: response.data.message,
+                placement: 'topRight',
+              })
+            }
+          })
+      }
+      if (commandRef.current === 'Delete') {
+        let option = myChart.getOption()
+        let __series = option.series
+        setNameArray(
+          nameArray.filter((item) => !deleteValue.includes(item.value))
+        )
+        setBrushArray(
+          brushArray.filter((item) => !deleteValue.includes(item.value))
+        )
+        let _indices = deleteValue.map(
+          (item) => item + itemGroupRef.current.length
+        )
+        __series = __series.filter(
+          (item) => !_indices.includes(item.datasetIndex)
+        )
+        myChart.setOption(
+          {
+            series: __series,
+          },
+          {
+            replaceMerge: ['series'],
+          }
+        )
+        setSeriesArray(__series)
+        setDeleteValue([])
+        console.log(myChart.getOption())
+        api.warning({
+          message: 'Annotation Deleted',
+          description:
+            'Previous annotation is deleted, but you can recover them until leaving this page.',
+          placement: 'topRight',
+        })
+      }
+      if (commandRef.current === 'Download') {
+        let jsonFile = {}
+        jsonFile.columns = ['barcode', 'umap_0', 'umap_1', 'annotation']
+        jsonFile.data = []
+        for (let item of brushArray) {
+          let itemData = item.data.map((index) => [
+            _data[index]['index'],
+            _data[index]['umap_0'],
+            _data[index]['umap_1'],
+            item.name,
+          ])
+          jsonFile.data = [...jsonFile.data, ...itemData]
+        }
+        const fileStream = JSON.stringify(jsonFile)
+        const blob = new Blob([fileStream])
+        saveAs(blob, `Annotation-${new Date().getTime()}.json`)
+      }
+    } else {
+      // init the echart container
+      var myChart = echarts.init(chartRef.current, theme)
+      let _dims = [...Object.keys(_data[0]), 'id']
+      let source = _data.map((item, id) => {
+        return [...Object.entries(item).map(([_, value]) => value), id]
+      })
+      symbolSizeRef.current = source.length > 5000 ? 2 : 4
+      setCellNum(source.length)
+
+      // set annotations
+      let defaultAnno = 'annotation'
+      setClusterCur({ value: 0, label: defaultAnno, attr: 'categories' })
+      prevCluster.current = { value: 0, label: defaultAnno, attr: 'categories' }
+      setClusterOps([{ value: 0, label: defaultAnno, attr: 'categories' }])
+      let annotations = setItemGroup(source, 3)
+
+      // set embeddings
+      let axis = setAxis(source, _dims, 'umap_0', 'umap_1')
+      setEmbedCur('umap')
+      setEmbedCur1('umap')
+      setEmbedOps([{ value: 0, label: 'umap' }])
+
+      // set datasets
+      let _datasets = setDataset(source, _dims, 'annotation', annotations)
+
+      let _series = []
+      let _snum = 0
+      _series.push({
+        type: 'scatter',
+        xAxisIndex: 1,
+        yAxisIndex: 1,
+        symbolSize: symbolSizeRef.current,
+        encode: {
+          x: 'umap_0',
+          y: 'umap_1',
+        },
+        tooltip: { show: false },
+        itemStyle: {
+          color: 'gray',
+          opacity: 0.3,
+        },
+        large: true,
+        largeThreshold: 0,
+        datasetIndex: _snum,
+      })
+      for (let anno of annotations) {
+        // seperate the _data into subgroups by cell-types
+        _snum = _snum + 1
+        _series.push({
+          type: 'scatter',
+          symbolSize: symbolSizeRef.current,
+          name: anno,
+          encode: {
+            x: 'umap_0',
+            y: 'umap_1',
+            tooltip: [0, 1, 2, 3],
+            itemName: anno,
+          },
+          emphasis: {
+            focus: 'series',
+          },
+          large: true,
+          largeThreshold: 5000,
+          datasetIndex: _snum,
+        })
+      }
+      snumRef.current = _snum
+      myChart.setOption({
+        tooltip: {},
+        brush: {
+          toolbox: ['rect', 'polygon', 'clear'],
+          outOfBrush: {
+            colorAlpha: 0.3,
+          },
+          xAxisIndex: 0,
+          throttleType: 'debounce',
+          throttleDelay: 1000,
+        },
+        toolbox: {
+          show: true,
+          itemSize: 20,
+          itemGap: 10,
+          feature: {
+            bursh: {
+              type: ['rect', 'polygon', 'clear'],
+            },
+            mark: { show: true },
+            dataView: { show: true, readOnly: true },
+            restore: { show: true },
+            saveAsImage: { show: true },
+            dataZoom: {},
+          },
+          iconStyle: {
+            borderWidth: 1.5,
+          },
+          top: '5%',
+        },
+
+        color: vega_20,
+        title: [
+          {
+            text: title,
+            left: 'center',
+            textStyle: {
+              fontSize: 24,
+            },
+          },
+        ],
+        xAxis: axis.xAxis,
+        yAxis: axis.yAxis,
+        grid: [
+          {
+            top: '15%',
+            left: '5%',
+            width: '43%',
+            bottom: '13%',
+            axisLine: {
+              lineStyle: {
+                color: '#fff',
+              },
+            },
+            axisPointer: {
+              lineStyle: {
+                color: '#ffbd67',
+              },
+            },
+          },
+          {
+            top: '15%',
+            width: '43%',
+            right: '1%',
+            bottom: '13%',
+            axisLine: {
+              lineStyle: {
+                color: '#fff',
+              },
+            },
+            axisPointer: {
+              lineStyle: {
+                color: '#ffbd67',
+              },
+            },
+          },
+        ],
+        legend: {
+          type: 'scroll',
+          animation: false,
+          pageIconColor: '#4096ff',
+          orient: 'horizontal',
+          bottom: '1%',
+          padding: 0,
+          textStyle: {
+            fontSize: 16,
+          },
+        },
+        dataset: _datasets,
+        series: _series,
+      })
+      setInit(true)
+      setSeriesArray(_series)
+
+      myChart.on('brushSelected', function (params) {
+        let brushed = []
+        let brushComponent = params.batch[0]
+        let selectedIdx = brushComponent.selected.map((item) => {
+          return item.seriesIndex
+        })
+        let selectedInd = brushComponent.selected.map((item) => {
+          return item.dataIndex
+        })
+        // skip the sIdx = 0, because it's the gray scatters in index 1.
+        for (let i = 0; i < selectedIdx.length; i++) {
+          // search for each seriesIndex
+          let sIdx = selectedIdx[i]
+          let dIdx = selectedInd[i]
+          for (let j = 0; j < dIdx.length; j++) {
+            let dataIndex = dIdx[j]
+            brushed.push(itemGroupRef.current[sIdx - 1][dataIndex])
+          }
+        }
+
+        if (brushed.length > 0) {
+          // trigger the brush command in useEffect
+          let option = myChart.getOption()
+          let newOption = {}
+          if (brushRef.current.length > 0) {
+            newOption = setBrushedMap(option, brushed, true, brushMode.current)
+          } else {
+            newOption = setBrushedMap(option, brushed, false, brushMode.current)
+          }
+          myChart.setOption(newOption)
+          setAllowConfirm(true)
+        }
+      })
+    }
+  }, [action])
+
+  const toggleAnno = (command) => {
+    commandRef.current = command
+    setAction(action + 1)
+  }
+
+  const H5adLoader = (file) => {
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      let newTitle = file.name.replace(/\.h5ad$/, '')
+      setTitle(newTitle)
+      var f = new hdf5.File(event.target.result, file.name)
+      let _obs = f.get('obs').keys
+      let _index
+      if (_obs.includes('_index')) {
+        _index = f.get('obs/_index').value
+      } else {
+        console.log(f.get('obs').attrs)
+        let _indexName = f.get('obs').attrs['_index']
+        _index = f.get('obs/' + _indexName).value
+      }
+
+      let _value = { index: _index }
+      let _clusters
+      if (_obs.includes('__categories')) {
+        // old h5ad versions have __categories in obs
+        // load categories in obs
+        let _cateNames = f.get('obs/__categories').keys
+        for (let obs of _cateNames) {
+          let _cate = f.get('obs/__categories/' + obs).value
+          _value[obs] = f.get('obs/' + obs).value.map((item) => {
+            return _cate[item]
+          })
+        }
+        // load values in obs
+        let _valNames = f
+          .get('obs')
+          .keys.filter(
+            (item) =>
+              !(
+                _cateNames.includes(item) ||
+                ['__categories', '_index'].includes(item)
+              )
+          )
+        for (let key of _valNames) {
+          _value[key] = f.get('obs/' + key).value
+        }
+        _clusters = _cateNames.map((item, id) => ({
+          value: id,
+          label: item,
+          attr: 'categories',
+        }))
+        _clusters = [
+          ..._clusters,
+          ..._valNames.map((item, id) => ({
+            value: id + _cateNames.length,
+            label: item,
+            attr: 'values',
+          })),
+        ]
+      } else {
+        // new version indicates categories as groups and values as datasets
+        let _type = []
+        for (let key of _obs) {
+          if (Array.isArray(f.get('obs/' + key).keys)) {
+            let _cate = f.get('obs/' + key + '/categories').value
+            _value[key] = f.get('obs/' + key + '/codes').value.map((item) => {
+              return _cate[item]
+            })
+            _type.push('categories')
+          } else {
+            _value[key] = f.get('obs/' + key).value
+            _type.push('values')
+          }
+        }
+        _clusters = _obs.map((item, id) => ({
+          value: id,
+          label: item,
+          attr: _type[id],
+        }))
+      }
+      setClusterOps(_clusters)
+
+      let _obsmNames = f.get('obsm').keys
+      let _len = _index.length
+      for (let obsm of _obsmNames) {
+        let _embd = f.get('obsm/' + obsm).value
+        let _dims = _embd.length / _len
+        let _loadDims = _dims
+        if (obsm === 'X_pca') {
+          _loadDims = 2
+        }
+        for (let dim = 0; dim < _loadDims; dim++) {
+          _value[`${obsm}_${dim}`] = _index.map((_, id) => {
+            return _embd[id * _dims + dim]
+          })
+        }
+      }
+
+      let __data = _index.map((_, id) =>
+        Object.entries(_value).reduce((obj, [key, value]) => {
+          obj[key] = value[id]
+          return obj
+        }, {})
+      )
+      _setData(__data)
+      setEmbedOps(_obsmNames.map((item, id) => ({ value: id, label: item })))
+      toggleAnno('Upload')
+    }
+    reader.readAsArrayBuffer(file)
+  }
+
+  const JsonLoader = (file) => {
+    let newTitle = file.name.replace(/\.json$/, '')
+    setTitle(newTitle)
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const jsonData = JSON.parse(event.target.result)
+      _setData(jsonData)
+      toggleAnno('Upload')
+    }
+    reader.readAsText(file)
+  }
+
+  const CsvLoader = (file) => {
+    let newTitle = file.name.replace(/\.json$/, '')
+    setTitle(newTitle)
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const jsonData = JSON.parse(event.target.result)
+      _setData(jsonData)
+      toggleAnno('Upload')
+    }
+    reader.readAsText(file)
+  }
+
+  const beforeUpload = (file) => {
+    if (file.type === 'application/json' || file.name.endsWith('.json')) {
+      FileLoaderRef.current = JsonLoader
+    } else if (file.name.endsWith('.h5ad')) {
+      FileLoaderRef.current = H5adLoader
+    } else {
+      alert('Please select a .json or .h5ad file~')
+      return false
+    }
+    return true
+  }
+
+  const onUpload = (info) => {
+    setUploading(true)
+    const file = info.file
+    FileLoaderRef.current(file)
+    setUploading(false)
+  }
+
+  const onChange = (info) => {
+    console.log(info)
+  }
+
+  const upLoadProps = {
+    maxCount: 1,
+    beforeUpload: beforeUpload,
+    customRequest: onUpload,
+    onChange: onChange,
+    listType: 'text',
+    showUploadList: false,
+  }
+
+  return (
+    <div>
+      {contextHolder}
+
+      <Space size="small">
+        <div
+          ref={chartRef}
+          className="chart"
+          //the target DOM container needs height and width
+          style={{ height: height, width: width, margin: margin }}></div>
+        <ConfigProvider
+          theme={{
+            components: {
+              Form: {
+                itemMarginBottom: '4px',
+              },
+              Button: {
+                borderColorDisabled: 'gray',
+                colorTextDisabled: 'gray',
+                colorBgContainerDisabled: 'rgba(0.5, 0.5, 0.5, 0.1)',
+              },
+              Upload: {
+                padding: 0,
+              },
+            },
+          }}>
+          <Space direction="vertical" size="small">
+            <Dragger {...upLoadProps}>
+              <p
+                className="ant-upload-drag-icon"
+                style={{ fontSize: 16, fontFamily: 'Centra' }}>
+                <InboxOutlined />
+                Upload
+              </p>
+            </Dragger>
+            <Popover
+              title={<>Setting Figure Options:</>}
+              placement="topLeft"
+              content={
+                <Space size="small" direction="vertical">
+                  <Form
+                    name="Settings"
+                    size="large"
+                    labelCol={{
+                      span: 6,
+                    }}
+                    wrapperCol={{
+                      span: 17,
+                    }}>
+                    <Form.Item label="ItemSize">
+                      {' '}
+                      <Slider
+                        min={0}
+                        max={10}
+                        marks={{ 0: '0', 5: '5', 10: '10' }}
+                        onChange={(value) => {
+                          setItemSize(value)
+                        }}
+                        value={typeof itemSize === 'number' ? itemSize : 2}
+                      />
+                    </Form.Item>
+                    <Form.Item label="Opacity">
+                      {' '}
+                      <Slider
+                        min={0}
+                        max={1}
+                        marks={{ 0: '0', 0.5: '0.5', 1: '1.0' }}
+                        step={0.01}
+                        onChange={(value) => {
+                          setItemOpacity(value)
+                        }}
+                        value={
+                          typeof itemOpacity === 'number' ? itemOpacity : 0.8
+                        }
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      label="Label Loc"
+                      labelCol={{
+                        span: 7,
+                      }}>
+                      {' '}
+                      <Segmented
+                        options={[
+                          { label: 'on Data', value: 'on Data' },
+                          { label: 'Bottom', value: 'Bottom' },
+                          { label: 'Hide', value: 'Hide' },
+                        ]}
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      label="Brush Mode"
+                      labelCol={{
+                        span: 8,
+                      }}>
+                      {' '}
+                      <Segmented
+                        options={[
+                          { label: 'Select', value: 'Select' },
+                          { label: 'Draw', value: 'Draw' },
+                          { label: 'Erase', value: 'Erase' },
+                        ]}
+                        defaultValue="Select"
+                        onChange={(value) => {
+                          brushMode.current = value
+                          setBrushModeState(value)
+                        }}
+                        value={brushModeState}
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      label="Inverse"
+                      labelCol={{
+                        span: 7,
+                      }}>
+                      <Space>
+                        xAxis:
+                        <Switch
+                          checked={xInv}
+                          onChange={() => {
+                            setxInv(!xInv)
+                          }}
+                        />
+                        yAxis:
+                        <Switch
+                          checked={yInv}
+                          onChange={() => {
+                            setyInv(!yInv)
+                          }}
+                        />
+                      </Space>
+                    </Form.Item>
+                    <Form.Item
+                      label="Pictures"
+                      labelCol={{
+                        span: 7,
+                      }}>
+                      <Space>
+                        Left:
+                        <Switch /> Right:
+                        <Switch />
+                      </Space>
+                    </Form.Item>
+                    <Form.Item
+                      label="Clustering"
+                      labelCol={{
+                        span: 7,
+                      }}>
+                      {' '}
+                      <Select
+                        labelInValue
+                        placeholder="Clustering"
+                        style={{
+                          width: '100%',
+                        }}
+                        placement="topLeft"
+                        options={clusterOps}
+                        value={clusterCur}
+                        onChange={(target) => {
+                          setClusterCur({
+                            value: target.value,
+                            label: target.label,
+                            attr: clusterOps[target.value].attr,
+                          })
+                        }}
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      label="Embedding 0"
+                      labelCol={{
+                        span: 9,
+                      }}>
+                      {' '}
+                      <Select
+                        labelInValue
+                        placeholder="Embedding Left"
+                        style={{
+                          width: '100%',
+                        }}
+                        placement="topLeft"
+                        options={embedOps}
+                        value={embedCur}
+                        onChange={(value) => {
+                          setEmbedCur(value.label)
+                        }}
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      label="Embedding 1"
+                      labelCol={{
+                        span: 9,
+                      }}>
+                      {' '}
+                      <Select
+                        labelInValue
+                        placeholder="Embedding Right"
+                        style={{
+                          width: '100%',
+                        }}
+                        placement="topLeft"
+                        options={embedOps}
+                        value={embedCur1}
+                        onChange={(value) => {
+                          setEmbedCur1(value.label)
+                        }}
+                      />
+                    </Form.Item>
+                  </Form>
+                  <Space size="small">
+                    <Button icon={<ReloadOutlined />}>Reset</Button>
+                    <Button
+                      type="primary"
+                      icon={<SettingOutlined />}
+                      onClick={() => {
+                        toggleAnno('Setting')
+                      }}>
+                      Apply
+                    </Button>
+                  </Space>
+                </Space>
+              }
+              trigger="click">
+              <Button type="primary" block icon={<SettingOutlined />}>
+                Settings
+              </Button>
+            </Popover>
+            <Popconfirm
+              title={
+                <div>
+                  <div>Rename your annotation here (at most 30 characters)</div>{' '}
+                  <Input
+                    placeholder="Your annotations"
+                    showCount
+                    value={inputValue}
+                    maxLength={30}
+                    onChange={(event) => {
+                      setInputValue(event.target.value)
+                    }}
+                  />
+                  Previous annotation is: {nameRef.current}
+                </div>
+              }
+              okText="Rename"
+              onConfirm={() => {
+                toggleAnno('Rename')
+              }}
+              cancelText="Cancel">
+              <Button
+                block
+                type="primary"
+                disabled={!allowConfirm}
+                icon={<FormOutlined />}>
+                Rename
+              </Button>
+            </Popconfirm>
+            <Popover
+              title={<>Select the annotation to refine:</>}
+              content={
+                <Space direction="vertical">
+                  <Select
+                    labelInValue
+                    placeholder="Select a Refiner"
+                    style={{
+                      width: '100%',
+                    }}
+                    value={refineValue}
+                    placement="topLeft"
+                    options={refineOption}
+                    onChange={(value) => {
+                      setRefineValue(value)
+                    }}
+                  />
+                  <Space size="small">
+                    <Button
+                      block
+                      icon={<CloseOutlined />}
+                      onClick={() => {
+                        setRefineOpen(false)
+                      }}>
+                      Cancel
+                    </Button>
+                    <Button
+                      block
+                      icon={<ReloadOutlined />}
+                      onClick={() => {
+                        setRefineValue([])
+                        toggleAnno('Refine_Reset')
+                      }}>
+                      Reset
+                    </Button>
+                    <Button
+                      block
+                      type="primary"
+                      icon={<SlidersOutlined />}
+                      disabled={!allowConfirm}
+                      onClick={() => {
+                        toggleAnno('Refine')
+                      }}>
+                      Refine
+                    </Button>
+                  </Space>
+                </Space>
+              }
+              open={refineOpen}
+              onOpenChange={(newOpen) => {
+                setRefineOpen(newOpen)
+              }}
+              trigger="click">
+              <Button block type="primary" icon={<SlidersOutlined />}>
+                Refine
+              </Button>
+            </Popover>
+            <Popconfirm
+              title={`Are you sure about \'${nameRef.current}\'?`}
+              okText="Yes"
+              onConfirm={() => toggleAnno('Confirm')}
+              cancelText="No">
+              <Button
+                block
+                type="primary"
+                disabled={!allowConfirm}
+                icon={<CheckOutlined />}>
+                Confirm
+              </Button>
+            </Popconfirm>
+            <Popover
+              title={<>Select the annotation to delete:</>}
+              content={
+                <Space direction="vertical">
+                  <Select
+                    mode="tags"
+                    placeholder="Your previous annotation"
+                    style={{
+                      width: '100%',
+                    }}
+                    value={deleteValue}
+                    placement="topLeft"
+                    options={nameArray}
+                    onChange={(value) => {
+                      setDeleteValue(value)
+                    }}
+                  />
+                  <Space size="small">
+                    <Button
+                      block
+                      icon={<CloseOutlined />}
+                      onClick={() => {
+                        setDeleteOpen(false)
+                      }}>
+                      Cancel
+                    </Button>
+                    <Button
+                      block
+                      icon={<ReloadOutlined />}
+                      onClick={() => {
+                        setDeleteValue([])
+                      }}>
+                      Reset
+                    </Button>
+                    <Button
+                      block
+                      danger
+                      icon={<DeleteOutlined />}
+                      onClick={() => {
+                        toggleAnno('Delete')
+                      }}>
+                      Delete
+                    </Button>
+                  </Space>
+                </Space>
+              }
+              open={deleteOpen}
+              onOpenChange={(newOpen) => {
+                setDeleteOpen(newOpen)
+              }}
+              trigger="click">
+              <Button type="primary" block icon={<DeleteOutlined />}>
+                Delete
+              </Button>
+            </Popover>
+            <Popconfirm
+              title="Select the download file mode"
+              okText="JSON"
+              onConfirm={() => {
+                toggleAnno('Download')
+              }}
+              cancelText="Table">
+              <Button type="primary" block icon={<CloudDownloadOutlined />}>
+                Save
+              </Button>
+            </Popconfirm>
+          </Space>
+          <br />
+          <br />
+          <b>Current Status</b>
+          <div>Mode: {brushModeState}</div>
+          <div>Clustering: {clusterCur.label}</div>
+          <div>Embedding 0: {embedCur}</div>
+          <div>Embedding 1: {embedCur1}</div>
+          <div>Annotated Clusters: {snumRef.current}</div>
+          <div>Cell number: {cellNum}</div>
+        </ConfigProvider>
+      </Space>
+      <h4 align="center"> Series Gallery</h4>
+      <SeriesGallery />
+    </div>
+  )
+}
+
+ScScatter.defaultProps = {
+  theme: 'dark',
+  height: '31rem',
+  width: '55rem',
+  margin: '2rem',
+}
+
+ScScatter.propTypes = {
+  theme: PropTypes.string,
+  height: PropTypes.string,
+  width: PropTypes.string,
+  margin: PropTypes.string,
+}
+
+export default ScScatter

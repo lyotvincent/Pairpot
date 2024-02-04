@@ -1,0 +1,1472 @@
+[
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "APOE",
+        "expr": 4.2099885941,
+        "frac": 1.0
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "CLU",
+        "expr": 4.021466732,
+        "frac": 0.9955357143
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "SLC1A3",
+        "expr": 3.8343992233,
+        "frac": 0.9821428571
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "GPR37L1",
+        "expr": 3.0830998421,
+        "frac": 0.96875
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "GJA1",
+        "expr": 3.002263546,
+        "frac": 0.9776785714
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "SPARC",
+        "expr": 1.3547458649,
+        "frac": 0.5491071429
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "ESAM",
+        "expr": 0.1675091833,
+        "frac": 0.09375
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "HES1",
+        "expr": 1.1108833551,
+        "frac": 0.5848214286
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "ITM2A",
+        "expr": 0.3868173063,
+        "frac": 0.1696428571
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "EPAS1",
+        "expr": 0.8727588058,
+        "frac": 0.5446428571
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "GAD1",
+        "expr": 0.2888516486,
+        "frac": 0.1741071429
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "GAD2",
+        "expr": 0.1634968221,
+        "frac": 0.0982142857
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "NAP1L5",
+        "expr": 0.5303109288,
+        "frac": 0.3303571429
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "TSPYL4",
+        "expr": 0.3915529549,
+        "frac": 0.2946428571
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "NDRG4",
+        "expr": 0.5317517519,
+        "frac": 0.3660714286
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "B2M",
+        "expr": 1.1800919771,
+        "frac": 0.6785714286
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "CSF1R",
+        "expr": 0.0556855425,
+        "frac": 0.03125
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "TYROBP",
+        "expr": 0.0205243938,
+        "frac": 0.0089285714
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "C1QA",
+        "expr": 0.0323634148,
+        "frac": 0.0223214286
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "C1QB",
+        "expr": 0.0195686836,
+        "frac": 0.0089285714
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "PLP1",
+        "expr": 1.9133608341,
+        "frac": 0.7321428571
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "MBP",
+        "expr": 0.5716151595,
+        "frac": 0.2901785714
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "MOG",
+        "expr": 0.304728806,
+        "frac": 0.1473214286
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "UGT8A",
+        "expr": 0.406316787,
+        "frac": 0.2142857143
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "CNP",
+        "expr": 0.9659789205,
+        "frac": 0.5625
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "GRIA1",
+        "expr": 0.5256271362,
+        "frac": 0.3169642857
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "CPNE6",
+        "expr": 0.162117213,
+        "frac": 0.1294642857
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "NEUROD6",
+        "expr": 0.248825863,
+        "frac": 0.1651785714
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "CRYM",
+        "expr": 0.123771891,
+        "frac": 0.0982142857
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "CAMKV",
+        "expr": 0.2964542508,
+        "frac": 0.1875
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "PCSK2",
+        "expr": 0.2848981619,
+        "frac": 0.1919642857
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "SNAP25",
+        "expr": 0.9560166001,
+        "frac": 0.5044642857
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "MEF2C",
+        "expr": 0.4755657911,
+        "frac": 0.2901785714
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "ARPP21",
+        "expr": 0.7735966444,
+        "frac": 0.40625
+    },
+    {
+        "cell": "astrocytes_ependymal",
+        "gene": "CHN1",
+        "expr": 0.8820879459,
+        "frac": 0.4910714286
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "APOE",
+        "expr": 0.7548391819,
+        "frac": 0.3446808511
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "CLU",
+        "expr": 0.5540533066,
+        "frac": 0.3191489362
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "SLC1A3",
+        "expr": 0.5690637827,
+        "frac": 0.2595744681
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "GPR37L1",
+        "expr": 0.383304894,
+        "frac": 0.1872340426
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "GJA1",
+        "expr": 0.6772432327,
+        "frac": 0.3957446809
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "SPARC",
+        "expr": 3.7500691414,
+        "frac": 0.9829787234
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "ESAM",
+        "expr": 1.823813796,
+        "frac": 0.8468085106
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "HES1",
+        "expr": 2.2919871807,
+        "frac": 0.8893617021
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "ITM2A",
+        "expr": 3.2316856384,
+        "frac": 0.8255319149
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "EPAS1",
+        "expr": 2.0389754772,
+        "frac": 0.8553191489
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "GAD1",
+        "expr": 0.1978460997,
+        "frac": 0.1234042553
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "GAD2",
+        "expr": 0.1875982136,
+        "frac": 0.1234042553
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "NAP1L5",
+        "expr": 0.4031386971,
+        "frac": 0.2382978723
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "TSPYL4",
+        "expr": 0.3196973503,
+        "frac": 0.2340425532
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "NDRG4",
+        "expr": 0.4595457911,
+        "frac": 0.2638297872
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "B2M",
+        "expr": 2.2179718018,
+        "frac": 0.8595744681
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "CSF1R",
+        "expr": 0.0816481486,
+        "frac": 0.0595744681
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "TYROBP",
+        "expr": 0.0350152366,
+        "frac": 0.0212765957
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "C1QA",
+        "expr": 0.0357558616,
+        "frac": 0.0212765957
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "C1QB",
+        "expr": 0.0405832641,
+        "frac": 0.0170212766
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "PLP1",
+        "expr": 2.0349435806,
+        "frac": 0.8
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "MBP",
+        "expr": 0.6200959086,
+        "frac": 0.3531914894
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "MOG",
+        "expr": 0.1459337473,
+        "frac": 0.0978723404
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "UGT8A",
+        "expr": 0.3029285967,
+        "frac": 0.1744680851
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "CNP",
+        "expr": 0.3617711365,
+        "frac": 0.2255319149
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "GRIA1",
+        "expr": 0.3761779368,
+        "frac": 0.2170212766
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "CPNE6",
+        "expr": 0.1280420423,
+        "frac": 0.0978723404
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "NEUROD6",
+        "expr": 0.1905465722,
+        "frac": 0.1234042553
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "CRYM",
+        "expr": 0.0373402685,
+        "frac": 0.0255319149
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "CAMKV",
+        "expr": 0.2878398299,
+        "frac": 0.1914893617
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "PCSK2",
+        "expr": 0.4106342196,
+        "frac": 0.2382978723
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "SNAP25",
+        "expr": 1.1458193064,
+        "frac": 0.5446808511
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "MEF2C",
+        "expr": 1.2810063362,
+        "frac": 0.6553191489
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "ARPP21",
+        "expr": 0.9684818983,
+        "frac": 0.4170212766
+    },
+    {
+        "cell": "endothelial-mural",
+        "gene": "CHN1",
+        "expr": 0.8438482881,
+        "frac": 0.429787234
+    },
+    {
+        "cell": "interneurons",
+        "gene": "APOE",
+        "expr": 0.1642226577,
+        "frac": 0.0896551724
+    },
+    {
+        "cell": "interneurons",
+        "gene": "CLU",
+        "expr": 1.715531826,
+        "frac": 0.9586206897
+    },
+    {
+        "cell": "interneurons",
+        "gene": "SLC1A3",
+        "expr": 0.1752046794,
+        "frac": 0.0965517241
+    },
+    {
+        "cell": "interneurons",
+        "gene": "GPR37L1",
+        "expr": 0.0935952961,
+        "frac": 0.0586206897
+    },
+    {
+        "cell": "interneurons",
+        "gene": "GJA1",
+        "expr": 0.0946705043,
+        "frac": 0.0655172414
+    },
+    {
+        "cell": "interneurons",
+        "gene": "SPARC",
+        "expr": 0.140655756,
+        "frac": 0.0965517241
+    },
+    {
+        "cell": "interneurons",
+        "gene": "ESAM",
+        "expr": 0.021464102,
+        "frac": 0.024137931
+    },
+    {
+        "cell": "interneurons",
+        "gene": "HES1",
+        "expr": 0.2255304009,
+        "frac": 0.2034482759
+    },
+    {
+        "cell": "interneurons",
+        "gene": "ITM2A",
+        "expr": 0.1607548743,
+        "frac": 0.1103448276
+    },
+    {
+        "cell": "interneurons",
+        "gene": "EPAS1",
+        "expr": 0.0615925677,
+        "frac": 0.0551724138
+    },
+    {
+        "cell": "interneurons",
+        "gene": "GAD1",
+        "expr": 3.1217753887,
+        "frac": 0.9965517241
+    },
+    {
+        "cell": "interneurons",
+        "gene": "GAD2",
+        "expr": 2.8874893188,
+        "frac": 0.9931034483
+    },
+    {
+        "cell": "interneurons",
+        "gene": "NAP1L5",
+        "expr": 2.816423893,
+        "frac": 1.0
+    },
+    {
+        "cell": "interneurons",
+        "gene": "TSPYL4",
+        "expr": 2.1566445827,
+        "frac": 1.0
+    },
+    {
+        "cell": "interneurons",
+        "gene": "NDRG4",
+        "expr": 2.8756859303,
+        "frac": 0.9965517241
+    },
+    {
+        "cell": "interneurons",
+        "gene": "B2M",
+        "expr": 0.2320862859,
+        "frac": 0.2
+    },
+    {
+        "cell": "interneurons",
+        "gene": "CSF1R",
+        "expr": 0.0194667019,
+        "frac": 0.0137931034
+    },
+    {
+        "cell": "interneurons",
+        "gene": "TYROBP",
+        "expr": 0.0146239139,
+        "frac": 0.0103448276
+    },
+    {
+        "cell": "interneurons",
+        "gene": "C1QA",
+        "expr": 0.0221040137,
+        "frac": 0.0137931034
+    },
+    {
+        "cell": "interneurons",
+        "gene": "C1QB",
+        "expr": 0.011394701,
+        "frac": 0.0068965517
+    },
+    {
+        "cell": "interneurons",
+        "gene": "PLP1",
+        "expr": 0.6348116398,
+        "frac": 0.3551724138
+    },
+    {
+        "cell": "interneurons",
+        "gene": "MBP",
+        "expr": 0.2297157943,
+        "frac": 0.175862069
+    },
+    {
+        "cell": "interneurons",
+        "gene": "MOG",
+        "expr": 0.1232110113,
+        "frac": 0.0655172414
+    },
+    {
+        "cell": "interneurons",
+        "gene": "UGT8A",
+        "expr": 0.1350753009,
+        "frac": 0.1
+    },
+    {
+        "cell": "interneurons",
+        "gene": "CNP",
+        "expr": 0.1816777736,
+        "frac": 0.1482758621
+    },
+    {
+        "cell": "interneurons",
+        "gene": "GRIA1",
+        "expr": 1.410880208,
+        "frac": 0.8517241379
+    },
+    {
+        "cell": "interneurons",
+        "gene": "CPNE6",
+        "expr": 0.7439172268,
+        "frac": 0.624137931
+    },
+    {
+        "cell": "interneurons",
+        "gene": "NEUROD6",
+        "expr": 0.1819700003,
+        "frac": 0.1448275862
+    },
+    {
+        "cell": "interneurons",
+        "gene": "CRYM",
+        "expr": 0.1579332054,
+        "frac": 0.0827586207
+    },
+    {
+        "cell": "interneurons",
+        "gene": "CAMKV",
+        "expr": 0.8269326091,
+        "frac": 0.675862069
+    },
+    {
+        "cell": "interneurons",
+        "gene": "PCSK2",
+        "expr": 1.3689495325,
+        "frac": 0.8655172414
+    },
+    {
+        "cell": "interneurons",
+        "gene": "SNAP25",
+        "expr": 3.5694935322,
+        "frac": 1.0
+    },
+    {
+        "cell": "interneurons",
+        "gene": "MEF2C",
+        "expr": 1.4426497221,
+        "frac": 0.8344827586
+    },
+    {
+        "cell": "interneurons",
+        "gene": "ARPP21",
+        "expr": 0.7418341637,
+        "frac": 0.5379310345
+    },
+    {
+        "cell": "interneurons",
+        "gene": "CHN1",
+        "expr": 1.8432224989,
+        "frac": 0.9379310345
+    },
+    {
+        "cell": "microglia",
+        "gene": "APOE",
+        "expr": 4.0903673172,
+        "frac": 0.8979591837
+    },
+    {
+        "cell": "microglia",
+        "gene": "CLU",
+        "expr": 0.5263647437,
+        "frac": 0.2959183673
+    },
+    {
+        "cell": "microglia",
+        "gene": "SLC1A3",
+        "expr": 0.7929158211,
+        "frac": 0.3367346939
+    },
+    {
+        "cell": "microglia",
+        "gene": "GPR37L1",
+        "expr": 0.420714736,
+        "frac": 0.193877551
+    },
+    {
+        "cell": "microglia",
+        "gene": "GJA1",
+        "expr": 0.5060809851,
+        "frac": 0.3163265306
+    },
+    {
+        "cell": "microglia",
+        "gene": "SPARC",
+        "expr": 1.7328584194,
+        "frac": 0.6020408163
+    },
+    {
+        "cell": "microglia",
+        "gene": "ESAM",
+        "expr": 0.3853171766,
+        "frac": 0.2142857143
+    },
+    {
+        "cell": "microglia",
+        "gene": "HES1",
+        "expr": 0.6898748875,
+        "frac": 0.3469387755
+    },
+    {
+        "cell": "microglia",
+        "gene": "ITM2A",
+        "expr": 0.6475037336,
+        "frac": 0.2551020408
+    },
+    {
+        "cell": "microglia",
+        "gene": "EPAS1",
+        "expr": 0.4012968242,
+        "frac": 0.2551020408
+    },
+    {
+        "cell": "microglia",
+        "gene": "GAD1",
+        "expr": 0.1217003688,
+        "frac": 0.0918367347
+    },
+    {
+        "cell": "microglia",
+        "gene": "GAD2",
+        "expr": 0.136275053,
+        "frac": 0.0918367347
+    },
+    {
+        "cell": "microglia",
+        "gene": "NAP1L5",
+        "expr": 0.4258255661,
+        "frac": 0.2653061224
+    },
+    {
+        "cell": "microglia",
+        "gene": "TSPYL4",
+        "expr": 0.1599331498,
+        "frac": 0.1530612245
+    },
+    {
+        "cell": "microglia",
+        "gene": "NDRG4",
+        "expr": 0.3877009749,
+        "frac": 0.2551020408
+    },
+    {
+        "cell": "microglia",
+        "gene": "B2M",
+        "expr": 3.1998209953,
+        "frac": 1.0
+    },
+    {
+        "cell": "microglia",
+        "gene": "CSF1R",
+        "expr": 2.708060503,
+        "frac": 0.9897959184
+    },
+    {
+        "cell": "microglia",
+        "gene": "TYROBP",
+        "expr": 2.9108307362,
+        "frac": 0.9795918367
+    },
+    {
+        "cell": "microglia",
+        "gene": "C1QA",
+        "expr": 3.3076622486,
+        "frac": 0.9795918367
+    },
+    {
+        "cell": "microglia",
+        "gene": "C1QB",
+        "expr": 3.0227837563,
+        "frac": 0.9795918367
+    },
+    {
+        "cell": "microglia",
+        "gene": "PLP1",
+        "expr": 2.438873291,
+        "frac": 0.8775510204
+    },
+    {
+        "cell": "microglia",
+        "gene": "MBP",
+        "expr": 0.8647215366,
+        "frac": 0.4897959184
+    },
+    {
+        "cell": "microglia",
+        "gene": "MOG",
+        "expr": 0.2617715597,
+        "frac": 0.1428571429
+    },
+    {
+        "cell": "microglia",
+        "gene": "UGT8A",
+        "expr": 0.4563086629,
+        "frac": 0.2448979592
+    },
+    {
+        "cell": "microglia",
+        "gene": "CNP",
+        "expr": 0.5239210129,
+        "frac": 0.3163265306
+    },
+    {
+        "cell": "microglia",
+        "gene": "GRIA1",
+        "expr": 0.3766789436,
+        "frac": 0.2346938776
+    },
+    {
+        "cell": "microglia",
+        "gene": "CPNE6",
+        "expr": 0.1611290127,
+        "frac": 0.1224489796
+    },
+    {
+        "cell": "microglia",
+        "gene": "NEUROD6",
+        "expr": 0.2472457737,
+        "frac": 0.1428571429
+    },
+    {
+        "cell": "microglia",
+        "gene": "CRYM",
+        "expr": 0.0797902718,
+        "frac": 0.0510204082
+    },
+    {
+        "cell": "microglia",
+        "gene": "CAMKV",
+        "expr": 0.3202506006,
+        "frac": 0.2244897959
+    },
+    {
+        "cell": "microglia",
+        "gene": "PCSK2",
+        "expr": 0.2701692283,
+        "frac": 0.193877551
+    },
+    {
+        "cell": "microglia",
+        "gene": "SNAP25",
+        "expr": 0.9384433627,
+        "frac": 0.5
+    },
+    {
+        "cell": "microglia",
+        "gene": "MEF2C",
+        "expr": 1.4156930447,
+        "frac": 0.7244897959
+    },
+    {
+        "cell": "microglia",
+        "gene": "ARPP21",
+        "expr": 0.7580179572,
+        "frac": 0.3775510204
+    },
+    {
+        "cell": "microglia",
+        "gene": "CHN1",
+        "expr": 0.6189534664,
+        "frac": 0.3265306122
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "APOE",
+        "expr": 0.6988228559,
+        "frac": 0.3426829268
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "CLU",
+        "expr": 0.5468326211,
+        "frac": 0.3548780488
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "SLC1A3",
+        "expr": 0.7935320139,
+        "frac": 0.4963414634
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "GPR37L1",
+        "expr": 0.4570524991,
+        "frac": 0.2646341463
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "GJA1",
+        "expr": 0.3183560669,
+        "frac": 0.2182926829
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "SPARC",
+        "expr": 0.7629666328,
+        "frac": 0.4414634146
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "ESAM",
+        "expr": 0.1451646984,
+        "frac": 0.1146341463
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "HES1",
+        "expr": 0.3135547042,
+        "frac": 0.2073170732
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "ITM2A",
+        "expr": 0.3744307458,
+        "frac": 0.1829268293
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "EPAS1",
+        "expr": 0.4105389416,
+        "frac": 0.3365853659
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "GAD1",
+        "expr": 0.1540070921,
+        "frac": 0.1207317073
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "GAD2",
+        "expr": 0.1191733256,
+        "frac": 0.0865853659
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "NAP1L5",
+        "expr": 0.6870190501,
+        "frac": 0.5231707317
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "TSPYL4",
+        "expr": 0.59356004,
+        "frac": 0.5402439024
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "NDRG4",
+        "expr": 0.3828390837,
+        "frac": 0.2768292683
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "B2M",
+        "expr": 0.6235265136,
+        "frac": 0.4231707317
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "CSF1R",
+        "expr": 0.1420310438,
+        "frac": 0.0853658537
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "TYROBP",
+        "expr": 0.1341278553,
+        "frac": 0.0646341463
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "C1QA",
+        "expr": 0.1429102272,
+        "frac": 0.0658536585
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "C1QB",
+        "expr": 0.1343435198,
+        "frac": 0.0707317073
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "PLP1",
+        "expr": 6.3798584938,
+        "frac": 1.0
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "MBP",
+        "expr": 3.9867956638,
+        "frac": 0.9987804878
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "MOG",
+        "expr": 3.9408452511,
+        "frac": 0.9890243902
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "UGT8A",
+        "expr": 3.6124296188,
+        "frac": 0.9975609756
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "CNP",
+        "expr": 3.6641261578,
+        "frac": 0.9987804878
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "GRIA1",
+        "expr": 0.2433140576,
+        "frac": 0.1841463415
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "CPNE6",
+        "expr": 0.1312920451,
+        "frac": 0.112195122
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "NEUROD6",
+        "expr": 0.1495033056,
+        "frac": 0.112195122
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "CRYM",
+        "expr": 0.0595616363,
+        "frac": 0.0475609756
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "CAMKV",
+        "expr": 0.2006137818,
+        "frac": 0.1731707317
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "PCSK2",
+        "expr": 0.3833914399,
+        "frac": 0.2707317073
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "SNAP25",
+        "expr": 0.8494036198,
+        "frac": 0.5109756098
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "MEF2C",
+        "expr": 0.5867609382,
+        "frac": 0.4109756098
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "ARPP21",
+        "expr": 0.5842651725,
+        "frac": 0.3512195122
+    },
+    {
+        "cell": "oligodendrocytes",
+        "gene": "CHN1",
+        "expr": 0.5834576488,
+        "frac": 0.3756097561
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "APOE",
+        "expr": 0.3345319331,
+        "frac": 0.1576144835
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "CLU",
+        "expr": 0.8972533345,
+        "frac": 0.6687965921
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "SLC1A3",
+        "expr": 0.2620483339,
+        "frac": 0.1437699681
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "GPR37L1",
+        "expr": 0.1625279486,
+        "frac": 0.1054313099
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "GJA1",
+        "expr": 0.189897269,
+        "frac": 0.1192758253
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "SPARC",
+        "expr": 0.2841030359,
+        "frac": 0.1767838126
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "ESAM",
+        "expr": 0.060493771,
+        "frac": 0.0607028754
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "HES1",
+        "expr": 0.3734234571,
+        "frac": 0.2854100106
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "ITM2A",
+        "expr": 0.2155458927,
+        "frac": 0.1682641108
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "EPAS1",
+        "expr": 0.081207633,
+        "frac": 0.0756123536
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "GAD1",
+        "expr": 0.0988582522,
+        "frac": 0.0809371672
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "GAD2",
+        "expr": 0.0970872045,
+        "frac": 0.0798722045
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "NAP1L5",
+        "expr": 1.0451543331,
+        "frac": 0.8061767838
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "TSPYL4",
+        "expr": 1.2792124748,
+        "frac": 0.9243876464
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "NDRG4",
+        "expr": 2.3130316734,
+        "frac": 1.0
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "B2M",
+        "expr": 0.4305465221,
+        "frac": 0.4004259851
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "CSF1R",
+        "expr": 0.0389158241,
+        "frac": 0.0276890309
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "TYROBP",
+        "expr": 0.0264305882,
+        "frac": 0.0181043663
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "C1QA",
+        "expr": 0.0301254131,
+        "frac": 0.0223642173
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "C1QB",
+        "expr": 0.0234707724,
+        "frac": 0.0159744409
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "PLP1",
+        "expr": 0.7457175255,
+        "frac": 0.3897763578
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "MBP",
+        "expr": 0.4637522399,
+        "frac": 0.3418530351
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "MOG",
+        "expr": 0.1561934203,
+        "frac": 0.077742279
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "UGT8A",
+        "expr": 0.1595889777,
+        "frac": 0.0947816826
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "CNP",
+        "expr": 0.2228169143,
+        "frac": 0.1331203408
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "GRIA1",
+        "expr": 2.7168188095,
+        "frac": 1.0
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "CPNE6",
+        "expr": 2.1317019463,
+        "frac": 0.9818956337
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "NEUROD6",
+        "expr": 2.2641658783,
+        "frac": 0.9936102236
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "CRYM",
+        "expr": 2.28576231,
+        "frac": 0.9733759318
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "CAMKV",
+        "expr": 2.0961167812,
+        "frac": 0.9968051118
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "PCSK2",
+        "expr": 1.9174864292,
+        "frac": 0.9861554846
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "SNAP25",
+        "expr": 3.1074502468,
+        "frac": 1.0
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "MEF2C",
+        "expr": 0.3533872068,
+        "frac": 0.3493077742
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "ARPP21",
+        "expr": 1.5816222429,
+        "frac": 0.9382321619
+    },
+    {
+        "cell": "pyramidal CA1",
+        "gene": "CHN1",
+        "expr": 3.2283976078,
+        "frac": 1.0
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "APOE",
+        "expr": 0.2667935193,
+        "frac": 0.1428571429
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "CLU",
+        "expr": 1.3355426788,
+        "frac": 0.9122807018
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "SLC1A3",
+        "expr": 0.2283673435,
+        "frac": 0.1578947368
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "GPR37L1",
+        "expr": 0.1439602971,
+        "frac": 0.0977443609
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "GJA1",
+        "expr": 0.1434938163,
+        "frac": 0.0977443609
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "SPARC",
+        "expr": 0.281625092,
+        "frac": 0.1604010025
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "ESAM",
+        "expr": 0.1230431274,
+        "frac": 0.1177944862
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "HES1",
+        "expr": 0.4971520603,
+        "frac": 0.3834586466
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "ITM2A",
+        "expr": 0.3704409897,
+        "frac": 0.2581453634
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "EPAS1",
+        "expr": 0.1335697323,
+        "frac": 0.1052631579
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "GAD1",
+        "expr": 0.0549866334,
+        "frac": 0.0551378446
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "GAD2",
+        "expr": 0.0448190384,
+        "frac": 0.045112782
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "NAP1L5",
+        "expr": 1.037529707,
+        "frac": 0.7919799499
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "TSPYL4",
+        "expr": 1.1393960714,
+        "frac": 0.8822055138
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "NDRG4",
+        "expr": 2.4825310707,
+        "frac": 1.0
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "B2M",
+        "expr": 0.7412486672,
+        "frac": 0.6140350877
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "CSF1R",
+        "expr": 0.0552970916,
+        "frac": 0.045112782
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "TYROBP",
+        "expr": 0.051966615,
+        "frac": 0.030075188
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "C1QA",
+        "expr": 0.0505858026,
+        "frac": 0.030075188
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "C1QB",
+        "expr": 0.0428381711,
+        "frac": 0.0275689223
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "PLP1",
+        "expr": 1.5604302883,
+        "frac": 0.7393483709
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "MBP",
+        "expr": 0.5603389144,
+        "frac": 0.3759398496
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "MOG",
+        "expr": 0.313002795,
+        "frac": 0.1578947368
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "UGT8A",
+        "expr": 0.4186061025,
+        "frac": 0.2581453634
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "CNP",
+        "expr": 0.3870558739,
+        "frac": 0.2205513784
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "GRIA1",
+        "expr": 0.8401568532,
+        "frac": 0.709273183
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "CPNE6",
+        "expr": 0.515447557,
+        "frac": 0.4536340852
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "NEUROD6",
+        "expr": 0.8905940056,
+        "frac": 0.649122807
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "CRYM",
+        "expr": 0.301314801,
+        "frac": 0.2030075188
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "CAMKV",
+        "expr": 1.0876128674,
+        "frac": 0.8195488722
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "PCSK2",
+        "expr": 2.9505839348,
+        "frac": 1.0
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "SNAP25",
+        "expr": 3.8471853733,
+        "frac": 1.0
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "MEF2C",
+        "expr": 2.749712944,
+        "frac": 0.9874686717
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "ARPP21",
+        "expr": 2.6618614197,
+        "frac": 0.9949874687
+    },
+    {
+        "cell": "pyramidal SS",
+        "gene": "CHN1",
+        "expr": 3.2110471725,
+        "frac": 1.0
+    }
+]
