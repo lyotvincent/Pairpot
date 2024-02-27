@@ -1,4 +1,4 @@
-import { useState, View } from 'react'
+import { useEffect, useState, View } from 'react'
 import { Container, Row, Col, ListGroup, ListGroupItem } from 'react-bootstrap'
 import { Menu } from 'antd'
 import {
@@ -20,7 +20,7 @@ function getItem(label, key, icon, children, type) {
     type,
   }
 }
-const items = [
+const InitialItems = [
   getItem('Species', 'sub1', <YuqueOutlined />, [
     getItem('Homo sapiens(Human)', '1'),
     getItem('Mus musculus(Mouse)', '2'),
@@ -33,7 +33,7 @@ const items = [
     getItem('Skin', '7'),
     getItem('Kidney', '8'),
   ]),
-  getItem('Technologies', 'sub4', <ExperimentOutlined />, [
+  getItem('Technologies', 'sub3', <ExperimentOutlined />, [
     getItem('10X Visium', '9'),
     getItem('ST', '10'),
     getItem('GeoMx DSP', '11'),
@@ -42,6 +42,7 @@ const items = [
 ]
 
 const SideMenu = ({ theme, title, items }) => {
+  const [menuItems, setMenuItems] = useState(InitialItems)
   const [openKeys, setOpenKeys] = useState(['sub1'])
   var rootSubmenuKeys = ['sub1', 'sub2', 'sub4']
   const onOpenChange = (keys) => {
@@ -52,6 +53,26 @@ const SideMenu = ({ theme, title, items }) => {
       setOpenKeys(latestOpenKey ? [latestOpenKey] : [])
     }
   }
+  const ItemIdx = {
+    species: 0,
+    tissues: 1,
+    technologies: 2,
+  }
+
+  useEffect(() => {
+    let __menuItems = InitialItems
+    let usedKey = 0
+    for (let key in items) {
+      let idx = ItemIdx[key]
+      __menuItems[idx].children = items[key].map((item, i) =>
+        getItem(item.value, i + usedKey)
+      )
+      usedKey = usedKey + items[key].length
+    }
+    console.log(__menuItems)
+    setMenuItems(__menuItems)
+  }, [items])
+
   return (
     <Menu
       mode="inline"
@@ -59,7 +80,7 @@ const SideMenu = ({ theme, title, items }) => {
       title={title}
       openKeys={openKeys}
       onOpenChange={onOpenChange}
-      items={items}
+      items={menuItems}
     />
   )
 }
@@ -67,7 +88,7 @@ const SideMenu = ({ theme, title, items }) => {
 SideMenu.defaultProps = {
   theme: 'dark',
   title: 'Datasets',
-  items: items,
+  items: { Species: [], Tissues: [], Technologies: [] },
 }
 
 SideMenu.propTypes = {

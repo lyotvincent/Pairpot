@@ -114,7 +114,8 @@ const DatasetTable = ({ src, col }) => {
         text
       ),
   })
-  const columns = [
+
+  const initColumns = [
     Table.SELECTION_COLUMN,
     {
       title: 'ID',
@@ -137,73 +138,18 @@ const DatasetTable = ({ src, col }) => {
       dataIndex: 'species',
       key: 'species',
       width: '20%',
-      filters: [
-        {
-          text: 'Homo sapiens',
-          value: 'Homo sapiens',
-        },
-        {
-          text: 'Mus musculus',
-          value: 'Mus musculus',
-        },
-      ],
-      filterMode: 'tree',
-      filterSearch: true,
-      onFilter: (value, record) => record.species === value,
     },
     {
       title: 'Tissues',
       dataIndex: 'tissues',
       key: 'tissues',
       width: '20%',
-      filters: [
-        {
-          text: 'Brain',
-          value: 'Brain',
-        },
-        {
-          text: 'Skin',
-          value: 'Skin',
-        },
-        {
-          text: 'Bone',
-          value: 'Bone',
-        },
-        {
-          text: 'Spinal cord',
-          value: 'Spinal cord',
-        },
-      ],
-      filterMode: 'tree',
-      filterSearch: true,
-      onFilter: (value, record) => record.tissues === value,
     },
     {
       title: 'Technology',
       dataIndex: 'technologies',
       key: 'technologies',
       width: '20%',
-      filters: [
-        {
-          text: '10x Visium',
-          value: '10x Visium',
-        },
-        {
-          text: 'GeoMx DSP',
-          value: 'GeoMx DSP',
-        },
-        {
-          text: 'scRNA-seq',
-          value: 'scRNA-seq',
-        },
-        {
-          text: 'Slide-seq',
-          value: 'Slide-seq',
-        },
-      ],
-      filterMode: 'tree',
-      filterSearch: true,
-      onFilter: (value, record) => record.technology === value,
     },
     {
       title: 'PMID',
@@ -223,6 +169,8 @@ const DatasetTable = ({ src, col }) => {
     },
   ]
 
+  const [dyColumns, setDyColumns] = useState(initColumns)
+
   useEffect(() => {
     var attrStack = {}
     for (var i = 0; i < col.length; i++) {
@@ -230,7 +178,7 @@ const DatasetTable = ({ src, col }) => {
       attrStack[colname] = i
     }
     var dataStack = []
-    for (var i = 0; i < src.length; i++) {
+    for (let i = 0; i < src.length; i++) {
       dataStack.push({
         key: src[i][0],
         id: src[i][1],
@@ -242,11 +190,100 @@ const DatasetTable = ({ src, col }) => {
       })
     }
     setData(dataStack)
+
+    //filter columns
+    let filterName = ['species', 'tissues', 'technologies']
+    let filterItem = filterName.map((fc) => {
+      let Ori_col = Array.from(new Set(dataStack.map((val) => val[fc])))
+      let Uni_col = []
+      for (let col of Ori_col) {
+        if (col !== null) {
+          Uni_col = [...Uni_col, ...col.split(';')]
+        }
+      }
+      Uni_col = Array.from(new Set(Uni_col)).sort()
+      Uni_col = Uni_col.map((item) => ({ text: item, value: item }))
+      return Uni_col
+    })
+    let filterCol = {}
+    for (let i = 0; i < filterName.length; i++) {
+      filterCol[filterName[i]] = filterItem[i]
+    }
+    console.log(filterCol)
+
+    //generate columns and filters
+    let columns = [
+      Table.SELECTION_COLUMN,
+      {
+        title: 'ID',
+        dataIndex: 'id',
+        key: 'id',
+        width: '14%',
+        sorter: (a, b) => a.key - b.key,
+        sortDirections: ['descend', 'ascend'],
+        fixed: 'left',
+      },
+      {
+        title: 'Title',
+        dataIndex: 'title',
+        key: 'title',
+        width: '40%',
+        ...getColumnSearchProps('title'),
+      },
+      {
+        title: 'Species',
+        dataIndex: 'species',
+        key: 'species',
+        width: '20%',
+        filters: filterCol['species'],
+        filterMode: 'tree',
+        filterSearch: true,
+        onFilter: (value, record) => record.species.split(';').includes(value),
+      },
+      {
+        title: 'Tissues',
+        dataIndex: 'tissues',
+        key: 'tissues',
+        width: '20%',
+        filters: filterCol['tissues'],
+        filterMode: 'tree',
+        filterSearch: true,
+        onFilter: (value, record) => record.tissues.split(';').includes(value),
+      },
+      {
+        title: 'Technology',
+        dataIndex: 'technologies',
+        key: 'technologies',
+        width: '20%',
+        filters: filterCol['technologies'],
+        filterMode: 'tree',
+        filterSearch: true,
+        onFilter: (value, record) =>
+          record.technologies.split(';').includes(value),
+      },
+      {
+        title: 'PMID',
+        dataIndex: 'pmid',
+        key: 'pmid',
+        ...getColumnSearchProps('pmid'),
+        sorter: (a, b) => a.pmid.length - b.pmid.length,
+        sortDirections: ['descend', 'ascend'],
+        width: '20%',
+      },
+      {
+        title: 'Action',
+        key: 'operation',
+        fixed: 'right',
+        width: 120,
+        render: () => <a>Visualization</a>,
+      },
+    ]
+    setDyColumns(columns)
   }, [src, col])
 
   return (
     <Table
-      columns={columns}
+      columns={dyColumns}
       dataSource={data}
       size="small"
       rowSelection={{}}

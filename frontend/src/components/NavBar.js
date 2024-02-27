@@ -46,8 +46,13 @@ export const NavBar = () => {
               <Nav.Link href="#projects" className={activeLink === 'projects' ? 'active navbar-link' : 'navbar-link'} onClick={() => onUpdateActiveLink('projects')}>Projects</Nav.Link>
             </Nav>
             <span className="navbar-text">
-              <HashLink to='#connect'>
+              <HashLink to='/contact'>
                 <button className="vvd"><span>Let’s Connect</span></button>
+              </HashLink>
+            </span>
+            <span className="navbar-text">
+              <HashLink to='/projects'>
+                <button className="vvd"><span>projects</span></button>
               </HashLink>
             </span>
           </Navbar.Collapse>

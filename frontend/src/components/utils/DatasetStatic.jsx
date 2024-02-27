@@ -35,7 +35,7 @@ const DatasetStatic = ({ src, col, height, width, margin }) => {
     if (techSrc.length === 0) {
       axios({
         method: 'GET',
-        url: 'http://192.168.60.116:5001/strategies',
+        url: 'http://localhost:5001/strategies',
       }).then((response) => {
         setTechSrc(response.data.data)
         setTechCol(response.data.attributes)

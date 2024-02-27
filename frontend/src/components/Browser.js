@@ -37,36 +37,6 @@ export const Browser = () => {
       </div>
       <Container fluid='true'>
         <Card bg="secret" border="secondary">
-          <ToggleAccordion header={<h3>Data Selection & Submittion</h3>} border={null}>
-            {<div>
-              The Selection module supports .h5spt, .h5ad, .mtx or .zip file with 10X Visium format.
-              Hence, .mtx needs to have genes in rows and barcodes(cells) in columns.
-            </div>}
-          </ToggleAccordion>
-          <FileUpload />
-        </Card>
-        <br />
-        <Card bg="secret" border="secondary">
-          <ToggleAccordion header={<h3>UMI Detection & Decontamination</h3>} border={null}>
-            {<div>
-              (left) Total UMI counts for each spot overlayed on the tissue
-              image. Spots with greater UMI counts likely have higher RNA
-              content than spots with fewer UMI counts.
-              <br />
-              (right) Total UMI counts for spots displayed by a 2-dimensional
-              embedding produced by the t-SNE algorithm. In this space, pairs of
-              spots that are close to each other have more similar gene
-              expression profiles than spots that are distant from each other.
-            </div>}
-          </ToggleAccordion>
-          <Row>
-            <Col ><ScHeatmap /></Col>
-          </Row>
-        </Card>
-
-        <br />
-
-        <Card bg="secret" border="secondary">
           <ToggleAccordion header={<h3>Spatial Clustering</h3>} border={null}>
             {<div>
               (left) These are the assignments of each spot-barcode to clusters by an
@@ -84,6 +54,25 @@ export const Browser = () => {
           <Row>
             <Col><ScScatter /></Col>
             <Col><SpScatter /></Col>
+          </Row>
+        </Card>
+
+        <br />
+        <Card bg="secret" border="secondary">
+          <ToggleAccordion header={<h3>UMI Detection & Decontamination</h3>} border={null}>
+            {<div>
+              (left) Total UMI counts for each spot overlayed on the tissue
+              image. Spots with greater UMI counts likely have higher RNA
+              content than spots with fewer UMI counts.
+              <br />
+              (right) Total UMI counts for spots displayed by a 2-dimensional
+              embedding produced by the t-SNE algorithm. In this space, pairs of
+              spots that are close to each other have more similar gene
+              expression profiles than spots that are distant from each other.
+            </div>}
+          </ToggleAccordion>
+          <Row>
+            <Col ><ScHeatmap /></Col>
           </Row>
         </Card>
 
@@ -123,6 +112,16 @@ export const Browser = () => {
           <Row>
             <Landscape3D2 />
           </Row>
+        </Card>
+        <br />
+        <Card bg="secret" border="secondary">
+          <ToggleAccordion header={<h3>Data Selection & Submittion</h3>} border={null}>
+            {<div>
+              The Selection module supports .h5spt, .h5ad, .mtx or .zip file with 10X Visium format.
+              Hence, .mtx needs to have genes in rows and barcodes(cells) in columns.
+            </div>}
+          </ToggleAccordion>
+          <FileUpload />
         </Card>
       </Container>
     </>

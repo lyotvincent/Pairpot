@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.after_request
 def add_cors_headers(response):
-    response.headers.add('Access-Control-Allow-Origin', 'http://192.168.60.116:3000')
+    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type, x-requested-with')
     return response
 
@@ -115,6 +115,11 @@ def upload():
     refined = EagerRefine(selected, obs)
     return jsonify({"refined": refined,'success': True})
 
+@app.route('/submit', methods=['POST'])
+def submit():
+    data = request.get_json()
+    print(data)
+    return jsonify({'success': True})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001)

@@ -21,6 +21,7 @@ const { Header, Content, Footer, Sider } = Layout
 
 export const Database = () => {
   const [collapsed, setCollapsed] = useState(false)
+  const [srcMeta, setSrcMeta] = useState({}) // get the meta data from childrens
   const [selectedKey, setSelectedKey] = useState('datasets')
   const [visible, setVisible] = useState(true)
   const onClickTopMenu = (e) => {
@@ -56,13 +57,13 @@ export const Database = () => {
         minHeight: '100vh',
       }}>
       <Sider
-        width={200}
+        width={250}
         breakpoint="lg"
         trigger={null}
         collapsible
         collapsed={collapsed}>
         <div className="demo-logo-vertical"></div>
-        <SideMenu />
+        <SideMenu items={srcMeta} />
       </Sider>
       <Layout>
         <Header
@@ -95,7 +96,9 @@ export const Database = () => {
           style={{
             padding: '0rem 1rem',
           }}>
-          {visible && selectedKey === 'datasets' && <DatasetTab />}
+          {visible && selectedKey === 'datasets' && (
+            <DatasetTab sendData={setSrcMeta} />
+          )}
           {visible && selectedKey === 'samples' && <SampleTab />}
           {visible && selectedKey === 'pairs' && <div>pairs</div>}
         </Content>

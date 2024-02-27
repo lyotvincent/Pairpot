@@ -19,15 +19,16 @@ import {
 } from 'antd'
 import DatasetDescription from './DatasetDescription'
 import TextCollapse from './TextCollapse'
+import { useNavigate } from 'react-router-dom'
 //import { response } from 'express'
 
-const IconText = ({ icon, text, attr, placement = 'bottom' }) => (
-  <Space>
-    <Tooltip placement={placement} title={attr} arrow={false} align={'center'}>
+const IconText = ({ icon, text, attr, onClick, placement = 'bottom' }) => (
+  <Tooltip placement={placement} title={attr} arrow={false} align={'center'}>
+    <Space onClick={onClick} style={{ cursor: 'pointer' }}>
       {React.createElement(icon)}
-    </Tooltip>
-    {text}
-  </Space>
+      {text}
+    </Space>
+  </Tooltip>
 )
 
 const AddCommas = (num) => {
@@ -35,6 +36,7 @@ const AddCommas = (num) => {
 }
 
 const DatasetList = ({ src, col }) => {
+  const navigate = useNavigate()
   const [dataSrc, setDataSrc] = useState([])
   const [attr, setAttr] = useState([])
   const [dataCol, setDataCol] = useState({})
@@ -82,6 +84,7 @@ const DatasetList = ({ src, col }) => {
               attr="Technology"
               text={item[attr.technologies]}
               key="list-vertical-message"
+              onClick={() => {}}
             />,
             <Rate defaultValue={2} />,
           ]}
@@ -114,8 +117,17 @@ const DatasetList = ({ src, col }) => {
                 icon={LinkOutlined}
                 text="Paired Datasets"
                 key="list-vertical-Paired-Datasets-o"
-                attr="Show paired datasets"
+                attr="Link paired datasets"
                 placement="left"
+                onClick={() => {
+                  let values = Object.fromEntries(
+                    dataCol.map((k, i) => [k, item[i]])
+                  )
+                  navigate('/submit', { state: values })
+                  console.log(
+                    Object.fromEntries(dataCol.map((k, i) => [k, item[i]]))
+                  )
+                }}
               />
             </div>
           }>

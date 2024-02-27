@@ -21,7 +21,7 @@ const JsonUploader = () => {
     reader.onload = (event) => {
       const jsonData = JSON.parse(event.target.result)
       axios
-        .post('http://192.168.60.116:5001/upload', {
+        .post('http://localhost:5001/upload', {
           data: jsonData,
           headers: {
             'Content-Type': 'application/json',

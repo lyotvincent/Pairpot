@@ -148,15 +148,17 @@ const DatasetDescription = ({ descCol, descInfo }) => {
   }, [descCol, descInfo])
   return (
     <div>
-      <Space>
-        <Tooltip
-          placement="left"
-          title="Show Descriptions"
-          arrow={false}
-          align={'center'}>
-          <FileTextOutlined onClick={() => setModal1Open(true)} /> Descriptions
-        </Tooltip>
-      </Space>
+      <Tooltip
+        placement="left"
+        title="Show Descriptions"
+        arrow={false}
+        align={'center'}>
+        <Space
+          onClick={() => setModal1Open(true)}
+          style={{ cursor: 'pointer' }}>
+          <FileTextOutlined /> Descriptions
+        </Space>
+      </Tooltip>
       <Modal
         title="Dataset Descriptions"
         open={modal1Open}

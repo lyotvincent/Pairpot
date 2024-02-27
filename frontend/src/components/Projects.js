@@ -58,19 +58,21 @@ export const Projects = () => {
                   <Tab.Container id="projects-tabs" defaultActiveKey="first">
                     <Nav variant="pills" className="nav-pills mb-5 justify-content-center align-items-center" id="pills-tab">
                       <Nav.Item>
-                        <Nav.Link eventKey="first">SRT Database</Nav.Link>
+                        <Nav.Link eventKey="first">SRT Browser</Nav.Link>
                       </Nav.Item>
                       <Nav.Item>
                         <Nav.Link eventKey="second">SRT Analyzer</Nav.Link>
                       </Nav.Item>
 
                       <Nav.Item>
-                        <Nav.Link eventKey="third">SRT Browser</Nav.Link>
+                        <Nav.Link eventKey="third">SRT Database</Nav.Link>
                       </Nav.Item>
                     </Nav>
                     <Tab.Content id="slideInUp" className={isVisible ? "animate__animated animate__slideInUp" : ""}>
                       <Tab.Pane eventKey="first">
-                        <Database />
+                        <p>This is a Browser for Spatially Resolved Transcriptomics (SRT).</p>
+                        <Browser />
+
                       </Tab.Pane>
                       <Tab.Pane eventKey="second">
                         <p>This is a Analyzer for Spatially Resolved Transcriptomics (SRT).</p>
@@ -78,8 +80,8 @@ export const Projects = () => {
                       </Tab.Pane>
 
                       <Tab.Pane eventKey="third">
-                        <p>This is a Browser for Spatially Resolved Transcriptomics (SRT).</p>
-                        <Browser />
+
+                        <Database />
                       </Tab.Pane>
                     </Tab.Content>
                   </Tab.Container>
