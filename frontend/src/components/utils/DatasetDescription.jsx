@@ -1,83 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react'
 import { Descriptions, Modal, Space, Tooltip } from 'antd'
 import { FileTextOutlined } from '@ant-design/icons'
-const items = [
-  {
-    label: 'Product',
-    children: 'Cloud Database',
-  },
-  {
-    label: 'Billing',
-    children: 'Prepaid',
-  },
-  {
-    label: 'Time',
-    children: '18:00:00',
-  },
-  {
-    label: 'Amount',
-    children: '$80.00',
-  },
-  {
-    label: 'Discount',
-    span: {
-      xl: 2,
-      xxl: 2,
-    },
-    children: '$20.00',
-  },
-  {
-    label: 'Official',
-    span: {
-      xl: 2,
-      xxl: 2,
-    },
-    children: '$60.00',
-  },
-  {
-    label: 'Config Info',
-    span: {
-      xs: 1,
-      sm: 2,
-      md: 3,
-      lg: 3,
-      xl: 2,
-      xxl: 2,
-    },
-    children: (
-      <>
-        Data disk type: MongoDB
-        <br />
-        Database version: 3.4
-        <br />
-        Package: dds.mongo.mid
-      </>
-    ),
-  },
-  {
-    label: 'Hardware Info',
-    span: {
-      xs: 1,
-      sm: 2,
-      md: 3,
-      lg: 3,
-      xl: 2,
-      xxl: 2,
-    },
-    children: (
-      <>
-        CPU: 6 Core 3.5 GHz
-        <br />
-        Storage space: 10 GB
-        <br />
-        Replication factor: 3
-        <br />
-        Region: East China 1
-      </>
-    ),
-  },
-]
-const DatasetDescription = ({ descCol, descInfo }) => {
+
+const DatasetDescription = ({ descCol, descInfo, text, placement }) => {
   const [modal1Open, setModal1Open] = useState(false)
   const [descItem, setDescItem] = useState({})
 
@@ -114,6 +39,9 @@ const DatasetDescription = ({ descCol, descInfo }) => {
     'contacts',
     'development_stages',
   ]
+
+  const aItems = ['accessions']
+
   const smItems = [
     'species',
     'tissues',
@@ -129,16 +57,21 @@ const DatasetDescription = ({ descCol, descInfo }) => {
   const excludeItems = ['cell_types']
 
   useEffect(() => {
-    var items = []
+    let items = []
     if (descInfo.length > 0) {
       for (var i = 0; i < descCol.length; i++) {
-        var useSpan = midItemSpan
+        let useSpan = midItemSpan
         useSpan = lgItems.includes(descCol[i]) ? lgItemSpan : useSpan
         useSpan = smItems.includes(descCol[i]) ? smItemSpan : useSpan
+        let useInfo = aItems.includes(descCol[i]) ? (
+          <a href={descInfo[i]}>{descInfo[i]}</a>
+        ) : (
+          descInfo[i]
+        )
         if (!excludeItems.includes(descCol[i])) {
           items.push({
             label: descCol[i],
-            children: descInfo[i],
+            children: useInfo,
             span: useSpan,
           })
         }
@@ -149,14 +82,15 @@ const DatasetDescription = ({ descCol, descInfo }) => {
   return (
     <div>
       <Tooltip
-        placement="left"
+        placement={placement}
         title="Show Descriptions"
         arrow={false}
         align={'center'}>
         <Space
           onClick={() => setModal1Open(true)}
           style={{ cursor: 'pointer' }}>
-          <FileTextOutlined /> Descriptions
+          <FileTextOutlined />
+          {text}
         </Space>
       </Tooltip>
       <Modal

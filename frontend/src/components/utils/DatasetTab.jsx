@@ -102,7 +102,7 @@ const DatasetTab = (props) => {
             filterCol[filterName[i]] = filterItem[i]
           }
           sendData(filterCol)
-          console.log(filterCol['technologies'].map((item) => item.text))
+          //console.log(filterCol['technologies'].map((item) => item.text))
         })
         .catch((error) => {
           console.log(error)

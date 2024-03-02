@@ -5,6 +5,7 @@ import {
   YuqueOutlined,
   EyeOutlined,
   LinkOutlined,
+  FileTextOutlined,
 } from '@ant-design/icons'
 import React, { useRef, useState, useEffect } from 'react'
 import {
@@ -40,6 +41,8 @@ const DatasetList = ({ src, col }) => {
   const [dataSrc, setDataSrc] = useState([])
   const [attr, setAttr] = useState([])
   const [dataCol, setDataCol] = useState({})
+  const [descOpen, setDescOpen] = useState(false)
+  const [descInfo, setDescInfo] = useState([])
   useEffect(() => {
     setDataSrc(src)
     setDataCol(col)
@@ -101,9 +104,13 @@ const DatasetList = ({ src, col }) => {
                 ' '
               )}
               <br />
-              <DatasetDescription descCol={dataCol} descInfo={item} />
+              <DatasetDescription
+                descCol={dataCol}
+                descInfo={item}
+                text={'Descriptions'}
+                placement={'left'}
+              />
               <br />
-
               <IconText
                 icon={EyeOutlined}
                 text="Visualization"
@@ -123,7 +130,7 @@ const DatasetList = ({ src, col }) => {
                   let values = Object.fromEntries(
                     dataCol.map((k, i) => [k, item[i]])
                   )
-                  navigate('/submit', { state: values })
+                  navigate('/submit/link', { state: values })
                   console.log(
                     Object.fromEntries(dataCol.map((k, i) => [k, item[i]]))
                   )

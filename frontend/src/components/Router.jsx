@@ -14,6 +14,10 @@ export default function Router() {
       element: <Banner />,
     },
     {
+      path: '/home',
+      element: <Banner />,
+    },
+    {
       path: 'browse',
       element: <Projects />,
     },
@@ -32,6 +36,12 @@ export default function Router() {
     {
       path: 'submit',
       element: <Submit />,
+      children: [
+        {
+          path: 'link',
+          element: <Submit />,
+        },
+      ],
     },
   ])
   return routes

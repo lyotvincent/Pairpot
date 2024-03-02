@@ -117,9 +117,59 @@ def upload():
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    data = request.get_json()
-    print(data)
-    return jsonify({'success': True})
+    info = request.get_json()
+    data = info['data']
+    pair_state = data.pop('pair-state', None)
+    print(pair_state)
+    table_name = 'datasets'
+
+    # open the database
+    conn = sqlite3.connect('resources/STpair.db')
+    cursor = conn.cursor()
+
+    if pair_state == 'From original dataset':
+        try:
+            # update data
+            update_query = f"UPDATE {table_name} SET has_paired = ? WHERE dataset_id = ?"
+            cursor.execute(update_query, (data['has_paired'], data['has_paired']))
+            conn.commit()
+            message = 'Submit success.'
+            state = 'success'
+        except sqlite3.Error as e:
+            message = print(f"Error occurs: {e}.")
+            print(message)
+            state = 'error'
+    elif pair_state == 'From existing dataset':
+        state = 'success'
+        message = 'Submit success.'
+    else:
+
+        # find current id
+        query = f"SELECT MAX(id) FROM {table_name}"
+        cursor.execute(query)
+        curr_id = cursor.fetchone()[0]
+        data['id'] = curr_id + 1
+        data['dataset_id'] = f"STDSA000{curr_id + 1}"
+
+        # split species, tissues, and technologies
+        for key in ['species', 'tissues', 'technologies']:
+            data[key] = ';'.join(data[key])
+
+        try:
+            # insert data
+            insert_query = f"INSERT INTO {table_name} ({','.join([col for col in data.keys()])}) VALUES ({','.join(['?' for _ in data.keys()])})"
+            cursor.execute(insert_query, list(data.values()))
+            conn.commit()
+            message = 'Submit success.'
+            state = 'success'
+        except sqlite3.Error as e:
+            message = print(f"Error occurs: {e}.")
+            print(message)
+            state = 'error'
+    cursor.close()
+    conn.close()
+
+    return jsonify({'state': state, 'message': message})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001)

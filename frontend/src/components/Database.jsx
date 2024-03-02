@@ -57,12 +57,11 @@ export const Database = () => {
         minHeight: '100vh',
       }}>
       <Sider
-        width={250}
+        width={200}
         breakpoint="lg"
         trigger={null}
         collapsible
         collapsed={collapsed}>
-        <div className="demo-logo-vertical"></div>
         <SideMenu items={srcMeta} />
       </Sider>
       <Layout>

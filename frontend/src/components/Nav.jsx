@@ -107,7 +107,7 @@ const Nav = () => {
         height: 70,
         position: 'sticky',
         top: 0,
-        zIndex: 1,
+        zIndex: 1060,
         width: '100%',
         display: 'flex',
       }}>

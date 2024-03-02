@@ -1,10 +1,28 @@
-import { SearchOutlined } from '@ant-design/icons'
+import {
+  DownloadOutlined,
+  EyeOutlined,
+  FileTextOutlined,
+  LinkOutlined,
+  SearchOutlined,
+} from '@ant-design/icons'
 import React, { useEffect, useRef, useState } from 'react'
 import Highlighter from 'react-highlight-words'
-import { Button, Input, Space, Table, Pagination } from 'antd'
+import { Button, Input, Space, Table, Pagination, Tooltip } from 'antd'
+import { useNavigate } from 'react-router-dom'
+import DatasetDescription from './DatasetDescription'
+
+const IconTip = ({ icon, attr, onClick, placement = 'bottom' }) => (
+  <Tooltip placement={placement} title={attr} arrow={false} align={'center'}>
+    {React.createElement(icon, (onClick = { onClick }))}
+  </Tooltip>
+)
 
 const DatasetTable = ({ src, col }) => {
+  const navigate = useNavigate()
   const [data, setData] = useState([])
+  const [descOpen, setDescOpen] = useState(false)
+  const [descInfo, setDescInfo] = useState({})
+  const [dataCol, setDataCol] = useState([])
   const [searchText, setSearchText] = useState('')
   const [searchedColumn, setSearchedColumn] = useState('')
   const searchInput = useRef(null)
@@ -172,6 +190,7 @@ const DatasetTable = ({ src, col }) => {
   const [dyColumns, setDyColumns] = useState(initColumns)
 
   useEffect(() => {
+    setDataCol(col)
     var attrStack = {}
     for (var i = 0; i < col.length; i++) {
       var colname = col[i]
@@ -209,7 +228,6 @@ const DatasetTable = ({ src, col }) => {
     for (let i = 0; i < filterName.length; i++) {
       filterCol[filterName[i]] = filterItem[i]
     }
-    console.log(filterCol)
 
     //generate columns and filters
     let columns = [
@@ -218,7 +236,7 @@ const DatasetTable = ({ src, col }) => {
         title: 'ID',
         dataIndex: 'id',
         key: 'id',
-        width: '14%',
+        width: '12%',
         sorter: (a, b) => a.key - b.key,
         sortDirections: ['descend', 'ascend'],
         fixed: 'left',
@@ -226,15 +244,17 @@ const DatasetTable = ({ src, col }) => {
       {
         title: 'Title',
         dataIndex: 'title',
+        ellipsis: true,
         key: 'title',
-        width: '40%',
+        width: '30%',
         ...getColumnSearchProps('title'),
       },
       {
         title: 'Species',
         dataIndex: 'species',
         key: 'species',
-        width: '20%',
+        ellipsis: true,
+        width: '15%',
         filters: filterCol['species'],
         filterMode: 'tree',
         filterSearch: true,
@@ -244,17 +264,23 @@ const DatasetTable = ({ src, col }) => {
         title: 'Tissues',
         dataIndex: 'tissues',
         key: 'tissues',
-        width: '20%',
+        ellipsis: true,
+        width: '15%',
         filters: filterCol['tissues'],
         filterMode: 'tree',
         filterSearch: true,
-        onFilter: (value, record) => record.tissues.split(';').includes(value),
+        onFilter: (value, record) => {
+          return record.tissues !== null
+            ? record.tissues.split(';').includes(value)
+            : false
+        },
       },
       {
         title: 'Technology',
         dataIndex: 'technologies',
         key: 'technologies',
-        width: '20%',
+        width: '15%',
+        ellipsis: true,
         filters: filterCol['technologies'],
         filterMode: 'tree',
         filterSearch: true,
@@ -264,41 +290,70 @@ const DatasetTable = ({ src, col }) => {
       {
         title: 'PMID',
         dataIndex: 'pmid',
+        ellipsis: true,
         key: 'pmid',
         ...getColumnSearchProps('pmid'),
-        sorter: (a, b) => a.pmid.length - b.pmid.length,
-        sortDirections: ['descend', 'ascend'],
-        width: '20%',
+        width: '10%',
       },
       {
         title: 'Action',
         key: 'operation',
         fixed: 'right',
-        width: 120,
-        render: () => <a>Visualization</a>,
+        width: '8%',
+        render: (_, record) => (
+          <>
+            <Space>
+              <DatasetDescription
+                descCol={col}
+                descInfo={src[record.key]}
+                placement={'top'}
+              />
+              <EyeOutlined />
+              <IconTip
+                icon={LinkOutlined}
+                key="list-vertical-Paired-Datasets-o"
+                attr="Link paired datasets"
+                placement="top"
+                onClick={() => {
+                  let item = src[record.key]
+                  let values = Object.fromEntries(
+                    col.map((k, i) => [k, item[i]])
+                  )
+                  navigate('/submit', { state: values })
+                }}
+              />
+              <IconTip
+                icon={DownloadOutlined}
+                attr={'Download from:' + src[record.key][attrStack.accessions]}
+                placement="top"
+              />
+            </Space>
+          </>
+        ),
       },
     ]
     setDyColumns(columns)
   }, [src, col])
 
   return (
-    <Table
-      columns={dyColumns}
-      dataSource={data}
-      size="small"
-      rowSelection={{}}
-      scroll={{
-        x: 1500,
-        y: 1000,
-      }}
-      pagination={{
-        showSizeChanger: true,
-        total: data.length,
-        showQuickJumper: true,
-        showTotal: (total) => `Total ${total} items`,
-        position: 'bottomRight',
-      }}
-    />
+    <>
+      <Table
+        columns={dyColumns}
+        dataSource={data}
+        size="small"
+        rowSelection={{}}
+        scroll={{
+          x: 1000,
+          y: 1000,
+        }}
+        pagination={{
+          showSizeChanger: true,
+          showQuickJumper: true,
+          showTotal: (total) => `Total ${total} items`,
+          position: 'bottomRight',
+        }}
+      />
+    </>
   )
 }
 export default DatasetTable
