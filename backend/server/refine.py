@@ -33,7 +33,7 @@ def LazyRefine(selected, file):
     return list(refinedObs.index)
 
 
-def LPARefine(selected, file, use_model=LabelPropagation):
+def LPARefine(selected,  file, use_model=LabelPropagation):
     adata = sc.read_h5ad(file)
     X = adata.obsm['X_umap']
     adata.obs['test'] = adata.obs['annotation'].iloc[
