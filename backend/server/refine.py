@@ -33,23 +33,24 @@ def LazyRefine(selected, file):
     return list(refinedObs.index)
 
 
-def LPARefine(selected, refered, file, use_model=LabelPropagation):
+def LPARefine(selected, file, use_model=LabelPropagation):
     adata = sc.read_h5ad(file)
-    X = adata.obsm['X_pca']
-    y = np.ones_like(adata.obs_names, dtype=int) * -1
-    y[selected] = 1
-    y[refered] = 0
+    X = adata.obsm['X_umap']
+    adata.obs['test'] = adata.obs['annotation'].iloc[
+        np.random.choice(len(adata), int(len(adata) * 0.1), replace=False)]
+    y = adata.obs['test'].copy()
+    oriCat = list(adata.obs['test'].cat.categories)
+    oriCat.append("Selected")
+    y = y.cat.rename_categories(list(range(len(oriCat)-1)))
+    y = np.array([-1 if s is np.NaN else s for s in y])
+    y[selected] = len(oriCat)
+    # do LabelPropagation
     y = pd.Series(y, index=adata.obs_names)
-    print(y)
-    y_orig = np.zeros_like(adata.obs_names, dtype=int)
-    y_orig[selected] = 1
-    model = LabelPropagation().fit(X, y)
+    model = use_model().fit(X, y)
     y_pred = model.predict(X)
-    print(y_pred)
-    def acc(y_true, y_pred):
-        return np.sum(np.equal(y_true, y_pred))
-    print("similar:{}".format(acc(y_orig, y_pred)))
-    return y_pred
+    y_pred = pd.Series(y_pred, index=adata.obs_names)
+    y_pred = y_pred[y_pred == len(oriCat)]
+    return y_pred.index
 
 
 def Gen_maskSet(candidate: pd.DataFrame, errRate=0.20):
