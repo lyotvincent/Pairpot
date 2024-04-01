@@ -85,6 +85,7 @@ const ScScatter = ({ theme, height, width, margin }) => {
   const [title, setTitle] = useState('CID4971-umap-sc')
   const FileLoaderRef = useRef('')
   const symbolSizeRef = useRef('')
+  const [loadings, setLoadings] = useState([]);
   const [Uploading, setUploading] = useState(false)
   const brushMode = useRef('Select')
   const [brushModeState, setBrushModeState] = useState('Select')
@@ -374,6 +375,21 @@ const ScScatter = ({ theme, height, width, margin }) => {
     }
     return _datasets
   }
+
+  const enterLoading = (index) => {
+    setLoadings((prevLoadings) => {
+      let newLoadings = [...prevLoadings];
+      newLoadings[index] = true;
+      return newLoadings;
+    });
+    setTimeout(() => {
+      setLoadings((prevLoadings) => {
+        let newLoadings = [...prevLoadings];
+        newLoadings[index] = false;
+        return newLoadings;
+      });
+    }, 60000);
+  };
 
   useEffect(() => {
     if (isInit) {
@@ -728,12 +744,14 @@ const ScScatter = ({ theme, height, width, margin }) => {
         commandRef.current = null
       }
       if (commandRef.current === 'Refine') {
+        let starttime = Date.now()
         axios
           .post('http://localhost:5001/refine', {
             data: {
               name: 'resources/V1-Mouse-Brain.h5ad',
               anno: brushRef.current,
               refiner: refineValue.value,
+              starttime: starttime,
             },
             headers: {
               'Content-Type': 'application/json',
@@ -741,22 +759,29 @@ const ScScatter = ({ theme, height, width, margin }) => {
           })
           .then((response) => {
             if (response.data.success) {
+              let endtime = response.data.endtime
               let refScatter = response.data.refined
               let option = myChart.getOption()
               let newOption = setBrushedMap(option, refScatter, true, 'Select')
               myChart.setOption(newOption)
-              api.info({
-                message: 'Annotation Refined',
+              api.success({
+                message: `Annotation Refined in ${(endtime - starttime) /1000}s`,
                 description: response.data.message,
                 placement: 'topRight',
               })
             } else {
+              let endtime = response.data.endtime
               api.warning({
-                message: 'Annotation does not Refined',
+                message: `Annotation does not Refined in ${(endtime - starttime) /1000}s`,
                 description: response.data.message,
                 placement: 'topRight',
               })
             }
+            setLoadings((prevLoadings) => {
+              let newLoadings = [...prevLoadings];
+              newLoadings[0] = false;
+              return newLoadings;
+            });
           })
       }
       if (commandRef.current === 'Delete') {
@@ -1469,10 +1494,12 @@ const ScScatter = ({ theme, height, width, margin }) => {
                       type="primary"
                       icon={<SlidersOutlined />}
                       disabled={!allowConfirm}
+                      loading={loadings[0]}
                       onClick={() => {
+                        enterLoading(0)
                         toggleAnno('Refine')
                       }}>
-                      Refine
+                      {loadings[0] ? "Refining" : "Refine"}
                     </Button>
                   </Space>
                 </Space>

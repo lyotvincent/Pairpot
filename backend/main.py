@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import sqlite3
+import time
 from server.refine import *
 app = Flask(__name__)
 
@@ -91,6 +92,7 @@ def refine():
     selected = data['anno']
     file = data['name']
     refinerID = data['refiner']
+    starttime = data['starttime']
 
     if refinerID == 0:
         refined = EagerRefine(selected, file)
@@ -101,9 +103,16 @@ def refine():
     else:
         refined = LPARefine(selected, file, use_model=LabelSpreading)
     if len(refined) == 0:
-        response = jsonify({"refined": refined, 'success': False, 'message': "Lasso is too small."})
+        response = jsonify({"refined": refined,
+                            'success': False,
+                            'message': "Lasso is too small.",
+                            'endtime': int(time.time()*1000)})
     else:
-        response = jsonify({"refined": refined, 'success': True, 'message': "Refining by {}".format(Refiners[refinerID])})
+        response = jsonify({"refined": refined,
+                            'success': True,
+                            'message': "Refined by {} successfully.".format(Refiners[refinerID]),
+                            "endtime": int(time.time()*1000),
+                            })
     return response
 
 
