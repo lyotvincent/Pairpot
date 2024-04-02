@@ -1,0 +1,15 @@
+Faker==20.1.0
+Flask==3.0.2
+Flask_Cors==4.0.0
+Flask_JWT_Extended==4.5.3
+flask_restplus==0.13.0
+matplotlib==3.8.2
+numpy==1.26.4
+pandas==2.2.1
+scanpy==1.10.0
+scikit_learn==1.3.2
+SQLAlchemy==2.0.23
+torch==2.1.2
+torchvision==0.16.2
+tqdm==4.66.1
+xlrd==2.0.1
