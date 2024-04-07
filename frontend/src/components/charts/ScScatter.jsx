@@ -746,7 +746,7 @@ const ScScatter = ({ theme, height, width, margin }) => {
       if (commandRef.current === 'Refine') {
         let starttime = Date.now()
         axios
-          .post('http://localhost:5001/refine', {
+          .post('http://localhost:5522/refine', {
             data: {
               name: 'resources/V1-Mouse-Brain.h5ad',
               anno: brushRef.current,

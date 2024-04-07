@@ -3,11 +3,11 @@ import sqlite3
 import time
 from server.refine import *
 app = Flask(__name__)
-
+app.debug = True
 
 @app.after_request
 def add_cors_headers(response):
-    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
+    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:6634')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type, x-requested-with')
     return response
 
@@ -181,4 +181,4 @@ def submit():
     return jsonify({'state': state, 'message': message})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001)
+    app.run(host='0.0.0.0', port=5522)
