@@ -8,8 +8,6 @@
 # --UMAP2维和3维表示
 # --TSNE2维表示
 # -细胞类型标注
-# --cellTypist标注
-# --SingleR标注
 # --原始数据自带标注
 # --细胞类型marker基因
 # --KEGG结果
@@ -18,11 +16,11 @@
 # -邻接矩阵
 # --k近邻矩阵
 import scanpy as sc
-import os
 import pandas as pd
 import numpy as np
 import anndata as ad
-import celltypist
+from AUCell import *
+from db import panglaoDB
 
 def input_adata_10X(sample):
     adata = sc.read_mtx(sample+'/matrix.mtx.gz')
@@ -51,13 +49,20 @@ def concat_adata(samples, sampleNames, inputFunc=input_adata_10Xh5):
     for i in range(len(sampleNames)):
         adata = inputFunc(samples[i])
         adatas.append(adata)
+    if len(adatas) > 0:
+        intersection_var = set(adatas[0].var_names)
+        for a in adatas[1:]:
+            intersection_var &= set(a.var_names)
+        common_vars = list(intersection_var)
+        for i in range(len(adatas)):
+            adatas[i] = adatas[i][:, common_vars]
     # 进行数据合并
-    adata_concat = ad.concat(adatas, label="batch", keys=sampleNames, index_unique='-')
+    adata_concat = adatas[0].concatenate(adatas[1:], batch_categories=sampleNames)
     adata_concat
     return adata_concat
 
 # 预处理
-def pp(adata):
+def pp(adata:ad.AnnData):
     mito_genes = adata.var_names.str.startswith('MT-')
     # the `.A1` is only necessary as X is sparse (to transform to a dense array after summing)
     adata.obs['mt_frac'] = np.sum(
@@ -72,13 +77,10 @@ def pp(adata):
     rp_genes = adata.var_names.str.startswith('RP')
     mt_genes = adata.var_names.str.startswith('MT-')
     adata = adata[:, ~(rp_genes + mt_genes)]
-    
+    adata = adata[adata.obs['mt_frac'] < 0.2]
     sc.pp.normalize_total(adata)
     sc.pp.log1p(adata)
-    
     sc.pp.highly_variable_genes(adata, min_mean=0.0125, max_mean=3, min_disp=0.5, n_top_genes=2000)
-
-    adata = adata[adata.obs['mt_frac'] < 0.2]
     return adata
 
 # macro_Mye = scv.read('velo-Macro.h5ad')
@@ -92,29 +94,42 @@ def clu(adata, key_added="leiden-1", n_neighbors=50, n_pcs=30, rep='X_pca_harmon
         print("{0} Cells retained after scrublet, {1} cells reomved.".format(adata.shape[0], n0-adata.shape[0]))
     else:
         print("Ignoring processing doublet cells...")
-    sc.tl.pca(adata, svd_solver='arpack')
+    sc.pp.pca(adata, svd_solver='arpack', use_highly_variable=True)
     if do_har:
         sc.external.pp.harmony_integrate(adata, key=har_key,max_iter_harmony=max_iter)
     sc.pp.neighbors(adata, n_neighbors=n_neighbors, n_pcs=n_pcs, use_rep=rep)
     # Run UMAP
     sc.tl.umap(adata)
+    sc.tl.tsne(adata)
     sc.tl.leiden(adata, key_added=key_added, resolution=resolution)
     sc.pl.umap(adata, color=key_added, legend_fontoutline=True, palette=sc.pl.palettes.default_20, legend_loc="on data")
     return adata
 
-def marker(adata, groupby="leiden-1", method='wilcoxon'):
+
+def rank(adata, organs, method="AUCell", top=0.05, alpha=10e-40):
+  # 对每个细胞的基因表达进行排序并且提取前5%
+  adata = AUCell_buildRankings(adata, top=top)
+
+  # Find the potential Celltypes
+  celltype = pd.unique(panglaoDB[panglaoDB['organ'].isin(organs)]['cell type'].dropna())
+  celltype.sort()
+
+  # UCell_Assign
+  adata = AUCell_UCAssign(adata, db=panglaoDB, celltype=celltype, alpha=alpha)
+  return adata
+
+def anno(adata:ad.AnnData, annoDict:dict):
+  adata.obs['annotation'] = 'Unknown'
+  for key in annoDict.keys():
+    adata.obs.loc[adata.obs['leiden-1'].isin(annoDict[key]), 'annotation'] = key
+  return adata
+
+def marker(adata, groupby="annotation", method='wilcoxon'):
     sc.tl.rank_genes_groups(adata, groupby = groupby, method = method)
     sc.tl.dendrogram(adata, groupby=groupby, use_rep='X_pca_harmony')
     sc.pl.rank_genes_groups_dotplot(adata, groupby = groupby)
     return adata
 
-def anno(adata):
-    # 采用AUCell方法进行标注
-    # 对每个细胞的基因表达进行排序并且提取前5%
-    # 找到marker并对重要性进行排序
-    # 计算AUC
-    # 计算每个类的平均AUC并展示
-    pass
 
 # 空转数据
 # -表达矩阵

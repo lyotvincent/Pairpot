@@ -3,6 +3,7 @@ import scanpy as sc
 import pandas as pd
 import numpy as np
 import anndata as ad
+from scipy.stats import kruskal
 
 def partition_arg_topK(matrix, K, axis=1):
     """
@@ -30,6 +31,7 @@ def naive_topK(matrix, K, axis=1):
 def AUCell_buildRankings(adata:ad.AnnData, top=0.05):
   k = int(len(adata.var_names)*top)
   adata.obsm['AUCell_rankings'] = pd.DataFrame(naive_topK(adata.X.todense(), k), index=adata.obs_names)
+  adata.obsm['AUCell_rankings'].columns = np.array(adata.obsm['AUCell_rankings'].columns, dtype=str)
   return adata
 
 
@@ -92,7 +94,6 @@ def AUCell_exploreThreshold(adata:ad.AnnData, cellType:str, assign=True, index="
 def AUCell_calcUC(adata:ad.AnnData, markerList:list, cellType:str, rankings="AUCell_rankings"):
   varList = list(adata.var_names)
   markerIdx = [varList.index(s) for s in markerList]
-  print(markerIdx)
   rankMat = adata.obsm[rankings]
   maxRank = len(adata.obsm[rankings].columns)
   n = len(markerIdx)
@@ -108,5 +109,41 @@ def AUCell_calcUC(adata:ad.AnnData, markerList:list, cellType:str, rankings="AUC
     else:
       u = np.sum([list(mat).index(s) for s in intagIdx]) + (n-len(intagIdx))*maxRank - smin
       ucell[i] = 1 - u / umax
-  adata.obs[f"UCell_{cellType}"] = ucell
+
+  # do knn-smooth
+  # knnMat = np.argsort(-adata.obsp["connectivities"].todense(), axis=1)[:,:5]
+  # for i in range(len(ucell)):
+  #   knnCells = list(knnMat[i])
+  #   ucell[i] = np.mean(ucell[knnCells])
+  adata.obs[f"UCell_{cellType}"] = pd.Series(ucell, index=adata.obs_names, dtype=float)
+  return adata
+
+
+
+def AUCell_UCAssign(adata:ad.AnnData, db:pd.DataFrame, celltype:str, alpha=10e-30, gene_col='official gene symbol'):
+  annotation = {}
+  for ct in celltype:
+    candidates = []
+    markerList = np.array(db[db['cell type'] ==ct][gene_col])
+    markerList = list(set(markerList).intersection(set(adata.var_names)))
+    adata = AUCell_calcUC(adata, markerList, ct)
+    ucell = adata.obs[["leiden-1", f"UCell_{ct}"]]
+    rank = ucell.groupby("leiden-1", observed=False).mean()
+    rank = rank.sort_values(by=f"UCell_{ct}", ascending=False)
+    rank = rank.reset_index()
+
+    for i in range(len(rank)):
+      anno = rank.iloc[i,0]
+      sample1 = ucell.loc[ucell['leiden-1'].isin([anno]), f"UCell_{ct}"]
+      sample2 = ucell.loc[~ucell['leiden-1'].isin([anno]), f"UCell_{ct}"]
+      w = kruskal(sample1, sample2)
+      if w.pvalue < alpha:
+        candidates.append(anno)
+        ucell = ucell[~ucell['leiden-1'].isin([anno])]
+      else:
+        break
+    if len(candidates) > 0:
+      annotation[ct] = candidates
+  adata.uns['UCell_Assign'] = annotation
+  adata.obsm['AUCell_rankings'].columns = np.array(adata.obsm['AUCell_rankings'].columns, dtype=str)
   return adata
