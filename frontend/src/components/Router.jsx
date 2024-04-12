@@ -19,7 +19,7 @@ export default function Router() {
     },
     {
       path: 'browse',
-      element: <Projects />,
+      element: <Browser />,
     },
     {
       path: 'projects',

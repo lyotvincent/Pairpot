@@ -1,9 +1,29 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import * as echarts from 'echarts'
 import PropTypes from 'prop-types'
 import '../theme/dark'
 import '../theme/vintage'
 import { TooltipComponent, VisualMapComponent } from 'echarts/components'
+import {
+  ConfigProvider,
+  Button,
+  Card,
+  Space,
+  Popconfirm,
+  Input,
+  Select,
+  notification,
+  Popover,
+  Upload,
+  Segmented,
+  InputNumber,
+  Slider,
+  Switch,
+  Col,
+  Row,
+  Form,
+  Flex
+} from 'antd'
 import {
   GraphicComponent,
   GridComponent,
@@ -24,214 +44,362 @@ echarts.use([
 
 const SpScatter = ({ theme, title, height, width, margin }) => {
   const chartRef = useRef(null) // get current DOM container
+  const [api, contextHolder] = notification.useNotification()
+  const [isInit, setInit] = useState(false) // whether echart object is inited
+  const [xInv, setxInv] = useState(false)
+  const [yInv, setyInv] = useState(false)
+  const itemGroupRef = useRef([])
 
-  useEffect(() => {
-    var myChart = echarts.init(chartRef.current, theme) //init the echart container
-    var _data = require('../../assets/data/Mouse-Brain-umap.json')
-
-    var array_row = _data.map((item) => {
-      return -item['array_row']
+  const setAxis = (
+    source,
+    dims,
+    xName0,
+    yName0,
+    xName1 = null,
+    yName1 = null
+  ) => {
+    // the axis of left chart
+    let xIdx0 = dims.indexOf(xName0)
+    let yIdx0 = dims.indexOf(yName0)
+    let embd0_x = source.map((item) => {
+      return item[xIdx0]
     })
-    var array_col = _data.map((item) => {
-      return -item['array_col']
+    let embd0_y = source.map((item) => {
+      return item[yIdx0]
     })
 
-    var vega_20 = [
-      '#1f77b4',
-      '#aec7e8',
-      '#ff7f0e',
-      '#ffbb78',
-      '#2ca02c',
-      '#98df8a',
-      '#d62728',
-      '#ff9896',
-      '#9467bd',
-      '#c5b0d5',
-      '#8c564b',
-      '#c49c94',
-      '#e377c2',
-      '#f7b6d2',
-      '#7f7f7f',
-      '#c7c7c7',
-      '#bcbd22',
-      '#dbdb8d',
-      '#17becf',
-      '#9edae5',
-    ]
+    // the axis of right chart. By default it's as same as the axis in left chart.
+    let xIdx1 = xIdx0
+    let yIdx1 = yIdx0
+    let embd1_x = embd0_x
+    let embd1_y = embd0_y
+    if (xName1 !== null && yName1 !== null) {
+      xIdx1 = dims.indexOf(xName1)
+      yIdx1 = dims.indexOf(yName1)
+      embd1_x = source.map((item) => {
+        return item[xIdx1]
+      })
+      embd1_y = source.map((item) => {
+        return item[yIdx1]
+      })
+    }
 
-    vega_20 = [...vega_20, ...vega_20]
+    return {
+      xAxis: [
+        {
+          id: 0,
+          gridIndex: 0,
+          name: xName0,
+          nameLocation: 'middle',
+          nameGap: 23,
+          nameTextStyle: {
+            fontSize: 16,
+          },
+          axisLine: {
+            onZero: false,
+          },
+          axisLabel: {
+            fontSize: 14,
+          },
+          position: 'bottom',
+          inverse: xInv,
+          min: Math.ceil(Math.min.apply(null, embd0_x) - 1.5),
+          max: Math.ceil(Math.max.apply(null, embd0_x) + 1.5),
+        },
+        {
+          id: 1,
+          gridIndex: 1,
+          name: xName1,
+          nameLocation: 'middle',
+          nameGap: 23,
+          nameTextStyle: {
+            fontSize: 16,
+          },
+          axisLine: {
+            onZero: false,
+          },
+          axisLabel: {
+            fontSize: 14,
+          },
+          position: 'bottom',
+          inverse: xInv,
+          min: Math.ceil(Math.min.apply(null, embd1_x) - 1.5),
+          max: Math.ceil(Math.max.apply(null, embd1_x) + 1.5),
+        },
+      ],
+      yAxis: [
+        {
+          id: 0,
+          gridIndex: 0,
+          name: yName0,
+          nameLocation: yInv ? 'start' : 'end',
+          nameTextStyle: {
+            fontSize: 16,
+          },
+          axisLine: {
+            onZero: false,
+          },
+          axisLabel: {
+            fontSize: 14,
+          },
+          position: 'left',
+          inverse: yInv,
+          min: Math.ceil(Math.min.apply(null, embd0_y) - 1.5),
+          max: Math.ceil(Math.max.apply(null, embd0_y) + 1.5),
+        },
+        {
+          id: 1,
+          gridIndex: 1,
+          name: yName1,
+          nameLocation: yInv ? 'start' : 'end',
+          nameTextStyle: {
+            fontSize: 16,
+          },
+          axisLine: {
+            onZero: false,
+          },
+          axisLabel: {
+            fontSize: 14,
+          },
+          position: 'left',
+          inverse: yInv,
+          min: Math.ceil(Math.min.apply(null, embd1_y) - 1.5),
+          max: Math.ceil(Math.max.apply(null, embd1_y) + 1.5),
+        },
+      ],
+    }
+  }
 
-    var umapSeries = [
-      {
-        type: 'scatter',
-        symbolSize: 6,
-        name: 'V1_Adult_Mouse_Brain',
-        dimensions: ['array_col', 'array_row', 'umap_1', 'umap_2', 'umap_3'],
-        data: _data.map((item) => {
-          return [
-            item['array_col'],
-            -item['array_row'],
-            item['umap_1'],
-            item['umap_2'],
-            item['umap_3'],
-          ]
-        }),
-        encode: {
-          x: 'array_col',
-          y: 'array_row',
-          tooltip: [0, 1, 2, 3, 4],
+  const setItemGroup = (source, annoIdx, type = 'categories') => {
+    let itemGroup = []
+    let annotations = []
+    if (type === 'categories') {
+      annotations = [
+        ...new Set(
+          source.map((item) => {
+            return item[annoIdx]
+          })
+        ),
+      ]
+
+      annotations = annotations.sort()
+      for (let anno of annotations) {
+        itemGroup.push(
+          source
+            .filter((item) => {
+              return item[annoIdx] === anno
+            })
+            .map((item) => item[item.length - 1])
+        )
+      }
+    } else {
+      itemGroup.push(source.map((item) => item[item.length - 1]))
+    }
+
+    itemGroupRef.current = itemGroup
+    return annotations
+  }
+
+  const setDataset = (source, dims, annoName, annotations) => {
+    let _datasets = []
+    _datasets.push({
+      dimensions: dims,
+      source: source,
+    })
+    if (annotations.length === 0) {
+      // if no annotations, all the data are annotated by a label.
+      _datasets.push({
+        // 这个 dataset 的 index 是 `1`。
+        transform: {
+          type: 'sort',
+          config: { dimension: annoName, order: 'desc' },
         },
-        itemStyle: {
-          color: (params) => {
-            return (
-              'rgba(' +
-              params.data[2] * 255 +
-              ',' +
-              params.data[3] * 255 +
-              ',' +
-              params.data[4] * 255 +
-              ',1)'
-            )
-          },
-        },
-      },
-    ]
-    var legendData = ['V1_Adult_Mouse_Brain']
-    var cluSeries = []
-    var item = _data[0]
-    for (let key of Object.keys(item)) {
-      if (
-        [
-          'BayesSpace',
-          'SEDR',
-          'stlearn',
-          'Giotto',
-          'Seurat',
-          'leiden',
-          'SpaGCN',
-        ].includes(key)
-      ) {
-        legendData.push(key)
-        cluSeries.push({
-          type: 'scatter',
-          symbolSize: 6,
-          name: key,
-          dimensions: ['array_col', 'array_row', 'Cluster'],
-          data: _data.map((item) => {
-            return [item['array_col'], -item['array_row'], item[key]]
-          }),
-          encode: {
-            x: 'array_col',
-            y: 'array_row',
-            tooltip: [0, 1, 2],
-          },
-          itemStyle: {
-            color: (params) => {
-              return vega_20[params.data[2]]
-            },
+      })
+    } else {
+      for (let anno of annotations) {
+        _datasets.push({
+          // 这个 dataset 的 index 是 `1`。
+          transform: {
+            type: 'filter',
+            config: { dimension: annoName, value: anno },
           },
         })
       }
     }
-    var mySeries = [...umapSeries, ...cluSeries]
-    myChart.setOption({
-      tooltip: {},
-      title: [
-        {
-          text: title,
-          left: 'center',
-          textStyle: {
-            fontSize: 24,
-          },
-        },
-      ],
-      xAxis: {
-        axisLine: {
-          onZero: false,
-        },
-        position: 'bottom',
-        // min: Math.min.apply(null, array_col) - 0.5,
-        // max: Math.max.apply(null, array_col) + 0.5,
-      },
-      yAxis: {
-        axisLine: {
-          onZero: false,
-        },
-        position: 'left',
-        min: Math.min.apply(null, array_row) - 5,
-        max: Math.max.apply(null, array_row) + 5,
-      },
-      grid: {
-        top: '7%',
-        left: '10%',
-        bottom: '14%',
-        axisLine: {
-          lineStyle: {
-            color: '#fff',
-          },
-        },
-        axisPointer: {
-          lineStyle: {
-            color: '#ffbd67',
-          },
-        },
-      },
-      legend: {
-        show: true,
-        bottom: '0%',
-        data: legendData,
-        selectedMode: 'single',
-        selected: {
-          V1_Adult_Mouse_Brain: true,
-          BayesSpace: false,
-        },
-        textStyle: {
-          fontSize: 16,
-        },
-      },
-      series: mySeries,
-      // graphic: [
-      //   {
-      //     type: 'group',
-      //     left: '10%',
-      //     top: 'center',
-      //     children: [
-      //       {
-      //         type: 'rect',
-      //         z: 0,
-      //         left: 'center',
-      //         top: 'middle',
-      //         shape: {
-      //           width: 240,
-      //           height: 90,
-      //         },
-      //         style: {
-      //           color: 'rgba(0,0,0,0)',
-      //           fill: '#fff',
-      //           stroke: '#555',
-      //           lineWidth: 1,
-      //           shadowBlur: 8,
-      //           shadowOffsetX: 3,
-      //           shadowOffsetY: 3,
-      //           shadowColor: 'rgba(0,0,0,0.2)',
-      //         },
-      //       },
-      //       {
-      //         type: 'image',
-      //         z: 0,
-      //         left: 'center',
-      //         top: 'middle',
-      //         style: {
-      //           image:
-      //             'https://pic1.zhimg.com/80/v2-884c88e9ddd12fd94418c0359a43c148_1440w.webp',
+    return _datasets
+  }
 
-      //           width: 220,
-      //         },
-      //       },
-      //     ],
-      //   },
-      // ],
-    })
+  useEffect(() => {
+    if (isInit) {
+      console.log("Is Inited.")
+      var myChart = echarts.getInstanceByDom(chartRef.current)
+    } else {
+      var myChart = echarts.init(chartRef.current, theme) //init the echart container
+      var _data = require('../../assets/data/Mouse-Brain-umap.json')
+
+      var array_row = _data.map((item) => {
+        return -item['array_row']
+      })
+      var array_col = _data.map((item) => {
+        return -item['array_col']
+      })
+
+      var vega_20 = [
+        '#1f77b4',
+        '#aec7e8',
+        '#ff7f0e',
+        '#ffbb78',
+        '#2ca02c',
+        '#98df8a',
+        '#d62728',
+        '#ff9896',
+        '#9467bd',
+        '#c5b0d5',
+        '#8c564b',
+        '#c49c94',
+        '#e377c2',
+        '#f7b6d2',
+        '#7f7f7f',
+        '#c7c7c7',
+        '#bcbd22',
+        '#dbdb8d',
+        '#17becf',
+        '#9edae5',
+      ]
+
+      vega_20 = [...vega_20, ...vega_20]
+
+      var umapSeries = [
+        {
+          type: 'scatter',
+          symbolSize: 6,
+          name: 'V1_Adult_Mouse_Brain',
+          dimensions: ['array_col', 'array_row', 'umap_1', 'umap_2', 'umap_3'],
+          data: _data.map((item) => {
+            return [
+              item['array_col'],
+              -item['array_row'],
+              item['umap_1'],
+              item['umap_2'],
+              item['umap_3'],
+            ]
+          }),
+          encode: {
+            x: 'array_col',
+            y: 'array_row',
+            tooltip: [0, 1, 2, 3, 4],
+          },
+          itemStyle: {
+            color: (params) => {
+              return (
+                'rgba(' +
+                params.data[2] * 255 +
+                ',' +
+                params.data[3] * 255 +
+                ',' +
+                params.data[4] * 255 +
+                ',1)'
+              )
+            },
+          },
+        },
+      ]
+      var legendData = ['V1_Adult_Mouse_Brain']
+      var cluSeries = []
+      var item = _data[0]
+      for (let key of Object.keys(item)) {
+        if (
+          [
+            'BayesSpace',
+            'SEDR',
+            'stlearn',
+            'Giotto',
+            'Seurat',
+            'leiden',
+            'SpaGCN',
+          ].includes(key)
+        ) {
+          legendData.push(key)
+          cluSeries.push({
+            type: 'scatter',
+            symbolSize: 6,
+            name: key,
+            dimensions: ['array_col', 'array_row', 'Cluster'],
+            data: _data.map((item) => {
+              return [item['array_col'], -item['array_row'], item[key]]
+            }),
+            encode: {
+              x: 'array_col',
+              y: 'array_row',
+              tooltip: [0, 1, 2],
+            },
+            itemStyle: {
+              color: (params) => {
+                return vega_20[params.data[2]]
+              },
+            },
+          })
+        }
+      }
+      var mySeries = [...umapSeries, ...cluSeries]
+      myChart.setOption({
+        tooltip: {},
+        title: [
+          {
+            text: title,
+            left: 'center',
+            textStyle: {
+              fontSize: 24,
+            },
+          },
+        ],
+        xAxis: {
+          axisLine: {
+            onZero: false,
+          },
+          position: 'bottom',
+          // min: Math.min.apply(null, array_col) - 0.5,
+          // max: Math.max.apply(null, array_col) + 0.5,
+        },
+        yAxis: {
+          axisLine: {
+            onZero: false,
+          },
+          position: 'left',
+          min: Math.min.apply(null, array_row) - 5,
+          max: Math.max.apply(null, array_row) + 5,
+        },
+        grid: {
+          top: '7%',
+          left: '10%',
+          bottom: '14%',
+          axisLine: {
+            lineStyle: {
+              color: '#fff',
+            },
+          },
+          axisPointer: {
+            lineStyle: {
+              color: '#ffbd67',
+            },
+          },
+        },
+        legend: {
+          show: true,
+          bottom: '0%',
+          data: legendData,
+          selectedMode: 'single',
+          selected: {
+            V1_Adult_Mouse_Brain: true,
+            BayesSpace: false,
+          },
+          textStyle: {
+            fontSize: 16,
+          },
+        },
+        series: mySeries,
+      })
+    }
   }, [theme, title])
 
   return (

@@ -33,6 +33,7 @@ import {
   Col,
   Row,
   Form,
+  Flex
 } from 'antd'
 import {
   CheckOutlined,
@@ -85,7 +86,7 @@ const ScScatter = ({ theme, height, width, margin }) => {
   const [title, setTitle] = useState('CID4971-umap-sc')
   const FileLoaderRef = useRef('')
   const symbolSizeRef = useRef('')
-  const [loadings, setLoadings] = useState([]);
+  const [loadings, setLoadings] = useState([])
   const [Uploading, setUploading] = useState(false)
   const brushMode = useRef('Select')
   const [brushModeState, setBrushModeState] = useState('Select')
@@ -378,25 +379,25 @@ const ScScatter = ({ theme, height, width, margin }) => {
 
   const enterLoading = (index) => {
     setLoadings((prevLoadings) => {
-      let newLoadings = [...prevLoadings];
-      newLoadings[index] = true;
-      return newLoadings;
-    });
+      let newLoadings = [...prevLoadings]
+      newLoadings[index] = true
+      return newLoadings
+    })
     setTimeout(() => {
       setLoadings((prevLoadings) => {
-        let newLoadings = [...prevLoadings];
-        newLoadings[index] = false;
-        return newLoadings;
-      });
-    }, 60000);
-  };
+        let newLoadings = [...prevLoadings]
+        newLoadings[index] = false
+        return newLoadings
+      })
+    }, 60000)
+  }
 
   const quitLoading = (index) => {
     setLoadings((prevLoadings) => {
-      let newLoadings = [...prevLoadings];
-      newLoadings[index] = false;
-      return newLoadings;
-    });
+      let newLoadings = [...prevLoadings]
+      newLoadings[index] = false
+      return newLoadings
+    })
   }
 
   useEffect(() => {
@@ -413,7 +414,7 @@ const ScScatter = ({ theme, height, width, margin }) => {
         symbolSizeRef.current = source.length > 5000 ? 2 : 4
         setItemSize(symbolSizeRef.current)
         // set annotaions or clusters
-        let defaultAnno = clusterOps.find((item)=>item.label==="annotation")
+        let defaultAnno = clusterOps.find((item) => item.label === "annotation")
         setClusterCur(defaultAnno)
         let annotations = setItemGroup(source, _dims.indexOf(defaultAnno.label))
 
@@ -434,7 +435,7 @@ const ScScatter = ({ theme, height, width, margin }) => {
           defaultAnno.label,
           annotations
         )
-        
+
         // set Series
         let _series = []
         let _snum = 0
@@ -636,9 +637,9 @@ const ScScatter = ({ theme, height, width, margin }) => {
                 null,
                 _source.map((item) => item[clusterIdx])
               ),
-              inRange:{
-                color:['#808080', '#FF3300'],
-                opacity:[0.5,1],
+              inRange: {
+                color: ['#808080', '#FF3300'],
+                opacity: [0.5, 1],
               },
               text: ['', clusterCur.label],
               textGap: 20,
@@ -777,30 +778,30 @@ const ScScatter = ({ theme, height, width, margin }) => {
               let newOption = setBrushedMap(option, refScatter, true, 'Select')
               myChart.setOption(newOption)
               api.success({
-                message: `Annotation Refined in ${(endtime - starttime) /1000}s`,
+                message: `Annotation Refined in ${(endtime - starttime) / 1000}s`,
                 description: response.data.message,
                 placement: 'topRight',
               })
             } else {
               let endtime = response.data.endtime
               api.warning({
-                message: `Annotation does not Refined in ${(endtime - starttime) /1000}s`,
+                message: `Annotation does not Refined in ${(endtime - starttime) / 1000}s`,
                 description: response.data.message,
                 placement: 'topRight',
               })
             }
             setLoadings((prevLoadings) => {
-              let newLoadings = [...prevLoadings];
-              newLoadings[0] = false;
-              return newLoadings;
-            });
+              let newLoadings = [...prevLoadings]
+              newLoadings[0] = false
+              return newLoadings
+            })
           }).catch((error) => {
             api.error({
               message: `Annotation failed for ${error}`,
               placement: 'topRight',
             })
           })
-          quitLoading(0)
+        quitLoading(0)
       }
       if (commandRef.current === 'Delete') {
         let option = myChart.getOption()
@@ -1129,7 +1130,7 @@ const ScScatter = ({ theme, height, width, margin }) => {
           label: item,
           attr: _type[id],
         }))
-              }
+      }
       setClusterOps(_clusters)
 
       let _obsmNames = f.get('obsm').keys
@@ -1141,7 +1142,7 @@ const ScScatter = ({ theme, height, width, margin }) => {
         if (obsm === 'X_pca') {
           _loadDims = 2
         }
-        if(obsm === 'AUCell_rankings'){
+        if (obsm === 'AUCell_rankings') {
           _loadDims = 2
         }
         for (let dim = 0; dim < _loadDims; dim++) {
@@ -1224,7 +1225,7 @@ const ScScatter = ({ theme, height, width, margin }) => {
     <div>
       {contextHolder}
 
-      <Space size="small">
+      <Flex justify="center" gap='middle'>
         <div
           ref={chartRef}
           className="chart"
@@ -1247,386 +1248,387 @@ const ScScatter = ({ theme, height, width, margin }) => {
             },
           }}>
           <Space direction="vertical" size="small">
-            <Dragger {...upLoadProps}>
-              <p
-                className="ant-upload-drag-icon"
-                style={{ fontSize: 16, fontFamily: 'Centra' }}>
-                <InboxOutlined />
-                Upload
-              </p>
-            </Dragger>
-            <Popover
-              title={<>Setting Figure Options:</>}
-              placement="topLeft"
-              content={
-                <Space size="small" direction="vertical">
-                  <Form
-                    name="Settings"
-                    size="large"
-                    labelCol={{
-                      span: 6,
-                    }}
-                    wrapperCol={{
-                      span: 17,
-                    }}>
-                    <Form.Item label="ItemSize">
-                      {' '}
-                      <Slider
-                        min={0}
-                        max={10}
-                        marks={{ 0: '0', 5: '5', 10: '10' }}
-                        onChange={(value) => {
-                          setItemSize(value)
-                        }}
-                        value={typeof itemSize === 'number' ? itemSize : 2}
-                      />
-                    </Form.Item>
-                    <Form.Item label="Opacity">
-                      {' '}
-                      <Slider
-                        min={0}
-                        max={1}
-                        marks={{ 0: '0', 0.5: '0.5', 1: '1.0' }}
-                        step={0.01}
-                        onChange={(value) => {
-                          setItemOpacity(value)
-                        }}
-                        value={
-                          typeof itemOpacity === 'number' ? itemOpacity : 0.8
-                        }
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      label="Label Loc"
+            <Space direction="vertical" size="small">
+              <Dragger {...upLoadProps}>
+                <p
+                  className="ant-upload-drag-icon"
+                  style={{ fontSize: 16, fontFamily: 'Arial', color: 'white', margin: 5 }}>
+                  <InboxOutlined />
+                  <br />
+                  Upload
+                </p>
+              </Dragger>
+              <Popover
+                title={<>Setting Figure Options:</>}
+                placement="topLeft"
+                content={
+                  <Space size="small" direction="vertical">
+                    <Form
+                      name="Settings"
+                      size="large"
                       labelCol={{
-                        span: 7,
+                        span: 6,
+                      }}
+                      wrapperCol={{
+                        span: 17,
                       }}>
-                      {' '}
-                      <Segmented
-                        options={[
-                          { label: 'on Data', value: 'on Data' },
-                          { label: 'Bottom', value: 'Bottom' },
-                          { label: 'Hide', value: 'Hide' },
-                        ]}
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      label="Brush Mode"
-                      labelCol={{
-                        span: 8,
-                      }}>
-                      {' '}
-                      <Segmented
-                        options={[
-                          { label: 'Select', value: 'Select' },
-                          { label: 'Draw', value: 'Draw' },
-                          { label: 'Erase', value: 'Erase' },
-                        ]}
-                        defaultValue="Select"
-                        onChange={(value) => {
-                          brushMode.current = value
-                          setBrushModeState(value)
-                        }}
-                        value={brushModeState}
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      label="Inverse"
-                      labelCol={{
-                        span: 7,
-                      }}>
-                      <Space>
-                        xAxis:
-                        <Switch
-                          checked={xInv}
-                          onChange={() => {
-                            setxInv(!xInv)
+                      <Form.Item label="ItemSize">
+                        {' '}
+                        <Slider
+                          min={0}
+                          max={10}
+                          marks={{ 0: '0', 5: '5', 10: '10' }}
+                          onChange={(value) => {
+                            setItemSize(value)
+                          }}
+                          value={typeof itemSize === 'number' ? itemSize : 2}
+                        />
+                      </Form.Item>
+                      <Form.Item label="Opacity">
+                        {' '}
+                        <Slider
+                          min={0}
+                          max={1}
+                          marks={{ 0: '0', 0.5: '0.5', 1: '1.0' }}
+                          step={0.01}
+                          onChange={(value) => {
+                            setItemOpacity(value)
+                          }}
+                          value={
+                            typeof itemOpacity === 'number' ? itemOpacity : 0.8
+                          }
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        label="Label Loc"
+                        labelCol={{
+                          span: 7,
+                        }}>
+                        {' '}
+                        <Segmented
+                          options={[
+                            { label: 'on Data', value: 'on Data' },
+                            { label: 'Bottom', value: 'Bottom' },
+                            { label: 'Hide', value: 'Hide' },
+                          ]}
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        label="Brush Mode"
+                        labelCol={{
+                          span: 8,
+                        }}>
+                        {' '}
+                        <Segmented
+                          options={[
+                            { label: 'Select', value: 'Select' },
+                            { label: 'Draw', value: 'Draw' },
+                            { label: 'Erase', value: 'Erase' },
+                          ]}
+                          defaultValue="Select"
+                          onChange={(value) => {
+                            brushMode.current = value
+                            setBrushModeState(value)
+                          }}
+                          value={brushModeState}
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        label="Inverse"
+                        labelCol={{
+                          span: 7,
+                        }}>
+                        <Space>
+                          xAxis:
+                          <Switch
+                            checked={xInv}
+                            onChange={() => {
+                              setxInv(!xInv)
+                            }}
+                          />
+                          yAxis:
+                          <Switch
+                            checked={yInv}
+                            onChange={() => {
+                              setyInv(!yInv)
+                            }}
+                          />
+                        </Space>
+                      </Form.Item>
+                      <Form.Item
+                        label="Pictures"
+                        labelCol={{
+                          span: 7,
+                        }}>
+                        <Space>
+                          Left:
+                          <Switch /> Right:
+                          <Switch />
+                        </Space>
+                      </Form.Item>
+                      <Form.Item
+                        label="Clustering"
+                        labelCol={{
+                          span: 7,
+                        }}>
+                        {' '}
+                        <Select
+                          labelInValue
+                          placeholder="Clustering"
+                          style={{
+                            width: '100%',
+                          }}
+                          placement="topLeft"
+                          options={clusterOps}
+                          value={clusterCur}
+                          onChange={(target) => {
+                            setClusterCur({
+                              value: target.value,
+                              label: target.label,
+                              attr: clusterOps[target.value].attr,
+                            })
                           }}
                         />
-                        yAxis:
-                        <Switch
-                          checked={yInv}
-                          onChange={() => {
-                            setyInv(!yInv)
+                      </Form.Item>
+                      <Form.Item
+                        label="Embedding 0"
+                        labelCol={{
+                          span: 9,
+                        }}>
+                        {' '}
+                        <Select
+                          labelInValue
+                          placeholder="Embedding Left"
+                          style={{
+                            width: '100%',
+                          }}
+                          placement="topLeft"
+                          options={embedOps}
+                          value={embedCur}
+                          onChange={(value) => {
+                            setEmbedCur(value.label)
                           }}
                         />
-                      </Space>
-                    </Form.Item>
-                    <Form.Item
-                      label="Pictures"
-                      labelCol={{
-                        span: 7,
-                      }}>
-                      <Space>
-                        Left:
-                        <Switch /> Right:
-                        <Switch />
-                      </Space>
-                    </Form.Item>
-                    <Form.Item
-                      label="Clustering"
-                      labelCol={{
-                        span: 7,
-                      }}>
-                      {' '}
-                      <Select
-                        labelInValue
-                        placeholder="Clustering"
-                        style={{
-                          width: '100%',
-                        }}
-                        placement="topLeft"
-                        options={clusterOps}
-                        value={clusterCur}
-                        onChange={(target) => {
-                          setClusterCur({
-                            value: target.value,
-                            label: target.label,
-                            attr: clusterOps[target.value].attr,
-                          })
-                        }}
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      label="Embedding 0"
-                      labelCol={{
-                        span: 9,
-                      }}>
-                      {' '}
-                      <Select
-                        labelInValue
-                        placeholder="Embedding Left"
-                        style={{
-                          width: '100%',
-                        }}
-                        placement="topLeft"
-                        options={embedOps}
-                        value={embedCur}
-                        onChange={(value) => {
-                          setEmbedCur(value.label)
-                        }}
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      label="Embedding 1"
-                      labelCol={{
-                        span: 9,
-                      }}>
-                      {' '}
-                      <Select
-                        labelInValue
-                        placeholder="Embedding Right"
-                        style={{
-                          width: '100%',
-                        }}
-                        placement="topLeft"
-                        options={embedOps}
-                        value={embedCur1}
-                        onChange={(value) => {
-                          setEmbedCur1(value.label)
-                        }}
-                      />
-                    </Form.Item>
-                  </Form>
-                  <Space size="small">
-                    <Button icon={<ReloadOutlined />}>Reset</Button>
-                    <Button
-                      type="primary"
-                      icon={<SettingOutlined />}
-                      onClick={() => {
-                        toggleAnno('Setting')
-                      }}>
-                      Apply
-                    </Button>
+                      </Form.Item>
+                      <Form.Item
+                        label="Embedding 1"
+                        labelCol={{
+                          span: 9,
+                        }}>
+                        {' '}
+                        <Select
+                          labelInValue
+                          placeholder="Embedding Right"
+                          style={{
+                            width: '100%',
+                          }}
+                          placement="topLeft"
+                          options={embedOps}
+                          value={embedCur1}
+                          onChange={(value) => {
+                            setEmbedCur1(value.label)
+                          }}
+                        />
+                      </Form.Item>
+                    </Form>
+                    <Space size="small">
+                      <Button icon={<ReloadOutlined />}>Reset</Button>
+                      <Button
+                        type="primary"
+                        icon={<SettingOutlined />}
+                        onClick={() => {
+                          toggleAnno('Setting')
+                        }}>
+                        Apply
+                      </Button>
+                    </Space>
                   </Space>
-                </Space>
-              }
-              trigger="click">
-              <Button type="primary" block icon={<SettingOutlined />}>
-                Settings
-              </Button>
-            </Popover>
-            <Popconfirm
-              title={
-                <div>
-                  <div>Rename your annotation here (at most 30 characters)</div>{' '}
-                  <Input
-                    placeholder="Your annotations"
-                    showCount
-                    value={inputValue}
-                    maxLength={30}
-                    onChange={(event) => {
-                      setInputValue(event.target.value)
-                    }}
-                  />
-                  Previous annotation is: {nameRef.current}
-                </div>
-              }
-              okText="Rename"
-              onConfirm={() => {
-                toggleAnno('Rename')
-              }}
-              cancelText="Cancel">
-              <Button
-                block
-                type="primary"
-                disabled={!allowConfirm}
-                icon={<FormOutlined />}>
-                Rename
-              </Button>
-            </Popconfirm>
-            <Popover
-              title={<>Select the annotation to refine:</>}
-              content={
-                <Space direction="vertical">
-                  <Select
-                    labelInValue
-                    placeholder="Select a Refiner"
-                    style={{
-                      width: '100%',
-                    }}
-                    value={refineValue}
-                    placement="topLeft"
-                    options={refineOption}
-                    onChange={(value) => {
-                      setRefineValue(value)
-                    }}
-                  />
-                  <Space size="small">
-                    <Button
-                      block
-                      icon={<CloseOutlined />}
-                      onClick={() => {
-                        setRefineOpen(false)
-                      }}>
-                      Cancel
-                    </Button>
-                    <Button
-                      block
-                      icon={<ReloadOutlined />}
-                      onClick={() => {
-                        setRefineValue([])
-                        toggleAnno('Refine_Reset')
-                      }}>
-                      Reset
-                    </Button>
-                    <Button
-                      block
-                      type="primary"
-                      icon={<SlidersOutlined />}
-                      disabled={!allowConfirm}
-                      loading={loadings[0]}
-                      onClick={() => {
-                        enterLoading(0)
-                        toggleAnno('Refine')
-                      }}>
-                      {loadings[0] ? "Refining" : "Refine"}
-                    </Button>
+                }
+                trigger="click">
+                <Button type="primary" block icon={<SettingOutlined />}>
+                  Settings
+                </Button>
+              </Popover>
+              <Popconfirm
+                title={
+                  <div>
+                    <div>Rename your annotation here (at most 30 characters)</div>{' '}
+                    <Input
+                      placeholder="Your annotations"
+                      showCount
+                      value={inputValue}
+                      maxLength={30}
+                      onChange={(event) => {
+                        setInputValue(event.target.value)
+                      }}
+                    />
+                    Previous annotation is: {nameRef.current}
+                  </div>
+                }
+                okText="Rename"
+                onConfirm={() => {
+                  toggleAnno('Rename')
+                }}
+                cancelText="Cancel">
+                <Button
+                  block
+                  type="primary"
+                  disabled={!allowConfirm}
+                  icon={<FormOutlined />}>
+                  Rename
+                </Button>
+              </Popconfirm>
+              <Popover
+                title={<>Select the annotation to refine:</>}
+                content={
+                  <Space direction="vertical">
+                    <Select
+                      labelInValue
+                      placeholder="Select a Refiner"
+                      style={{
+                        width: '100%',
+                      }}
+                      value={refineValue}
+                      placement="topLeft"
+                      options={refineOption}
+                      onChange={(value) => {
+                        setRefineValue(value)
+                      }}
+                    />
+                    <Space size="small">
+                      <Button
+                        block
+                        icon={<CloseOutlined />}
+                        onClick={() => {
+                          setRefineOpen(false)
+                        }}>
+                        Cancel
+                      </Button>
+                      <Button
+                        block
+                        icon={<ReloadOutlined />}
+                        onClick={() => {
+                          setRefineValue([])
+                          toggleAnno('Refine_Reset')
+                        }}>
+                        Reset
+                      </Button>
+                      <Button
+                        block
+                        type="primary"
+                        icon={<SlidersOutlined />}
+                        disabled={!allowConfirm}
+                        loading={loadings[0]}
+                        onClick={() => {
+                          enterLoading(0)
+                          toggleAnno('Refine')
+                        }}>
+                        {loadings[0] ? "Refining" : "Refine"}
+                      </Button>
+                    </Space>
                   </Space>
-                </Space>
-              }
-              open={refineOpen}
-              onOpenChange={(newOpen) => {
-                setRefineOpen(newOpen)
-              }}
-              trigger="click">
-              <Button block type="primary" icon={<SlidersOutlined />}>
-                Refine
-              </Button>
-            </Popover>
-            <Popconfirm
-              title={`Are you sure about \'${nameRef.current}\'?`}
-              okText="Yes"
-              onConfirm={() => toggleAnno('Confirm')}
-              cancelText="No">
-              <Button
-                block
-                type="primary"
-                disabled={!allowConfirm}
-                icon={<CheckOutlined />}>
-                Confirm
-              </Button>
-            </Popconfirm>
-            <Popover
-              title={<>Select the annotation to delete:</>}
-              content={
-                <Space direction="vertical">
-                  <Select
-                    mode="tags"
-                    placeholder="Your previous annotation"
-                    style={{
-                      width: '100%',
-                    }}
-                    value={deleteValue}
-                    placement="topLeft"
-                    options={nameArray}
-                    onChange={(value) => {
-                      setDeleteValue(value)
-                    }}
-                  />
-                  <Space size="small">
-                    <Button
-                      block
-                      icon={<CloseOutlined />}
-                      onClick={() => {
-                        setDeleteOpen(false)
-                      }}>
-                      Cancel
-                    </Button>
-                    <Button
-                      block
-                      icon={<ReloadOutlined />}
-                      onClick={() => {
-                        setDeleteValue([])
-                      }}>
-                      Reset
-                    </Button>
-                    <Button
-                      block
-                      danger
-                      icon={<DeleteOutlined />}
-                      onClick={() => {
-                        toggleAnno('Delete')
-                      }}>
-                      Delete
-                    </Button>
+                }
+                open={refineOpen}
+                onOpenChange={(newOpen) => {
+                  setRefineOpen(newOpen)
+                }}
+                trigger="click">
+                <Button block type="primary" icon={<SlidersOutlined />}>
+                  Refine
+                </Button>
+              </Popover>
+              <Popconfirm
+                title={`Are you sure about \'${nameRef.current}\'?`}
+                okText="Yes"
+                onConfirm={() => toggleAnno('Confirm')}
+                cancelText="No">
+                <Button
+                  block
+                  type="primary"
+                  disabled={!allowConfirm}
+                  icon={<CheckOutlined />}>
+                  Confirm
+                </Button>
+              </Popconfirm>
+              <Popover
+                title={<>Select the annotation to delete:</>}
+                content={
+                  <Space direction="vertical">
+                    <Select
+                      mode="tags"
+                      placeholder="Your previous annotation"
+                      style={{
+                        width: '100%',
+                      }}
+                      value={deleteValue}
+                      placement="topLeft"
+                      options={nameArray}
+                      onChange={(value) => {
+                        setDeleteValue(value)
+                      }}
+                    />
+                    <Space size="small">
+                      <Button
+                        block
+                        icon={<CloseOutlined />}
+                        onClick={() => {
+                          setDeleteOpen(false)
+                        }}>
+                        Cancel
+                      </Button>
+                      <Button
+                        block
+                        icon={<ReloadOutlined />}
+                        onClick={() => {
+                          setDeleteValue([])
+                        }}>
+                        Reset
+                      </Button>
+                      <Button
+                        block
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={() => {
+                          toggleAnno('Delete')
+                        }}>
+                        Delete
+                      </Button>
+                    </Space>
                   </Space>
-                </Space>
-              }
-              open={deleteOpen}
-              onOpenChange={(newOpen) => {
-                setDeleteOpen(newOpen)
-              }}
-              trigger="click">
-              <Button type="primary" block icon={<DeleteOutlined />}>
-                Delete
-              </Button>
-            </Popover>
-            <Popconfirm
-              title="Select the download file mode"
-              okText="JSON"
-              onConfirm={() => {
-                toggleAnno('Download')
-              }}
-              cancelText="Table">
-              <Button type="primary" block icon={<CloudDownloadOutlined />}>
-                Save
-              </Button>
-            </Popconfirm>
+                }
+                open={deleteOpen}
+                onOpenChange={(newOpen) => {
+                  setDeleteOpen(newOpen)
+                }}
+                trigger="click">
+                <Button type="primary" block icon={<DeleteOutlined />}>
+                  Delete
+                </Button>
+              </Popover>
+              <Popconfirm
+                title="Select the download file mode"
+                okText="JSON"
+                onConfirm={() => {
+                  toggleAnno('Download')
+                }}
+                cancelText="Table">
+                <Button type="primary" block icon={<CloudDownloadOutlined />}>
+                  Save
+                </Button>
+              </Popconfirm>
+            </Space>
+            <div>
+              <b>Current Status</b>
+              <div>Mode: {brushModeState}</div>
+              <div>Clustering: {clusterCur.label}</div>
+              <div>Embedding 0: {embedCur}</div>
+              <div>Embedding 1: {embedCur1}</div>
+              <div>Annotated Clusters: {snumRef.current}</div>
+              <div>Cell number: {cellNum}</div>
+            </div>
           </Space>
-          <br />
-          <br />
-          <b>Current Status</b>
-          <div>Mode: {brushModeState}</div>
-          <div>Clustering: {clusterCur.label}</div>
-          <div>Embedding 0: {embedCur}</div>
-          <div>Embedding 1: {embedCur1}</div>
-          <div>Annotated Clusters: {snumRef.current}</div>
-          <div>Cell number: {cellNum}</div>
         </ConfigProvider>
-      </Space>
-      <h4 align="center"> Series Gallery</h4>
-      <SeriesGallery />
+      </Flex>
     </div>
   )
 }
@@ -1635,7 +1637,7 @@ ScScatter.defaultProps = {
   theme: 'dark',
   height: '31rem',
   width: '55rem',
-  margin: '2rem',
+  margin: '1rem',
 }
 
 ScScatter.propTypes = {
