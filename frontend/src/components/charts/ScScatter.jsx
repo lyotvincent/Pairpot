@@ -391,6 +391,14 @@ const ScScatter = ({ theme, height, width, margin }) => {
     }, 60000);
   };
 
+  const quitLoading = (index) => {
+    setLoadings((prevLoadings) => {
+      let newLoadings = [...prevLoadings];
+      newLoadings[index] = false;
+      return newLoadings;
+    });
+  }
+
   useEffect(() => {
     if (isInit) {
       // get the echart container
@@ -404,8 +412,8 @@ const ScScatter = ({ theme, height, width, margin }) => {
         setCellNum(source.length)
         symbolSizeRef.current = source.length > 5000 ? 2 : 4
         setItemSize(symbolSizeRef.current)
-        // set annoataions or clusters
-        let defaultAnno = clusterOps[0]
+        // set annotaions or clusters
+        let defaultAnno = clusterOps.find((item)=>item.label==="annotation")
         setClusterCur(defaultAnno)
         let annotations = setItemGroup(source, _dims.indexOf(defaultAnno.label))
 
@@ -426,7 +434,7 @@ const ScScatter = ({ theme, height, width, margin }) => {
           defaultAnno.label,
           annotations
         )
-
+        
         // set Series
         let _series = []
         let _snum = 0
@@ -628,6 +636,10 @@ const ScScatter = ({ theme, height, width, margin }) => {
                 null,
                 _source.map((item) => item[clusterIdx])
               ),
+              inRange:{
+                color:['#808080', '#FF3300'],
+                opacity:[0.5,1],
+              },
               text: ['', clusterCur.label],
               textGap: 20,
               textStyle: {
@@ -748,7 +760,7 @@ const ScScatter = ({ theme, height, width, margin }) => {
         axios
           .post('http://localhost:5522/refine', {
             data: {
-              name: 'resources/V1-Mouse-Brain.h5ad',
+              name: `resources/${title}.h5ad`,
               anno: brushRef.current,
               refiner: refineValue.value,
               starttime: starttime,
@@ -782,7 +794,13 @@ const ScScatter = ({ theme, height, width, margin }) => {
               newLoadings[0] = false;
               return newLoadings;
             });
+          }).catch((error) => {
+            api.error({
+              message: `Annotation failed for ${error}`,
+              placement: 'topRight',
+            })
           })
+          quitLoading(0)
       }
       if (commandRef.current === 'Delete') {
         let option = myChart.getOption()
@@ -1111,7 +1129,7 @@ const ScScatter = ({ theme, height, width, margin }) => {
           label: item,
           attr: _type[id],
         }))
-      }
+              }
       setClusterOps(_clusters)
 
       let _obsmNames = f.get('obsm').keys
@@ -1121,6 +1139,9 @@ const ScScatter = ({ theme, height, width, margin }) => {
         let _dims = _embd.length / _len
         let _loadDims = _dims
         if (obsm === 'X_pca') {
+          _loadDims = 2
+        }
+        if(obsm === 'AUCell_rankings'){
           _loadDims = 2
         }
         for (let dim = 0; dim < _loadDims; dim++) {
