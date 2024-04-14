@@ -32,6 +32,8 @@ import {
 import { LineChart } from 'echarts/charts'
 import { UniversalTransition } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
+import H5adLoader from '../utils/H5adLoader'
+import { CloudDownloadOutlined, FileAddOutlined, FileOutlined, InboxOutlined, SettingOutlined } from '@ant-design/icons'
 echarts.use([
   GraphicComponent,
   TooltipComponent,
@@ -42,21 +44,56 @@ echarts.use([
   UniversalTransition,
 ])
 
-const SpScatter = ({ theme, title, height, width, margin }) => {
+const { Dragger } = Upload
+
+// left figure is umap2 and right figure is spatial3
+const SpScatter = ({ theme, height, width, margin }) => {
   const chartRef = useRef(null) // get current DOM container
+  const commandRef = useRef('') // get the current command for useEffect
+  const [action, setAction] = useState(0)
   const [api, contextHolder] = notification.useNotification()
   const [isInit, setInit] = useState(false) // whether echart object is inited
+  const [clusterCur, setClusterCur] = useState({})
+  const [batchCur, setBatchCur] = useState({})
+  const [embedCur, setEmbedCur] = useState('')
+  const [clusterOps, setClusterOps] = useState({})
+  const [embedOps, setEmbedOps] = useState({})
+  const [batchOps, setBatchOps] = useState({})
   const [xInv, setxInv] = useState(false)
   const [yInv, setyInv] = useState(false)
   const itemGroupRef = useRef([])
+  const symbolSizeRef = useRef('')
+  const FileLoaderRef = useRef('')
+  const prevCluster = useRef('')
+  const [title, setTitle] = useState('Mouse-Brain')
+  const [_data, _setData] = useState(
+    require('../../assets/data/Mouse-Brain-umap.json')
+  )
+  var vega_20 = [
+    '#1f77b4',
+    '#aec7e8',
+    '#ff7f0e',
+    '#ffbb78',
+    '#2ca02c',
+    '#98df8a',
+    '#d62728',
+    '#ff9896',
+    '#9467bd',
+    '#c5b0d5',
+    '#8c564b',
+    '#c49c94',
+    '#e377c2',
+    '#f7b6d2',
+    '#7f7f7f',
+    '#c7c7c7',
+    '#bcbd22',
+    '#dbdb8d',
+    '#17becf',
+    '#9edae5',
+  ]
 
-  const setAxis = (
-    source,
-    dims,
-    xName0,
-    yName0,
-    xName1 = null,
-    yName1 = null
+  vega_20 = [...vega_20, ...vega_20]
+  const setAxis = (source, dims, xName0, yName0,
   ) => {
     // the axis of left chart
     let xIdx0 = dims.indexOf(xName0)
@@ -67,22 +104,6 @@ const SpScatter = ({ theme, title, height, width, margin }) => {
     let embd0_y = source.map((item) => {
       return item[yIdx0]
     })
-
-    // the axis of right chart. By default it's as same as the axis in left chart.
-    let xIdx1 = xIdx0
-    let yIdx1 = yIdx0
-    let embd1_x = embd0_x
-    let embd1_y = embd0_y
-    if (xName1 !== null && yName1 !== null) {
-      xIdx1 = dims.indexOf(xName1)
-      yIdx1 = dims.indexOf(yName1)
-      embd1_x = source.map((item) => {
-        return item[xIdx1]
-      })
-      embd1_y = source.map((item) => {
-        return item[yIdx1]
-      })
-    }
 
     return {
       xAxis: [
@@ -103,28 +124,6 @@ const SpScatter = ({ theme, title, height, width, margin }) => {
           },
           position: 'bottom',
           inverse: xInv,
-          min: Math.ceil(Math.min.apply(null, embd0_x) - 1.5),
-          max: Math.ceil(Math.max.apply(null, embd0_x) + 1.5),
-        },
-        {
-          id: 1,
-          gridIndex: 1,
-          name: xName1,
-          nameLocation: 'middle',
-          nameGap: 23,
-          nameTextStyle: {
-            fontSize: 16,
-          },
-          axisLine: {
-            onZero: false,
-          },
-          axisLabel: {
-            fontSize: 14,
-          },
-          position: 'bottom',
-          inverse: xInv,
-          min: Math.ceil(Math.min.apply(null, embd1_x) - 1.5),
-          max: Math.ceil(Math.max.apply(null, embd1_x) + 1.5),
         },
       ],
       yAxis: [
@@ -144,27 +143,6 @@ const SpScatter = ({ theme, title, height, width, margin }) => {
           },
           position: 'left',
           inverse: yInv,
-          min: Math.ceil(Math.min.apply(null, embd0_y) - 1.5),
-          max: Math.ceil(Math.max.apply(null, embd0_y) + 1.5),
-        },
-        {
-          id: 1,
-          gridIndex: 1,
-          name: yName1,
-          nameLocation: yInv ? 'start' : 'end',
-          nameTextStyle: {
-            fontSize: 16,
-          },
-          axisLine: {
-            onZero: false,
-          },
-          axisLabel: {
-            fontSize: 14,
-          },
-          position: 'left',
-          inverse: yInv,
-          min: Math.ceil(Math.min.apply(null, embd1_y) - 1.5),
-          max: Math.ceil(Math.max.apply(null, embd1_y) + 1.5),
         },
       ],
     }
@@ -229,61 +207,297 @@ const SpScatter = ({ theme, title, height, width, margin }) => {
     return _datasets
   }
 
+  const SpH5adLoader = (file) => {
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      let h5info = H5adLoader(file, event)
+      _setData(h5info.data)
+      setTitle(h5info.title)
+      setClusterOps(h5info.clusters)
+      setEmbedOps(h5info.embdOps)
+    }
+    reader.onloadend = () => {
+      toggleAnno('Upload')
+    }
+    reader.readAsArrayBuffer(file)
+  }
+
+  const beforeUpload = (file) => {
+    if (file.name.endsWith('.h5ad')) {
+      FileLoaderRef.current = SpH5adLoader
+    } else {
+      alert('Please select a .json or .h5ad file')
+      return false
+    }
+    return true
+  }
+
+  const onUpload = (info) => {
+    const file = info.file
+    FileLoaderRef.current(file)
+  }
+
+  const upLoadProps = {
+    maxCount: 1,
+    beforeUpload: beforeUpload,
+    customRequest: onUpload,
+    listType: 'text',
+    showUploadList: false,
+  }
+
+  const toggleAnno = (command) => {
+    commandRef.current = command
+    setAction(action + 1)
+  }
+
   useEffect(() => {
     if (isInit) {
       console.log("Is Inited.")
       var myChart = echarts.getInstanceByDom(chartRef.current)
+      if (commandRef.current === "Upload") {
+
+        // 1.set source
+        let _dims = [...Object.keys(_data[0]), 'id']
+        let source = _data.map((item, id) => {
+          return [...Object.entries(item).map(([_, value]) => value), id]
+        })
+        symbolSizeRef.current = source.length > 5000 ? 2 : 4
+
+        // 2.set annotations and batches
+        let defaultAnno = 'annotation'
+        setClusterCur({ value: 0, label: defaultAnno, attr: 'categories' })
+        prevCluster.current = { value: 0, label: defaultAnno, attr: 'categories' }
+        let annotations = setItemGroup(source, _dims.indexOf(defaultAnno))
+
+        let defaultBatch = 'batch'
+        let batches = setItemGroup(source, _dims.indexOf(defaultBatch))
+        setBatchCur({ value: 0, label: batches[0], attr: 'categories' })
+        setBatchOps(batches.map((item, id) => ({ value: id, label: item, attr: 'categories' })))
+
+        // 3.set embeddings
+        let axis = setAxis(source, _dims, 'array_row', 'array_col')
+        setEmbedCur('spatial')
+        setEmbedOps([{ value: 0, label: 'spatial' }])
+        let xName = 'array_row'
+        let yName = 'array_col'
+
+        // 4.set datasets
+        let _datasets = setDataset(source, _dims, 'batch', batches)
+
+        // 5.set 3D series
+        let _series = []
+        let _snum = 0
+        let _3DSeries = {
+          type: 'scatter3D',
+          name: "batch",
+          encode: {
+            x: 'array_row',
+            y: 'array_col',
+            z: 'batch',
+            tooltip: [0, 1, 2],
+          },
+          large: true,
+          itemStyle: {
+            color: 'gray',
+            opacity: 0.3,
+          },
+          largeThreshold: 0,
+          datasetIndex: _snum,
+        }
+        _series.push(_3DSeries)
+
+        // 6.set batch series
+        for (let bat of batches) {
+          // seperate the _data into subgroups by cell-types
+          _series.push({
+            type: 'scatter',
+            symbolSize: symbolSizeRef.current,
+            xAxisIndex: 0,
+            yAxisIndex: 0,
+            name: bat,
+            encode: {
+              x: xName,
+              y: yName,
+              tooltip: [0, 1, 2, 3],
+              itemName: bat,
+            },
+            emphasis: {
+              focus: 'series',
+            },
+            large: true,
+            largeThreshold: 5000,
+            datasetIndex: _snum,
+          })
+          _snum = _snum + 1
+        }
+        console.log(_series)
+        // 7.render charts
+        myChart.setOption({
+          tooltip: {},
+          title: [
+            {
+              text: title,
+              left: 'center',
+              textStyle: {
+                fontSize: 24,
+              },
+            },
+          ],
+          grid3D: {
+            width: '55%',
+            axisLine: {
+              lineStyle: {
+                color: '#fff',
+              },
+            },
+            axisPointer: {
+              lineStyle: {
+                color: '#ffbd67',
+              },
+            },
+          },
+          xAxis3D: {},
+          yAxis3D: {},
+          zAxis3D: { type: 'category' },
+          xAxis: axis.xAxis,
+          yAxis: axis.yAxis,
+          grid: [{
+            top: '15%',
+            width: '40%',
+            right: '1%',
+            bottom: '13%',
+            axisLine: {
+              lineStyle: {
+                color: '#fff',
+              },
+            },
+            axisPointer: {
+              lineStyle: {
+                color: '#ffbd67',
+              },
+            },
+          }],
+          dataset: _datasets,
+          series: _series,
+        },
+          {
+            replaceMerge: ['dataset', 'series'],  // enable replaceMerge for datasets
+          })
+        console.log(myChart.getOption())
+      }
+      else if (commandRef.current === "Setting") {
+        let option = myChart.getOption()
+        let _source = option.dataset[0].source
+        let _dims = option.dataset[0].dimensions
+        let clusterIdx = _dims.indexOf(clusterCur.label)
+
+        let _series = option.series
+        // TODO: let batches change
+      }
     } else {
       var myChart = echarts.init(chartRef.current, theme) //init the echart container
-      var _data = require('../../assets/data/Mouse-Brain-umap.json')
 
-      var array_row = _data.map((item) => {
-        return -item['array_row']
+      let _dims = [...Object.keys(_data[0]), 'id']
+      let source = _data.map((item, id) => {
+        return [...Object.entries(item).map(([_, value]) => value), id]
       })
-      var array_col = _data.map((item) => {
-        return -item['array_col']
+      symbolSizeRef.current = source.length > 5000 ? 2 : 4
+
+      // set annotations
+      let defaultAnno = 'leiden'
+      setClusterCur({ value: 0, label: defaultAnno, attr: 'categories' })
+      prevCluster.current = { value: 0, label: defaultAnno, attr: 'categories' }
+      setClusterOps([{ value: 0, label: defaultAnno, attr: 'categories' }])
+      let annotations = setItemGroup(source, _dims.indexOf('leiden'))
+
+
+      // set embeddings
+      let axis = setAxis(source, _dims, 'array_row', 'array_col')
+      setEmbedCur('spatial')
+      setEmbedOps([{ value: 0, label: 'spatial' }])
+
+      // set datasets
+      let _datasets = setDataset(source, _dims, 'annotation', annotations)
+
+      // set Series
+      let _series = []
+      let _snum = 0
+
+      let option = {
+        tooltip: {},
+        grid3D: {
+          width: '50%',
+        },
+        xAxis3D: {},
+        yAxis3D: {},
+        zAxis3D: {},
+        grid: [
+          {
+            top: '15%',
+            left: '5%',
+            width: '43%',
+            bottom: '13%',
+            axisLine: {
+              lineStyle: {
+                color: '#fff',
+              },
+            },
+            axisPointer: {
+              lineStyle: {
+                color: '#ffbd67',
+              },
+            },
+          },
+        ],
+
+      }
+      _series.push({
+        type: 'scatter',
+        xAxisIndex: 1,
+        yAxisIndex: 1,
+        symbolSize: symbolSizeRef.current,
+        encode: {
+          x: 'umap_0',
+          y: 'umap_1',
+          z: 'batch',
+        },
+        tooltip: { show: false },
+        itemStyle: {
+          color: 'gray',
+          opacity: 0.3,
+        },
+        large: true,
+        largeThreshold: 0,
+        datasetIndex: _snum,
       })
 
-      var vega_20 = [
-        '#1f77b4',
-        '#aec7e8',
-        '#ff7f0e',
-        '#ffbb78',
-        '#2ca02c',
-        '#98df8a',
-        '#d62728',
-        '#ff9896',
-        '#9467bd',
-        '#c5b0d5',
-        '#8c564b',
-        '#c49c94',
-        '#e377c2',
-        '#f7b6d2',
-        '#7f7f7f',
-        '#c7c7c7',
-        '#bcbd22',
-        '#dbdb8d',
-        '#17becf',
-        '#9edae5',
+
+      var batchSeries = [
+        {
+          type: 'scatter3D',
+          name: "batch",
+          encode: {
+            x: 'array_row',
+            y: 'array_col',
+            z: 'in_tissue',
+            tooltip: [0, 1, 2],
+          },
+          large: true,
+          itemStyle: {
+            color: 'gray',
+            opacity: 0.3,
+          },
+          largeThreshold: 0,
+          datasetIndex: _snum,
+        }
       ]
-
-      vega_20 = [...vega_20, ...vega_20]
 
       var umapSeries = [
         {
           type: 'scatter',
           symbolSize: 6,
-          name: 'V1_Adult_Mouse_Brain',
-          dimensions: ['array_col', 'array_row', 'umap_1', 'umap_2', 'umap_3'],
-          data: _data.map((item) => {
-            return [
-              item['array_col'],
-              -item['array_row'],
-              item['umap_1'],
-              item['umap_2'],
-              item['umap_3'],
-            ]
-          }),
+          name: 'SOView',
+          datasetIndex: _snum,
           encode: {
             x: 'array_col',
             y: 'array_row',
@@ -293,18 +507,18 @@ const SpScatter = ({ theme, title, height, width, margin }) => {
             color: (params) => {
               return (
                 'rgba(' +
+                params.data[1] * 255 +
+                ',' +
                 params.data[2] * 255 +
                 ',' +
                 params.data[3] * 255 +
-                ',' +
-                params.data[4] * 255 +
                 ',1)'
               )
             },
           },
         },
       ]
-      var legendData = ['V1_Adult_Mouse_Brain']
+      var legendData = []
       var cluSeries = []
       var item = _data[0]
       for (let key of Object.keys(item)) {
@@ -317,6 +531,7 @@ const SpScatter = ({ theme, title, height, width, margin }) => {
             'Seurat',
             'leiden',
             'SpaGCN',
+            'annotation',
           ].includes(key)
         ) {
           legendData.push(key)
@@ -326,7 +541,7 @@ const SpScatter = ({ theme, title, height, width, margin }) => {
             name: key,
             dimensions: ['array_col', 'array_row', 'Cluster'],
             data: _data.map((item) => {
-              return [item['array_col'], -item['array_row'], item[key]]
+              return [item['array_col'], item['array_row'], item[key]]
             }),
             encode: {
               x: 'array_col',
@@ -341,7 +556,7 @@ const SpScatter = ({ theme, title, height, width, margin }) => {
           })
         }
       }
-      var mySeries = [...umapSeries, ...cluSeries]
+      _series = [...batchSeries, ...cluSeries]
       myChart.setOption({
         tooltip: {},
         title: [
@@ -353,26 +568,8 @@ const SpScatter = ({ theme, title, height, width, margin }) => {
             },
           },
         ],
-        xAxis: {
-          axisLine: {
-            onZero: false,
-          },
-          position: 'bottom',
-          // min: Math.min.apply(null, array_col) - 0.5,
-          // max: Math.max.apply(null, array_col) + 0.5,
-        },
-        yAxis: {
-          axisLine: {
-            onZero: false,
-          },
-          position: 'left',
-          min: Math.min.apply(null, array_row) - 5,
-          max: Math.max.apply(null, array_row) + 5,
-        },
-        grid: {
-          top: '7%',
-          left: '10%',
-          bottom: '14%',
+        grid3D: {
+          width: '55%',
           axisLine: {
             lineStyle: {
               color: '#fff',
@@ -384,40 +581,101 @@ const SpScatter = ({ theme, title, height, width, margin }) => {
             },
           },
         },
-        legend: {
-          show: true,
-          bottom: '0%',
-          data: legendData,
-          selectedMode: 'single',
-          selected: {
-            V1_Adult_Mouse_Brain: true,
-            BayesSpace: false,
+        xAxis3D: {},
+        yAxis3D: {},
+        zAxis3D: {},
+        xAxis: axis.xAxis,
+        yAxis: axis.yAxis,
+        grid: [{
+          top: '15%',
+          width: '40%',
+          right: '1%',
+          bottom: '13%',
+          axisLine: {
+            lineStyle: {
+              color: '#fff',
+            },
           },
-          textStyle: {
-            fontSize: 16,
+          axisPointer: {
+            lineStyle: {
+              color: '#ffbd67',
+            },
           },
-        },
-        series: mySeries,
+        }],
+        dataset: _datasets,
+        series: _series,
       })
+      setInit(true)
     }
-  }, [theme, title])
+  }, [theme, action])
 
   return (
-    <div>
+    <Flex justify="center" gap='middle'>
       <div
         ref={chartRef}
         className="chart"
         //the target DOM container needs height and width
         style={{ height: height, width: width, margin: margin }}></div>
-    </div>
+      <Space direction='vertical' size='small'>
+        <Dragger {...upLoadProps}>
+          <p
+            className="ant-upload-drag-icon"
+            style={{ fontSize: 16, fontFamily: 'Arial', color: 'white', margin: 5 }}>
+            <InboxOutlined />
+            <br />
+            Upload
+          </p>
+        </Dragger>
+        <Button type="primary" block icon={<SettingOutlined />}>
+          Settings
+        </Button>
+        <Button type="primary" block icon={<CloudDownloadOutlined />}>
+          Save
+        </Button>
+        <Form
+          name="Settings"
+          size="middle"
+          labelCol={{
+            span: 6,
+          }}
+          wrapperCol={{
+            span: 17,
+          }}>
+          {/* <Form.Item
+            label="Batch"
+            labelCol={{
+              span: 7,
+            }}>
+            {' '}
+            <Select
+              labelInValue
+              placeholder="Batch"
+              style={{
+                width: '100%',
+              }}
+              placement="topLeft"
+              options={batchOps}
+              value={batchCur}
+              onChange={(target) => {
+                setBatchCur({
+                  value: target.value,
+                  label: target.label,
+                  attr: batchOps[target.value].attr,
+                })
+                toggleAnno("Setting")
+              }}
+            />
+          </Form.Item> */}
+        </Form>
+      </Space>
+    </Flex>
   )
 }
 
 SpScatter.defaultProps = {
   theme: 'dark',
-  title: 'SpScatter',
-  height: '35rem',
-  width: '35rem',
+  height: '31rem',
+  width: '55rem',
   margin: '2rem',
 }
 
