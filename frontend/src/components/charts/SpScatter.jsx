@@ -21,6 +21,7 @@ import {
   Switch,
   Col,
   Row,
+  Spin,
   Form,
   Flex
 } from 'antd'
@@ -33,7 +34,7 @@ import { LineChart } from 'echarts/charts'
 import { UniversalTransition } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
 import H5adLoader from '../utils/H5adLoader'
-import { CloudDownloadOutlined, FileAddOutlined, FileOutlined, InboxOutlined, SettingOutlined } from '@ant-design/icons'
+import { CloudDownloadOutlined, FileAddOutlined, FileOutlined, InboxOutlined, SettingOutlined, ReloadOutlined } from '@ant-design/icons'
 echarts.use([
   GraphicComponent,
   TooltipComponent,
@@ -56,9 +57,12 @@ const SpScatter = ({ theme, height, width, margin }) => {
   const [clusterCur, setClusterCur] = useState({})
   const [batchCur, setBatchCur] = useState({})
   const [embedCur, setEmbedCur] = useState('')
-  const [clusterOps, setClusterOps] = useState({})
-  const [embedOps, setEmbedOps] = useState({})
-  const [batchOps, setBatchOps] = useState({})
+  const [clusterOps, setClusterOps] = useState([])
+  const [embedOps, setEmbedOps] = useState([])
+  const [batchOps, setBatchOps] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [itemSize, setItemSize] = useState(2)
+  const [itemOpacity, setItemOpacity] = useState(0.8)
   const [xInv, setxInv] = useState(false)
   const [yInv, setyInv] = useState(false)
   const itemGroupRef = useRef([])
@@ -93,8 +97,7 @@ const SpScatter = ({ theme, height, width, margin }) => {
   ]
 
   vega_20 = [...vega_20, ...vega_20]
-  const setAxis = (source, dims, xName0, yName0,
-  ) => {
+  const setAxis = (source, dims, xName0, yName0) => {
     // the axis of left chart
     let xIdx0 = dims.indexOf(xName0)
     let yIdx0 = dims.indexOf(yName0)
@@ -124,6 +127,8 @@ const SpScatter = ({ theme, height, width, margin }) => {
           },
           position: 'bottom',
           inverse: xInv,
+          min: Math.ceil(Math.min.apply(null, embd0_x) - 1.5),
+          max: Math.ceil(Math.max.apply(null, embd0_x) + 1.5),
         },
       ],
       yAxis: [
@@ -143,6 +148,8 @@ const SpScatter = ({ theme, height, width, margin }) => {
           },
           position: 'left',
           inverse: yInv,
+          min: Math.ceil(Math.min.apply(null, embd0_y) - 1.5),
+          max: Math.ceil(Math.max.apply(null, embd0_y) + 1.5),
         },
       ],
     }
@@ -218,6 +225,7 @@ const SpScatter = ({ theme, height, width, margin }) => {
     }
     reader.onloadend = () => {
       toggleAnno('Upload')
+      setLoading(false)
     }
     reader.readAsArrayBuffer(file)
   }
@@ -234,6 +242,7 @@ const SpScatter = ({ theme, height, width, margin }) => {
 
   const onUpload = (info) => {
     const file = info.file
+    setLoading(true)
     FileLoaderRef.current(file)
   }
 
@@ -276,14 +285,13 @@ const SpScatter = ({ theme, height, width, margin }) => {
 
         // 3.set embeddings
         let axis = setAxis(source, _dims, 'array_row', 'array_col')
-        setEmbedCur('spatial')
-        setEmbedOps([{ value: 0, label: 'spatial' }])
+        setEmbedCur(embedOps.find((item) => item.label === 'spatial'))
         let xName = 'array_row'
         let yName = 'array_col'
 
         // 4.set datasets
         let _datasets = setDataset(source, _dims, 'batch', batches)
-
+        console.log(_datasets)
         // 5.set 3D series
         let _series = []
         let _snum = 0
@@ -307,29 +315,28 @@ const SpScatter = ({ theme, height, width, margin }) => {
         _series.push(_3DSeries)
 
         // 6.set batch series
-        for (let bat of batches) {
-          // seperate the _data into subgroups by cell-types
-          _series.push({
-            type: 'scatter',
-            symbolSize: symbolSizeRef.current,
-            xAxisIndex: 0,
-            yAxisIndex: 0,
-            name: bat,
-            encode: {
-              x: xName,
-              y: yName,
-              tooltip: [0, 1, 2, 3],
-              itemName: bat,
-            },
-            emphasis: {
-              focus: 'series',
-            },
-            large: true,
-            largeThreshold: 5000,
-            datasetIndex: _snum,
-          })
-          _snum = _snum + 1
-        }
+        let bat = batches[0]
+        _snum = _snum + 1
+        // seperate the _data into subgroups by cell-types
+        _series.push({
+          type: 'scatter',
+          symbolSize: symbolSizeRef.current,
+          xAxisIndex: 0,
+          yAxisIndex: 0,
+          name: bat,
+          encode: {
+            x: xName,
+            y: yName,
+            tooltip: [0, 1, 2, 3],
+            itemName: bat,
+          },
+          emphasis: {
+            focus: 'series',
+          },
+          large: true,
+          largeThreshold: 5000,
+          datasetIndex: _snum,
+        })
         console.log(_series)
         // 7.render charts
         myChart.setOption({
@@ -390,9 +397,42 @@ const SpScatter = ({ theme, height, width, margin }) => {
         let _source = option.dataset[0].source
         let _dims = option.dataset[0].dimensions
         let clusterIdx = _dims.indexOf(clusterCur.label)
-
+        let bat = batchCur.label
+        let embd = embedCur.label
+        let _snum = batchCur.value + 1
         let _series = option.series
-        // TODO: let batches change
+        let xName = `${embd}_0`
+        let yName = `${embd}_1`
+        let axis = setAxis(_source, _dims, xName, yName)
+        _series.pop()
+        _series.push({
+          type: 'scatter',
+          symbolSize: symbolSizeRef.current,
+          xAxisIndex: 0,
+          yAxisIndex: 0,
+          name: bat,
+          encode: {
+            x: xName,
+            y: yName,
+            itemName: bat,
+          },
+          emphasis: {
+            focus: 'series',
+          },
+          large: true,
+          largeThreshold: 5000,
+          datasetIndex: _snum,
+        })
+
+        myChart.setOption({
+          xAxis: axis.xAxis,
+          yAxis: axis.yAxis,
+          series: _series,
+        },
+          {
+            replaceMerge: ['series'],
+          })
+        console.log(myChart.getOption())
       }
     } else {
       var myChart = echarts.init(chartRef.current, theme) //init the echart container
@@ -409,6 +449,12 @@ const SpScatter = ({ theme, height, width, margin }) => {
       prevCluster.current = { value: 0, label: defaultAnno, attr: 'categories' }
       setClusterOps([{ value: 0, label: defaultAnno, attr: 'categories' }])
       let annotations = setItemGroup(source, _dims.indexOf('leiden'))
+
+      let defaultBatch = 'in_tissue'
+      let batches = setItemGroup(source, _dims.indexOf(defaultBatch))
+      setBatchCur({ value: 0, label: batches[0], attr: 'categories' })
+      console.log(batches.map((item, id) => ({ value: id, label: item, attr: 'categories' })))
+      setBatchOps(batches.map((item, id) => ({ value: id, label: item, attr: 'categories' })))
 
 
       // set embeddings
@@ -611,27 +657,110 @@ const SpScatter = ({ theme, height, width, margin }) => {
 
   return (
     <Flex justify="center" gap='middle'>
-      <div
-        ref={chartRef}
-        className="chart"
-        //the target DOM container needs height and width
-        style={{ height: height, width: width, margin: margin }}></div>
+      <Spin spinning={loading}>
+        <div
+          ref={chartRef}
+          className="chart"
+          //the target DOM container needs height and width
+          style={{ height: height, width: width, margin: margin }}></div>
+      </Spin>
       <Space direction='vertical' size='small'>
-        <Dragger {...upLoadProps}>
-          <p
-            className="ant-upload-drag-icon"
-            style={{ fontSize: 16, fontFamily: 'Arial', color: 'white', margin: 5 }}>
-            <InboxOutlined />
-            <br />
-            Upload
-          </p>
-        </Dragger>
-        <Button type="primary" block icon={<SettingOutlined />}>
-          Settings
-        </Button>
-        <Button type="primary" block icon={<CloudDownloadOutlined />}>
-          Save
-        </Button>
+        <Space direction='vertical' size='small'>
+          <Dragger {...upLoadProps}>
+            <p
+              className="ant-upload-drag-icon"
+              style={{ fontSize: 16, fontFamily: 'Arial', color: 'white', margin: 5 }}>
+              <InboxOutlined />
+              <br />
+              Upload
+            </p>
+          </Dragger>
+          <Popover
+            title={<>Setting Figure Options:</>}
+            placement="topLeft"
+            content={
+              <Space size="small" direction="vertical">
+                <Form
+                  name="Settings"
+                  size="large"
+                  labelCol={{
+                    span: 6,
+                  }}
+                  wrapperCol={{
+                    span: 17,
+                  }}>
+                  <Form.Item label="ItemSize">
+                    {' '}
+                    <Slider
+                      min={0}
+                      max={10}
+                      marks={{ 0: '0', 5: '5', 10: '10' }}
+                      onChange={(value) => {
+                        setItemSize(value)
+                      }}
+                      value={typeof itemSize === 'number' ? itemSize : 2}
+                    />
+                  </Form.Item>
+                  <Form.Item label="Opacity">
+                    {' '}
+                    <Slider
+                      min={0}
+                      max={1}
+                      marks={{ 0: '0', 0.5: '0.5', 1: '1.0' }}
+                      step={0.01}
+                      onChange={(value) => {
+                        setItemOpacity(value)
+                      }}
+                      value={
+                        typeof itemOpacity === 'number' ? itemOpacity : 0.8
+                      }
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    label="Inverse"
+                    labelCol={{
+                      span: 7,
+                    }}>
+                    <Space>
+                      xAxis:
+                      <Switch
+                        checked={xInv}
+                        onChange={() => {
+                          setxInv(!xInv)
+                        }}
+                      />
+                      yAxis:
+                      <Switch
+                        checked={yInv}
+                        onChange={() => {
+                          setyInv(!yInv)
+                        }}
+                      />
+                    </Space>
+                  </Form.Item>
+                </Form>
+                <Space size="small">
+                  <Button icon={<ReloadOutlined />}>Reset</Button>
+                  <Button
+                    type="primary"
+                    icon={<SettingOutlined />}
+                    onClick={() => {
+                      toggleAnno('Setting')
+                    }}>
+                    Apply
+                  </Button>
+                </Space>
+              </Space>
+            }
+            trigger="click">
+            <Button type="primary" block icon={<SettingOutlined />}>
+              Settings
+            </Button>
+          </Popover>
+          <Button type="primary" block icon={<CloudDownloadOutlined />}>
+            Save
+          </Button>
+        </Space>
         <Form
           name="Settings"
           size="middle"
@@ -641,7 +770,7 @@ const SpScatter = ({ theme, height, width, margin }) => {
           wrapperCol={{
             span: 17,
           }}>
-          {/* <Form.Item
+          <Form.Item
             label="Batch"
             labelCol={{
               span: 7,
@@ -665,8 +794,34 @@ const SpScatter = ({ theme, height, width, margin }) => {
                 toggleAnno("Setting")
               }}
             />
-          </Form.Item> */}
+          </Form.Item>
+          <Form.Item
+            label="Embedding"
+            labelCol={{
+              span: 7,
+            }}>
+            {' '}
+            <Select
+              labelInValue
+              placeholder="Embedding"
+              style={{
+                width: '100%',
+              }}
+              placement="topLeft"
+              options={embedOps}
+              value={embedCur}
+              onChange={(target) => {
+                setEmbedCur({
+                  value: target.value,
+                  label: target.label,
+                  attr: embedOps[target.value].attr,
+                })
+                toggleAnno("Setting")
+              }}
+            />
+          </Form.Item>
         </Form>
+        <div>{JSON.stringify(loading)}</div>
       </Space>
     </Flex>
   )

@@ -33,7 +33,8 @@ import {
   Col,
   Row,
   Form,
-  Flex
+  Flex,
+  Spin
 } from 'antd'
 import {
   CheckOutlined,
@@ -1067,6 +1068,7 @@ const ScScatter = ({ theme, height, width, margin }) => {
     }
     reader.onloadend = () => {
       toggleAnno('Upload')
+      setUploading(false)
     }
     reader.readAsArrayBuffer(file)
   }
@@ -1111,7 +1113,6 @@ const ScScatter = ({ theme, height, width, margin }) => {
     setUploading(true)
     const file = info.file
     FileLoaderRef.current(file)
-    setUploading(false)
   }
 
   const upLoadProps = {
@@ -1127,11 +1128,13 @@ const ScScatter = ({ theme, height, width, margin }) => {
       {contextHolder}
 
       <Flex justify="center" gap='middle'>
-        <div
-          ref={chartRef}
-          className="chart"
-          //the target DOM container needs height and width
-          style={{ height: height, width: width, margin: margin }}></div>
+        <Spin spinning={Uploading}>
+          <div
+            ref={chartRef}
+            className="chart"
+            //the target DOM container needs height and width
+            style={{ height: height, width: width, margin: margin }}></div>
+        </Spin>
         <ConfigProvider
           theme={{
             components: {
