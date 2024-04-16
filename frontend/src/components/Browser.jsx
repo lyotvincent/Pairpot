@@ -94,6 +94,7 @@ export const Browser = () => {
                 </ToggleAccordion>
                 <Row>
                   <Col><ScScatter /></Col>
+                  <Col ><ScHeatmap /></Col>
                 </Row>
                 <br />
                 <br />
@@ -115,7 +116,6 @@ export const Browser = () => {
                 </div>}
               </ToggleAccordion>
               <Row>
-                <Col ><ScHeatmap /></Col>
                 <Col><SpScatter /></Col>
               </Row>
             </Card>
@@ -171,12 +171,6 @@ export const Browser = () => {
             </Card>
           </Container>
         </Content>
-        <Footer
-          style={{
-            textAlign: 'center',
-          }}>
-          pairST ©2023 Created by zhihan Ruan
-        </Footer>
       </Layout>
     </Layout>
   )

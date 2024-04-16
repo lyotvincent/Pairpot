@@ -1128,7 +1128,7 @@ const ScScatter = ({ theme, height, width, margin }) => {
       {contextHolder}
 
       <Flex justify="center" gap='middle'>
-        <Spin spinning={Uploading}>
+        <Spin spinning={Uploading} size="large">
           <div
             ref={chartRef}
             className="chart"

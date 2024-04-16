@@ -65,6 +65,7 @@ const SpScatter = ({ theme, height, width, margin }) => {
   const [itemOpacity, setItemOpacity] = useState(0.8)
   const [xInv, setxInv] = useState(false)
   const [yInv, setyInv] = useState(false)
+  const [cellNum, setCellNum] = useState(0)
   const itemGroupRef = useRef([])
   const symbolSizeRef = useRef('')
   const FileLoaderRef = useRef('')
@@ -152,6 +153,22 @@ const SpScatter = ({ theme, height, width, margin }) => {
           max: Math.ceil(Math.max.apply(null, embd0_y) + 1.5),
         },
       ],
+      xAxis3D: [{
+        grid3DIndex: 0,
+        name: xName0,
+        nameLocation: 'middle',
+        min: Math.ceil(Math.min.apply(null, embd0_x) - 1.5),
+        max: Math.ceil(Math.max.apply(null, embd0_x) + 1.5),
+      }
+      ],
+      yAxis3D: [{
+        grid3DIndex: 0,
+        name: yName0,
+        nameLocation: 'middle',
+        min: Math.ceil(Math.min.apply(null, embd0_y) - 1.5),
+        max: Math.ceil(Math.max.apply(null, embd0_y) + 1.5),
+      }
+      ],
     }
   }
 
@@ -208,6 +225,46 @@ const SpScatter = ({ theme, height, width, margin }) => {
             type: 'filter',
             config: { dimension: annoName, value: anno },
           },
+        })
+      }
+    }
+    return _datasets
+  }
+
+  const setBatchDataset = (source, dims, annoName, annotations, batchName, batch) => {
+    let _datasets = []
+    _datasets.push({
+      dimensions: dims,
+      source: source,
+    })
+    if (annotations.length === 0) {
+      // if no annotations, all the data are annotated by a label.
+      _datasets.push({
+        // 这个 dataset 的 index 是 `1`。
+
+        transform: [
+          {
+            type: 'filter', //batchName is considered a column name in.obs
+            config: { dimension: batchName, value: batch },
+          },
+          {
+            type: 'sort',
+            config: { dimension: annoName, order: 'desc' },
+          },]
+      })
+    } else {
+      for (let anno of annotations) {
+        _datasets.push({
+          // 这个 dataset 的 index 是 `1`。
+          transform: [
+            {
+              type: 'filter', //batchName is considered a column name in.obs
+              config: { dimension: batchName, value: batch },
+            },
+            {
+              type: 'filter',
+              config: { dimension: annoName, value: anno },
+            },]
         })
       }
     }
@@ -271,6 +328,8 @@ const SpScatter = ({ theme, height, width, margin }) => {
           return [...Object.entries(item).map(([_, value]) => value), id]
         })
         symbolSizeRef.current = source.length > 5000 ? 2 : 4
+        setItemSize(symbolSizeRef.current)
+        setCellNum(source.length)
 
         // 2.set annotations and batches
         let defaultAnno = 'annotation'
@@ -284,73 +343,64 @@ const SpScatter = ({ theme, height, width, margin }) => {
         setBatchOps(batches.map((item, id) => ({ value: id, label: item, attr: 'categories' })))
 
         // 3.set embeddings
-        let axis = setAxis(source, _dims, 'array_row', 'array_col')
+        let xName = 'spatial_0'
+        let yName = 'spatial_1'
+        let axis = setAxis(source, _dims, xName, yName)
         setEmbedCur(embedOps.find((item) => item.label === 'spatial'))
-        let xName = 'array_row'
-        let yName = 'array_col'
 
         // 4.set datasets
-        let _datasets = setDataset(source, _dims, 'batch', batches)
+        let _datasets = setBatchDataset(source, _dims, defaultAnno, annotations, 'batch', batches[0])
         console.log(_datasets)
         // 5.set 3D series
         let _series = []
         let _snum = 0
         let _3DSeries = {
           type: 'scatter3D',
+          coordinateSystem: 'cartesian3D',
+          symbolSize: symbolSizeRef.current,
           name: "batch",
           encode: {
-            x: 'array_row',
-            y: 'array_col',
+            x: xName,
+            y: yName,
             z: 'batch',
-            tooltip: [0, 1, 2],
+            tooltip: [0],
           },
-          large: true,
           itemStyle: {
             color: 'gray',
-            opacity: 0.3,
+            opacity: 0.8,
           },
-          largeThreshold: 0,
           datasetIndex: _snum,
         }
         _series.push(_3DSeries)
 
-        // 6.set batch series
-        let bat = batches[0]
-        _snum = _snum + 1
-        // seperate the _data into subgroups by cell-types
-        _series.push({
-          type: 'scatter',
-          symbolSize: symbolSizeRef.current,
-          xAxisIndex: 0,
-          yAxisIndex: 0,
-          name: bat,
-          encode: {
-            x: xName,
-            y: yName,
-            tooltip: [0, 1, 2, 3],
-            itemName: bat,
-          },
-          emphasis: {
-            focus: 'series',
-          },
-          large: true,
-          largeThreshold: 5000,
-          datasetIndex: _snum,
-        })
+        // 6.set series
+        for (let anno in annotations) {
+          _snum = _snum + 1
+          _series.push({
+            type: 'scatter',
+            symbolSize: symbolSizeRef.current,
+            xAxisIndex: 0,
+            yAxisIndex: 0,
+            name: anno,
+            encode: {
+              x: xName,
+              y: yName,
+              tooltip: [0, 1, 2, 3],
+              itemName: anno,
+            },
+            emphasis: {
+              focus: 'series',
+            },
+            large: true,
+            largeThreshold: 5000,
+            datasetIndex: _snum,
+          })
+        }
         console.log(_series)
         // 7.render charts
         myChart.setOption({
-          tooltip: {},
-          title: [
-            {
-              text: title,
-              left: 'center',
-              textStyle: {
-                fontSize: 24,
-              },
-            },
-          ],
           grid3D: {
+            top: 'top',
             width: '55%',
             axisLine: {
               lineStyle: {
@@ -363,27 +413,11 @@ const SpScatter = ({ theme, height, width, margin }) => {
               },
             },
           },
-          xAxis3D: {},
-          yAxis3D: {},
+          xAxis3D: axis.xAxis3D,
+          yAxis3D: axis.yAxis3D,
           zAxis3D: { type: 'category' },
           xAxis: axis.xAxis,
           yAxis: axis.yAxis,
-          grid: [{
-            top: '15%',
-            width: '40%',
-            right: '1%',
-            bottom: '13%',
-            axisLine: {
-              lineStyle: {
-                color: '#fff',
-              },
-            },
-            axisPointer: {
-              lineStyle: {
-                color: '#ffbd67',
-              },
-            },
-          }],
           dataset: _datasets,
           series: _series,
         },
@@ -396,41 +430,115 @@ const SpScatter = ({ theme, height, width, margin }) => {
         let option = myChart.getOption()
         let _source = option.dataset[0].source
         let _dims = option.dataset[0].dimensions
-        let clusterIdx = _dims.indexOf(clusterCur.label)
         let bat = batchCur.label
+        let clu = clusterCur.label
+        let cluIdx = _dims.indexOf(clu)
         let embd = embedCur.label
-        let _snum = batchCur.value + 1
+        let _snum = 1
         let _series = option.series
         let xName = `${embd}_0`
         let yName = `${embd}_1`
         let axis = setAxis(_source, _dims, xName, yName)
-        _series.pop()
-        _series.push({
-          type: 'scatter',
-          symbolSize: symbolSizeRef.current,
-          xAxisIndex: 0,
-          yAxisIndex: 0,
-          name: bat,
-          encode: {
-            x: xName,
-            y: yName,
-            itemName: bat,
-          },
-          emphasis: {
-            focus: 'series',
-          },
-          large: true,
-          largeThreshold: 5000,
-          datasetIndex: _snum,
-        })
+
+        // set Annotations
+        let annotations = setItemGroup(_source, _dims.indexOf(clu), clusterCur.attr)
+
+        // set Dataset
+        let _dataset = setBatchDataset(_source, _dims, clu, annotations, 'batch', bat)
+        console.log(_dataset)
+        // set series
+        let myVisualMap = []
+        let _3DSeries = _series[0]
+        _3DSeries.symbolSize = itemSize
+        _3DSeries.itemStyle.opacity = itemOpacity
+        let _newSeries = []
+        if (clusterCur.attr === 'categories') {
+          for (let anno in annotations) {
+            _newSeries.push({
+              type: 'scatter',
+              symbolSize: itemSize,
+              xAxisIndex: 0,
+              yAxisIndex: 0,
+              name: anno,
+              encode: {
+                x: xName,
+                y: yName,
+                itemName: anno,
+              },
+              emphasis: {
+                focus: 'series',
+              },
+              itemStyle: {
+                opacity: itemOpacity
+              },
+              large: true,
+              largeThreshold: 5000,
+              datasetIndex: _snum,
+            })
+            _snum = _snum + 1
+          }
+        }
+        else {
+          _newSeries.push({
+            type: 'scatter',
+            name: clusterCur.label,
+            symbolSize: itemSize,
+            encode: {
+              // annotations are displayed in left chart
+              x: xName,
+              y: yName,
+              tooltip: [
+                0,
+                _dims.indexOf(xName),
+                _dims.indexOf(yName),
+              ],
+            },
+            itemStyle: {
+              opacity: itemOpacity,
+            },
+            datasetIndex: _snum,
+          })
+          myVisualMap.push({
+            show: true,
+            id: clusterCur.label + '_visual',
+            calculable: true,
+            dimension: clusterCur.label,
+            seriesIndex: 1,
+            left: '0%',
+            top: '10%',
+            orient: 'horizontal',
+            precision: 2,
+            calculable: true,
+            min: Math.min.apply(
+              null,
+              _source.map((item) => item[cluIdx])
+            ),
+            max: Math.max.apply(
+              null,
+              _source.map((item) => item[cluIdx])
+            ),
+            inRange: {
+              color: ['#808080', '#FF3300'],
+              opacity: [0.8, 1],
+            },
+            text: [clusterCur.label, ''],
+            textGap: 20,
+            textStyle: {
+              fontSize: 16,
+            },
+          })
+        }
+        _series = [_3DSeries, ..._newSeries]
 
         myChart.setOption({
           xAxis: axis.xAxis,
           yAxis: axis.yAxis,
           series: _series,
+          dataset: _dataset,
+          visualMap: myVisualMap,
         },
           {
-            replaceMerge: ['series'],
+            replaceMerge: ['series', 'dataset', 'visualMap'],
           })
         console.log(myChart.getOption())
       }
@@ -442,7 +550,7 @@ const SpScatter = ({ theme, height, width, margin }) => {
         return [...Object.entries(item).map(([_, value]) => value), id]
       })
       symbolSizeRef.current = source.length > 5000 ? 2 : 4
-
+      setCellNum(source.length)
       // set annotations
       let defaultAnno = 'leiden'
       setClusterCur({ value: 0, label: defaultAnno, attr: 'categories' })
@@ -528,12 +636,10 @@ const SpScatter = ({ theme, height, width, margin }) => {
             z: 'in_tissue',
             tooltip: [0, 1, 2],
           },
-          large: true,
           itemStyle: {
             color: 'gray',
             opacity: 0.3,
           },
-          largeThreshold: 0,
           datasetIndex: _snum,
         }
       ]
@@ -608,6 +714,7 @@ const SpScatter = ({ theme, height, width, margin }) => {
         title: [
           {
             text: title,
+            top: '0%',
             left: 'center',
             textStyle: {
               fontSize: 24,
@@ -615,6 +722,7 @@ const SpScatter = ({ theme, height, width, margin }) => {
           },
         ],
         grid3D: {
+          top: 'top',
           width: '55%',
           axisLine: {
             lineStyle: {
@@ -627,16 +735,16 @@ const SpScatter = ({ theme, height, width, margin }) => {
             },
           },
         },
-        xAxis3D: {},
-        yAxis3D: {},
-        zAxis3D: {},
+        xAxis3D: axis.xAxis3D,
+        yAxis3D: axis.yAxis3D,
+        zAxis3D: { type: 'category' },
         xAxis: axis.xAxis,
         yAxis: axis.yAxis,
         grid: [{
           top: '15%',
           width: '40%',
           right: '1%',
-          bottom: '13%',
+          bottom: '15%',
           axisLine: {
             lineStyle: {
               color: '#fff',
@@ -648,6 +756,33 @@ const SpScatter = ({ theme, height, width, margin }) => {
             },
           },
         }],
+        legend: {
+          type: 'scroll',
+          animation: false,
+          pageIconColor: '#4096ff',
+          orient: 'horizontal',
+          bottom: '1%',
+          padding: 0,
+          textStyle: {
+            fontSize: 16,
+          },
+        },
+        toolbox: {
+          show: true,
+          itemSize: 20,
+          itemGap: 10,
+          feature: {
+            mark: { show: true },
+            dataView: { show: true, readOnly: true },
+            restore: { show: true },
+            saveAsImage: { show: true },
+            dataZoom: {},
+          },
+          iconStyle: {
+            borderWidth: 1.5,
+          },
+          top: '5%',
+        },
         dataset: _datasets,
         series: _series,
       })
@@ -657,172 +792,212 @@ const SpScatter = ({ theme, height, width, margin }) => {
 
   return (
     <Flex justify="center" gap='middle'>
-      <Spin spinning={loading}>
+      <Spin spinning={loading} size="large">
         <div
           ref={chartRef}
           className="chart"
           //the target DOM container needs height and width
           style={{ height: height, width: width, margin: margin }}></div>
       </Spin>
-      <Space direction='vertical' size='small'>
+      <ConfigProvider
+        theme={{
+          components: {
+            Form: {
+              itemMarginBottom: '4px',
+            },
+            Button: {
+              borderColorDisabled: 'gray',
+              colorTextDisabled: 'gray',
+              colorBgContainerDisabled: 'rgba(0.5, 0.5, 0.5, 0.1)',
+            },
+            Upload: {
+              padding: 0,
+            },
+          },
+        }}>
         <Space direction='vertical' size='small'>
-          <Dragger {...upLoadProps}>
-            <p
-              className="ant-upload-drag-icon"
-              style={{ fontSize: 16, fontFamily: 'Arial', color: 'white', margin: 5 }}>
-              <InboxOutlined />
-              <br />
-              Upload
-            </p>
-          </Dragger>
-          <Popover
-            title={<>Setting Figure Options:</>}
-            placement="topLeft"
-            content={
-              <Space size="small" direction="vertical">
-                <Form
-                  name="Settings"
-                  size="large"
-                  labelCol={{
-                    span: 6,
-                  }}
-                  wrapperCol={{
-                    span: 17,
-                  }}>
-                  <Form.Item label="ItemSize">
-                    {' '}
-                    <Slider
-                      min={0}
-                      max={10}
-                      marks={{ 0: '0', 5: '5', 10: '10' }}
-                      onChange={(value) => {
-                        setItemSize(value)
-                      }}
-                      value={typeof itemSize === 'number' ? itemSize : 2}
-                    />
-                  </Form.Item>
-                  <Form.Item label="Opacity">
-                    {' '}
-                    <Slider
-                      min={0}
-                      max={1}
-                      marks={{ 0: '0', 0.5: '0.5', 1: '1.0' }}
-                      step={0.01}
-                      onChange={(value) => {
-                        setItemOpacity(value)
-                      }}
-                      value={
-                        typeof itemOpacity === 'number' ? itemOpacity : 0.8
-                      }
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    label="Inverse"
+          <Space direction='vertical' size='small'>
+            <Dragger {...upLoadProps}>
+              <p
+                className="ant-upload-drag-icon"
+                style={{ fontSize: 16, fontFamily: 'Arial', color: 'white', margin: 5 }}>
+                <InboxOutlined />
+                <br />
+                Upload
+              </p>
+            </Dragger>
+            <Popover
+              title={<>Setting Figure Options:</>}
+              placement="topLeft"
+              content={
+                <Space size="small" direction="vertical">
+                  <Form
+                    name="Settings"
+                    size="large"
                     labelCol={{
-                      span: 7,
+                      span: 6,
+                    }}
+                    wrapperCol={{
+                      span: 24,
                     }}>
-                    <Space>
-                      xAxis:
-                      <Switch
-                        checked={xInv}
-                        onChange={() => {
-                          setxInv(!xInv)
+                    <Form.Item label="Size">
+                      {' '}
+                      <Slider
+                        min={0}
+                        max={10}
+                        marks={{ 0: '0', 5: '5', 10: '10' }}
+                        onChange={(value) => {
+                          setItemSize(value)
+                        }}
+                        value={typeof itemSize === 'number' ? itemSize : 2}
+                      />
+                    </Form.Item>
+                    <Form.Item label="Opacity">
+                      {' '}
+                      <Slider
+                        min={0}
+                        max={1}
+                        marks={{ 0: '0', 0.5: '0.5', 1: '1.0' }}
+                        step={0.01}
+                        onChange={(value) => {
+                          setItemOpacity(value)
+                        }}
+                        value={
+                          typeof itemOpacity === 'number' ? itemOpacity : 0.8
+                        }
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      label="Inverse"
+                      labelCol={{
+                        span: 6,
+                      }}>
+                      <Space>
+                        xAxis:
+                        <Switch
+                          checked={xInv}
+                          onChange={() => {
+                            setxInv(!xInv)
+                          }}
+                        />
+                        yAxis:
+                        <Switch
+                          checked={yInv}
+                          onChange={() => {
+                            setyInv(!yInv)
+                          }}
+                        />
+                      </Space>
+                    </Form.Item>
+                    <Form.Item
+                      label="Batch"
+                      labelCol={{
+                        span: 6,
+                      }}>
+                      {' '}
+                      <Select
+                        labelInValue
+                        placeholder="Batch"
+                        placement="topLeft"
+                        options={batchOps}
+                        value={batchCur}
+                        onChange={(target) => {
+                          setBatchCur({
+                            value: target.value,
+                            label: target.label,
+                            attr: batchOps[target.value].attr,
+                          })
+                          toggleAnno("Setting")
                         }}
                       />
-                      yAxis:
-                      <Switch
-                        checked={yInv}
-                        onChange={() => {
-                          setyInv(!yInv)
+                    </Form.Item>
+                    <Form.Item
+                      label="Cluster"
+                      labelCol={{
+                        span: 6,
+                      }}>
+                      {' '}
+                      <Select
+                        labelInValue
+                        placeholder="Cluster"
+                        style={{
+                          width: '100%',
+                        }}
+                        placement="topLeft"
+                        options={clusterOps}
+                        value={clusterCur}
+                        onChange={(target) => {
+                          setClusterCur({
+                            value: target.value,
+                            label: target.label,
+                            attr: clusterOps[target.value].attr,
+                          })
+                          toggleAnno("Setting")
                         }}
                       />
-                    </Space>
-                  </Form.Item>
-                </Form>
-                <Space size="small">
-                  <Button icon={<ReloadOutlined />}>Reset</Button>
-                  <Button
-                    type="primary"
-                    icon={<SettingOutlined />}
-                    onClick={() => {
-                      toggleAnno('Setting')
-                    }}>
-                    Apply
-                  </Button>
+                    </Form.Item>
+                    <Form.Item
+                      label="Coord"
+                      labelCol={{
+                        span: 6,
+                      }}>
+                      {' '}
+                      <Select
+                        labelInValue
+                        placeholder="Coord"
+                        style={{
+                          width: '100%',
+                        }}
+                        placement="topLeft"
+                        options={embedOps}
+                        value={embedCur}
+                        onChange={(target) => {
+                          setEmbedCur({
+                            value: target.value,
+                            label: target.label,
+                            attr: embedOps[target.value].attr,
+                          })
+                          toggleAnno("Setting")
+                        }}
+                      />
+                    </Form.Item>
+                  </Form>
+                  <Space size="small">
+                    <Button icon={<ReloadOutlined />}>Reset</Button>
+                    <Button
+                      type="primary"
+                      icon={<SettingOutlined />}
+                      onClick={() => {
+                        toggleAnno('Setting')
+                      }}>
+                      Apply
+                    </Button>
+                  </Space>
                 </Space>
-              </Space>
-            }
-            trigger="click">
-            <Button type="primary" block icon={<SettingOutlined />}>
-              Settings
+              }
+              trigger="click">
+              <Button type="primary" block icon={<SettingOutlined />}>
+                Settings
+              </Button>
+            </Popover>
+            <Button type="primary" block icon={<CloudDownloadOutlined />}>
+              Save
             </Button>
-          </Popover>
-          <Button type="primary" block icon={<CloudDownloadOutlined />}>
-            Save
-          </Button>
+          </Space>
+          <div>
+            <b>Current Status</b>
+            <div>Species: {"Mouse"}</div>
+            <div>Organs: {"Brain"}</div>
+            <div>Batch: {batchCur.label}</div>
+            <div>Clustering: {clusterCur.label}</div>
+            <div>Embedding: {embedCur.label}</div>
+            <div>Attributes: {clusterOps.length}</div>
+            <div>Batches: {batchOps.length}</div>
+            <div>Spot number: {cellNum}</div>
+            <div>Spot Radius: {"55um"}</div>
+          </div>
         </Space>
-        <Form
-          name="Settings"
-          size="middle"
-          labelCol={{
-            span: 6,
-          }}
-          wrapperCol={{
-            span: 17,
-          }}>
-          <Form.Item
-            label="Batch"
-            labelCol={{
-              span: 7,
-            }}>
-            {' '}
-            <Select
-              labelInValue
-              placeholder="Batch"
-              style={{
-                width: '100%',
-              }}
-              placement="topLeft"
-              options={batchOps}
-              value={batchCur}
-              onChange={(target) => {
-                setBatchCur({
-                  value: target.value,
-                  label: target.label,
-                  attr: batchOps[target.value].attr,
-                })
-                toggleAnno("Setting")
-              }}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Embedding"
-            labelCol={{
-              span: 7,
-            }}>
-            {' '}
-            <Select
-              labelInValue
-              placeholder="Embedding"
-              style={{
-                width: '100%',
-              }}
-              placement="topLeft"
-              options={embedOps}
-              value={embedCur}
-              onChange={(target) => {
-                setEmbedCur({
-                  value: target.value,
-                  label: target.label,
-                  attr: embedOps[target.value].attr,
-                })
-                toggleAnno("Setting")
-              }}
-            />
-          </Form.Item>
-        </Form>
-        <div>{JSON.stringify(loading)}</div>
-      </Space>
+      </ConfigProvider>
     </Flex>
   )
 }

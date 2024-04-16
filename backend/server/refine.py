@@ -58,7 +58,7 @@ def LazyRefine(selected, file):
 #     y_pred = y_pred[y_pred == len(oriCat)]
 #     return list(y_pred.index)
 
-def LPARefine(selected,  file, use_model=LabelPropagation):
+def LPARefine(selected,  file, use_model=LabelPropagation, do_correct=True):
     with h5py.File(file,'r') as f:
         group=f['obsp']['connectivities']
 
@@ -81,7 +81,6 @@ def LPARefine(selected,  file, use_model=LabelPropagation):
             mat = obs_group['annotation']['codes'][:]
         else:
             mat = obs_group['annotation'][:]
-    print(mat)
     val={}
 
     for i in np.unique(mat):
@@ -101,18 +100,20 @@ def LPARefine(selected,  file, use_model=LabelPropagation):
     select_list[selected] = 1
     selected_val = len(val) - 1
     mat[selected] = selected_val
-
-    print(mat)
     for i in range(mat.shape[0]):
         if select_list[i]:
             y_label.editval2(i,val[mat[i]])
 
     y_pred = LPA.mat(mat.shape[0], len(val))
-
-    LPA.labelPropagation(X, y_label, y_pred,0.5,1000)
+    y_new = LPA.mat(mat.shape[0], len(val))
+    LPA.labelPropagation(X, y_label, y_pred, y_new, 0.5,1000)
     y_res = np.zeros(mat.shape[0])
-    for i in range(mat.shape[0]):
-        y_res[i] = y_pred.getval(i,0)
+    if do_correct:
+        for i in range(mat.shape[0]):
+            y_res[i] = y_new.getval(i,0)
+    else:
+        for i in range(mat.shape[0]):
+            y_res[i] = y_pred.getval(i,0)
     y_res = pd.Series(y_res)
     y_res = y_res[y_res == selected_val]
     return list(y_res.index)

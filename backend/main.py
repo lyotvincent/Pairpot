@@ -88,11 +88,10 @@ def get_strategies():
 def refine():
     Refiners = ['Eager Refiner', 'Lazy Refiner', 'LabelPropagation','LabelSpreading']
     data = request.get_json()['data']
-    print(data)
+    # print(data)
     selected = data['anno']
     file = data['name']
     refinerID = data['refiner']
-    starttime = data['starttime']
 
     if refinerID == 0:
         refined = EagerRefine(selected, file)
