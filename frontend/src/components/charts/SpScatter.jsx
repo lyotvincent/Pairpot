@@ -253,6 +253,7 @@ const SpScatter = ({ theme, height, width, margin }) => {
           },]
       })
     } else {
+      // add datasets with batch filter
       for (let anno of annotations) {
         _datasets.push({
           // 这个 dataset 的 index 是 `1`。
@@ -261,6 +262,17 @@ const SpScatter = ({ theme, height, width, margin }) => {
               type: 'filter', //batchName is considered a column name in.obs
               config: { dimension: batchName, value: batch },
             },
+            {
+              type: 'filter',
+              config: { dimension: annoName, value: anno },
+            },]
+        })
+      }
+      // add datasets without batch filter
+      for (let anno of annotations) {
+        _datasets.push({
+          // 这个 dataset 的 index 是 `1`。
+          transform: [
             {
               type: 'filter',
               config: { dimension: annoName, value: anno },
@@ -370,10 +382,10 @@ const SpScatter = ({ theme, height, width, margin }) => {
             opacity: 0.8,
           },
           datasetIndex: _snum,
+          zlevel: -1,
         }
         _series.push(_3DSeries)
-
-        // 6.set series
+        // 6.set anno series with batch
         for (let anno in annotations) {
           _snum = _snum + 1
           _series.push({
@@ -391,13 +403,60 @@ const SpScatter = ({ theme, height, width, margin }) => {
             emphasis: {
               focus: 'series',
             },
+            itemStyle: {
+              opacity: itemOpacity,
+            },
             large: true,
             largeThreshold: 5000,
             datasetIndex: _snum,
           })
         }
-        console.log(_series)
-        // 7.render charts
+
+        // 7.set anno series without batch
+        for (let anno in annotations) {
+          _snum = _snum + 1
+          _series.push({
+            type: 'scatter3D',
+            symbolSize: symbolSizeRef.current,
+            name: anno,
+            encode: {
+              x: xName,
+              y: yName,
+              z: 'batch',
+              tooltip: [0],
+              itemName: anno,
+            },
+            itemStyle: {
+              opacity: 0.7,
+            },
+            emphasis: {
+              focus: 'series',
+            },
+            datasetIndex: _snum,
+          })
+        }
+
+        // //8. set visualMap
+        // let _visualMap = {
+        //   type: 'piecewise',
+        //   categories: batches,
+        //   dimension: _dims.indexOf(defaultBatch),
+        //   orient: 'horizontal',
+        //   top: "5%",
+        //   left: "0%",
+        //   right: '50%',
+        //   selectedMode: "single",
+        //   inRange: {
+        //     color: vega_20,
+        //   },
+        //   outOfRange: {
+        //     color: '#808080'
+        //   },
+        //   seriesIndex: [...Array(annotations).keys()],
+        // }
+
+
+        // 9.render charts
         myChart.setOption({
           grid3D: {
             top: 'top',
@@ -422,9 +481,24 @@ const SpScatter = ({ theme, height, width, margin }) => {
           series: _series,
         },
           {
-            replaceMerge: ['dataset', 'series'],  // enable replaceMerge for datasets
+            replaceMerge: ['dataset', 'series', 'visualMap'],  // enable replaceMerge for datasets
           })
-        console.log(myChart.getOption())
+
+        // register click action
+        myChart.on('click', (params) => {
+          if (params.componentType === 'series') {
+            let _seriesName = params._seriesName
+            myChart.setOption({
+              series: {
+                name: _seriesName,
+                itemStyle: {
+                  color: 'red',
+                  opacity: 1
+                }
+              }
+            })
+          }
+        })
       }
       else if (commandRef.current === "Setting") {
         let option = myChart.getOption()
@@ -453,6 +527,7 @@ const SpScatter = ({ theme, height, width, margin }) => {
         _3DSeries.itemStyle.opacity = itemOpacity
         let _newSeries = []
         if (clusterCur.attr === 'categories') {
+          // setting anno with batch
           for (let anno in annotations) {
             _newSeries.push({
               type: 'scatter',
@@ -473,6 +548,26 @@ const SpScatter = ({ theme, height, width, margin }) => {
               },
               large: true,
               largeThreshold: 5000,
+              datasetIndex: _snum,
+            })
+            _snum = _snum + 1
+          }
+          // setting anno without batch
+          for (let anno in annotations) {
+            _newSeries.push({
+              type: 'scatter3D',
+              symbolSize: itemSize,
+              name: anno,
+              encode: {
+                x: xName,
+                y: yName,
+                z: 'batch',
+                tooltip: [0],
+                itemName: anno,
+              },
+              itemStyle: {
+                opacity: itemOpacity
+              },
               datasetIndex: _snum,
             })
             _snum = _snum + 1
@@ -766,6 +861,24 @@ const SpScatter = ({ theme, height, width, margin }) => {
           textStyle: {
             fontSize: 16,
           },
+          selector: [{ type: 'all', title: "All" }, { type: 'inverse', title: 'Inverse' }],
+        },
+        visualMap: {
+          type: 'piecewise',
+          categories: annotations,
+          dimension: _dims.indexOf(defaultAnno),
+          orient: 'horizontal',
+          top: "5%",
+          left: "0%",
+          right: '50%',
+          selectedMode: "single",
+          inRange: {
+            color: vega_20,
+          },
+          outOfRange: {
+            color: '#808080'
+          },
+          seriesIndex: 0
         },
         toolbox: {
           show: true,
