@@ -458,6 +458,16 @@ const SpScatter = ({ theme, height, width, margin }) => {
 
         // 9.render charts
         myChart.setOption({
+          title: [
+            {
+              text: title,
+              top: '0%',
+              left: 'center',
+              textStyle: {
+                fontSize: 24,
+              },
+            },
+          ],
           grid3D: {
             top: 'top',
             width: '55%',
@@ -557,6 +567,7 @@ const SpScatter = ({ theme, height, width, margin }) => {
             _newSeries.push({
               type: 'scatter3D',
               symbolSize: itemSize,
+              grid3DIndex: 0,
               name: anno,
               encode: {
                 x: xName,
@@ -574,6 +585,7 @@ const SpScatter = ({ theme, height, width, margin }) => {
           }
         }
         else {
+          // add 2D series
           _newSeries.push({
             type: 'scatter',
             name: clusterCur.label,
@@ -593,12 +605,31 @@ const SpScatter = ({ theme, height, width, margin }) => {
             },
             datasetIndex: _snum,
           })
+
+          // add 3D series
+          _newSeries.push({
+            type: 'scatter3D',
+            name: clusterCur.label,
+            symbolSize: itemSize,
+            grid3DIndex: 0,
+            encode: {
+              // annotations are displayed in left chart
+              x: xName,
+              y: yName,
+              z: 'batch',
+              tooltip: [0],
+            },
+            itemStyle: {
+              opacity: itemOpacity,
+            },
+            datasetIndex: 0,
+          })
           myVisualMap.push({
             show: true,
             id: clusterCur.label + '_visual',
             calculable: true,
             dimension: clusterCur.label,
-            seriesIndex: 1,
+            seriesIndex: [1, 2],
             left: '0%',
             top: '10%',
             orient: 'horizontal',
@@ -626,6 +657,16 @@ const SpScatter = ({ theme, height, width, margin }) => {
         _series = [_3DSeries, ..._newSeries]
 
         myChart.setOption({
+          title: [
+            {
+              text: title,
+              top: '0%',
+              left: 'center',
+              textStyle: {
+                fontSize: 24,
+              },
+            },
+          ],
           xAxis: axis.xAxis,
           yAxis: axis.yAxis,
           series: _series,

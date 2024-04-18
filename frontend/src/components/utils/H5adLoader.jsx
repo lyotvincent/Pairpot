@@ -76,22 +76,26 @@ const H5adLoader = (file, event) => {
   //h5info['clusters'] = _clusters
 
   let _obsmNames = f.get('obsm').keys
+  console.log(_obsmNames)
   let _len = _index.length
   for (let obsm of _obsmNames) {
     let _embd = f.get('obsm/' + obsm).value
-    let _dims = _embd.length / _len
-    let _loadDims = _dims
-    if (obsm === 'X_pca') {
-      _loadDims = 2
+    if (typeof _embd !== 'undefined') {
+      let _dims = _embd.length / _len
+      let _loadDims = _dims
+      if (obsm === 'X_pca') {
+        _loadDims = 2
+      }
+      if (obsm === 'AUCell_rankings') {
+        _loadDims = 2
+      }
+      for (let dim = 0; dim < _loadDims; dim++) {
+        _value[`${obsm}_${dim}`] = _index.map((_, id) => {
+          return _embd[id * _dims + dim]
+        })
+      }
     }
-    if (obsm === 'AUCell_rankings') {
-      _loadDims = 2
-    }
-    for (let dim = 0; dim < _loadDims; dim++) {
-      _value[`${obsm}_${dim}`] = _index.map((_, id) => {
-        return _embd[id * _dims + dim]
-      })
-    }
+
   }
 
   let __data = _index.map((_, id) =>
