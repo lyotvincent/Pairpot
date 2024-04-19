@@ -18,6 +18,7 @@ import ScHeatmap from './charts/ScHeatmap'
 import SeriesGallery from "./utils/SeriesGallery"
 import Drag from "./charts/Drag"
 import CellProps from "./charts/CellProps"
+import CpdbCorr from "./charts/CpdbCorr"
 import { MenuUnfoldOutlined, MenuFoldOutlined, ProfileOutlined } from "@ant-design/icons"
 const { Header, Content, Footer, Sider } = Layout
 const sideMenuItems = [
@@ -95,6 +96,7 @@ export const Browser = () => {
                 <Row>
                   <Col><ScScatter /></Col>
                   <Col ><ScHeatmap /></Col>
+                  <Col ><CpdbCorr /></Col>
                 </Row>
                 <br />
                 <br />

@@ -241,7 +241,7 @@ const ScHeatmap = ({ theme, title, height, width, margin }) => {
           inRange: {
             // 设置映射的颜色范围为蓝色到红色之间
             symbolSize: [3, 18],
-            color: ['#e3e3e3', '#111111'],
+            color: ["#104e8b", "#ffdab9", "#8b0a50"],
           },
           text: ['Fraction of cells\n in group(%)'],
           textGap: 20,
@@ -274,6 +274,10 @@ const ScHeatmap = ({ theme, title, height, width, margin }) => {
           textGap: 13,
           textStyle: {
             fontSize: 14,
+          },
+          inRange: {
+            // 设置映射的颜色范围为蓝色到红色之间
+            color: ["#104e8b", "#ffdab9", "#8b0a50"],
           },
           indicatorIcon: 'roundRect',
           indicatorSize: '60%',
