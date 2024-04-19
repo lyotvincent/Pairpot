@@ -22,6 +22,7 @@ import anndata as ad
 from AUCell import *
 from db import panglaoDB
 import cell2location
+from cellphonedb.src.core.methods import cpdb_statistical_analysis_method
 
 def input_adata_10X(sample):
     adata = sc.read_mtx(sample+'/matrix.mtx.gz')
@@ -248,6 +249,21 @@ def Cell2Location_run(adata_sc, adata_sp, sc_max_epoches=250, sc_batch_size=2500
     weight = adata_sp.obsm['q05_cell_abundance_w_sf']
     weight.columns = adata_sp.uns['mod']['factor_names']
     return weight
+
+def CellphoneDB_run(adata_path, cpdb_file_path="resources/cellphonedb.zip", output_path="resources/cpdb", counts_data='hgnc_symbol'):
+    adata = sc.read_h5ad(adata_path)
+    meta = pd.DataFrame(adata.obs['annotation'].copy())
+    meta = meta.reset_index()
+    meta.columns=['Cell', 'cell_type']
+    meta.to_csv("resources/meta.txt", sep='\t', index=False)
+    cpdb_res = cpdb_statistical_analysis_method.call(
+        cpdb_file_path=cpdb_file_path,
+        meta_file_path="resources/meta.txt",
+        counts_file_path=adata_path,
+        counts_data=counts_data,
+        output_path=output_path
+    )
+    return cpdb_res
 
 # 空转数据
 # -表达矩阵
