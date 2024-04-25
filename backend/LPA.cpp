@@ -13,13 +13,14 @@
 namespace py = pybind11;
 using namespace py;
 // using namespace std;
+
 class matCoo {
 public:
     struct elems {
         double v;
         int row, col;
-        bool operator<(const elems& other) {
-            return this->row < other.row || this->row == other.row && this->col < other.col;
+        bool operator<(const elems& other) const {
+            return this->row < other.row || (this->row == other.row && this->col < other.col);
         }
         bool operator<(int i) const {
             return row < i;
@@ -241,7 +242,7 @@ void rectify(matCoo& x, mat& y_label, mat& y_ori, mat& y_new)
             p2 = std::lower_bound(x.elem.begin(), x.elem.end(), i + 1) - x.elem.begin();
             p.clear();
             p[y_ori.v[i][0]] = 1;
-            int maxx = 1, maxxj = y_ori.v[i][0], tmp = 0, val;
+            int maxx = 1, maxxj = y_ori.v[i][0], val;
             for (int j = p1; j < p2; j++)
             {
                 val = y_ori.v[x.elem[j].col][0];

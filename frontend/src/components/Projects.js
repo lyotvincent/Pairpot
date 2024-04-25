@@ -6,7 +6,7 @@ import projImg3 from "../assets/img/project-img3.png"
 import colorSharp2 from "../assets/img/color-sharp2.png"
 import 'animate.css'
 import TrackVisibility from 'react-on-screen'
-import { Browser } from "./Browser"
+import { Tools } from "./Tools"
 import { Analyzer } from "./Analyzer"
 import { Database } from "./Database"
 
@@ -71,7 +71,7 @@ export const Projects = () => {
                     <Tab.Content id="slideInUp" className={isVisible ? "animate__animated animate__slideInUp" : ""}>
                       <Tab.Pane eventKey="first">
                         <p>This is a Browser for Spatially Resolved Transcriptomics (SRT).</p>
-                        <Browser />
+                        <Tools />
 
                       </Tab.Pane>
                       <Tab.Pane eventKey="second">

@@ -9,7 +9,7 @@ import {
   CloudUploadOutlined,
   CloudDownloadOutlined,
 } from '@ant-design/icons'
-import { Menu, ConfigProvider, Layout } from 'antd'
+import { Menu, ConfigProvider, Layout, Radio } from 'antd'
 import { NavLink } from 'react-router-dom'
 const { Header } = Layout
 
@@ -42,31 +42,35 @@ const items = [
     icon: <DatabaseOutlined />,
   },
   {
-    label: 'Tools',
+    label: (
+      <NavLink to="/tools" style={{ textDecorationLine: 'none' }}>
+        Tools
+      </NavLink>
+    ),
     key: 'tools',
     icon: <ToolOutlined />,
-    children: [
-      {
-        label: 'Lasso-Refine',
-        key: 'lr',
-      },
-      {
-        label: 'Spatial Variable Genes',
-        key: 'svg',
-      },
-      {
-        label: 'Lasso-Deconvolution',
-        key: 'ld',
-      },
-      {
-        label: 'Cell Communication',
-        key: 'cc',
-      },
-      {
-        label: 'Function Analysis',
-        key: 'fa',
-      },
-    ],
+    // children: [
+    //   {
+    //     label: 'Lasso-Refine',
+    //     key: 'lr',
+    //   },
+    //   {
+    //     label: 'Spatial Variable Genes',
+    //     key: 'svg',
+    //   },
+    //   {
+    //     label: 'Lasso-Deconvolution',
+    //     key: 'ld',
+    //   },
+    //   {
+    //     label: 'Cell Communication',
+    //     key: 'cc',
+    //   },
+    //   {
+    //     label: 'Function Analysis',
+    //     key: 'fa',
+    //   },
+    // ],
   },
   {
     label: 'Download',
@@ -98,6 +102,10 @@ const items = [
 ]
 
 const Nav = () => {
+  const [themeToken, setThemeToken] = useState("secret")
+  const handleThemeChange = (e) => {
+    setThemeToken(e.target.value)
+  }
   return (
     <Header
       style={{
@@ -137,6 +145,11 @@ const Nav = () => {
           items={items}
           selectable={0}
         />
+        <span>Theme:</span>
+        <Radio.Group value={themeToken} onChange={handleThemeChange} defaultValue="secret" buttonStyle="solid">
+        <Radio.Button value="secret">Secret</Radio.Button>
+        <Radio.Button value="bright">Bright</Radio.Button>
+      </Radio.Group>
       </ConfigProvider>
     </Header>
   )

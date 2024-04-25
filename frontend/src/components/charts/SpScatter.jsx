@@ -55,8 +55,10 @@ const SpScatter = ({ theme, height, width, margin }) => {
   const [api, contextHolder] = notification.useNotification()
   const [isInit, setInit] = useState(false) // whether echart object is inited
   const [clusterCur, setClusterCur] = useState({})
+  const [batchName, setBatchName] = useState("batch")
   const [batchCur, setBatchCur] = useState({})
   const [embedCur, setEmbedCur] = useState('')
+  const [embed3Dcur, setEmbed3Dcur] = useState('')
   const [clusterOps, setClusterOps] = useState([])
   const [embedOps, setEmbedOps] = useState([])
   const [batchOps, setBatchOps] = useState([])
@@ -231,47 +233,67 @@ const SpScatter = ({ theme, height, width, margin }) => {
     return _datasets
   }
 
-  const setBatchDataset = (source, dims, annoName, annotations, batchName, batch) => {
+  const setBatchDataset = (source, dims, annoName, annotations, batch, batchName) => {
     let _datasets = []
     _datasets.push({
       dimensions: dims,
       source: source,
     })
-    if (annotations.length === 0) {
-      // if no annotations, all the data are annotated by a label.
-      _datasets.push({
-        // 这个 dataset 的 index 是 `1`。
-
-        transform: [
-          {
-            type: 'filter', //batchName is considered a column name in.obs
-            config: { dimension: batchName, value: batch },
-          },
-          {
-            type: 'sort',
-            config: { dimension: annoName, order: 'desc' },
-          },]
-      })
-    } else {
-      // add datasets with batch filter
-      for (let anno of annotations) {
+    if(batchName !== null){
+      if (annotations.length === 0) {
+        // if no annotations, all the data are annotated by a label.
         _datasets.push({
           // 这个 dataset 的 index 是 `1`。
+  
           transform: [
             {
               type: 'filter', //batchName is considered a column name in.obs
               config: { dimension: batchName, value: batch },
             },
             {
+              type: 'sort',
+              config: { dimension: annoName, order: 'desc' },
+            },]
+        })
+      } else {
+        // add datasets with batch filter
+        for (let anno of annotations) {
+          _datasets.push({
+            transform: [
+              {
+                type: 'filter', //batchName is considered a column name in.obs
+                config: { dimension: batchName, value: batch },
+              },
+              {
+                type: 'filter',
+                config: { dimension: annoName, value: anno },
+              },]
+          })
+        }
+        // add datasets without batch filter
+        for (let anno of annotations) {
+          _datasets.push({
+            transform: [
+              {
+                type: 'filter',
+                config: { dimension: annoName, value: anno },
+              },]
+          })
+        }
+      }
+    }else{
+      // add datasets without batch filter
+      for (let anno of annotations) {
+        _datasets.push({
+          transform: [
+            {
               type: 'filter',
               config: { dimension: annoName, value: anno },
             },]
         })
       }
-      // add datasets without batch filter
       for (let anno of annotations) {
         _datasets.push({
-          // 这个 dataset 的 index 是 `1`。
           transform: [
             {
               type: 'filter',
@@ -349,19 +371,32 @@ const SpScatter = ({ theme, height, width, margin }) => {
         prevCluster.current = { value: 0, label: defaultAnno, attr: 'categories' }
         let annotations = setItemGroup(source, _dims.indexOf(defaultAnno))
 
-        let defaultBatch = 'batch'
-        let batches = setItemGroup(source, _dims.indexOf(defaultBatch))
-        setBatchCur({ value: 0, label: batches[0], attr: 'categories' })
-        setBatchOps(batches.map((item, id) => ({ value: id, label: item, attr: 'categories' })))
+        let batches = []
+        if(_dims.includes(batchName)){
+          batches = setItemGroup(source, _dims.indexOf(batchName))
+          setBatchCur({ value: 0, label: batches[0], attr: 'categories' })
+          setBatchOps(batches.map((item, id) => ({ value: id, label: item, attr: 'categories' })))
+        }
+        else {
+          setBatchName(null)
+          batches = ['batch 1']
+          setBatchCur({ value: 0, label: batches[0], attr: 'categories' })
+          setBatchOps(batches.map((item, id) => ({ value: id, label: item, attr: 'categories' })))
+        }
+
 
         // 3.set embeddings
-        let xName = 'spatial_0'
-        let yName = 'spatial_1'
+        let _embd = embedOps.map((item) => item.label).includes('spatial')
+        ? 'spatial'
+        : embedOps[0]
+        let xName = `${_embd.label}_0`
+        let yName = `${_embd.label}_1`
         let axis = setAxis(source, _dims, xName, yName)
-        setEmbedCur(embedOps.find((item) => item.label === 'spatial'))
+        setEmbedCur(_embd)
+        setEmbed3Dcur(_embd)
 
         // 4.set datasets
-        let _datasets = setBatchDataset(source, _dims, defaultAnno, annotations, 'batch', batches[0])
+        let _datasets = setBatchDataset(source, _dims, defaultAnno, annotations, batches[0], batchName)
         console.log(_datasets)
         // 5.set 3D series
         let _series = []
@@ -374,7 +409,7 @@ const SpScatter = ({ theme, height, width, margin }) => {
           encode: {
             x: xName,
             y: yName,
-            z: 'batch',
+            z: batchName,
             tooltip: [0],
           },
           itemStyle: {
@@ -518,6 +553,7 @@ const SpScatter = ({ theme, height, width, margin }) => {
         let clu = clusterCur.label
         let cluIdx = _dims.indexOf(clu)
         let embd = embedCur.label
+        let embd3D = embed3Dcur.label
         let _snum = 1
         let _series = option.series
         let xName = `${embd}_0`
@@ -528,16 +564,22 @@ const SpScatter = ({ theme, height, width, margin }) => {
         let annotations = setItemGroup(_source, _dims.indexOf(clu), clusterCur.attr)
 
         // set Dataset
-        let _dataset = setBatchDataset(_source, _dims, clu, annotations, 'batch', bat)
+        let _dataset = setBatchDataset(_source, _dims, clu, annotations, bat, batchName)
         console.log(_dataset)
         // set series
         let myVisualMap = []
         let _3DSeries = _series[0]
         _3DSeries.symbolSize = itemSize
         _3DSeries.itemStyle.opacity = itemOpacity
+        _3DSeries.encode= {
+          x: `${embd3D}_0`,
+          y: `${embd3D}_1`,
+          z: batchName,
+          tooltip: [0],
+        }
         let _newSeries = []
         if (clusterCur.attr === 'categories') {
-          // setting anno with batch
+          // setting anno with batch in 2D
           for (let anno in annotations) {
             _newSeries.push({
               type: 'scatter',
@@ -562,7 +604,7 @@ const SpScatter = ({ theme, height, width, margin }) => {
             })
             _snum = _snum + 1
           }
-          // setting anno without batch
+          // setting anno without batch in 3D
           for (let anno in annotations) {
             _newSeries.push({
               type: 'scatter3D',
@@ -570,9 +612,9 @@ const SpScatter = ({ theme, height, width, margin }) => {
               grid3DIndex: 0,
               name: anno,
               encode: {
-                x: xName,
-                y: yName,
-                z: 'batch',
+                x: `${embd3D}_0`,
+                y: `${embd3D}_1`,
+                z: batchName,
                 tooltip: [0],
                 itemName: anno,
               },
@@ -614,9 +656,9 @@ const SpScatter = ({ theme, height, width, margin }) => {
             grid3DIndex: 0,
             encode: {
               // annotations are displayed in left chart
-              x: xName,
-              y: yName,
-              z: 'batch',
+              x: `${embd3D}_0`,
+              y: `${embd3D}_1`,
+              z: batchName,
               tooltip: [0],
             },
             itemStyle: {
@@ -694,14 +736,26 @@ const SpScatter = ({ theme, height, width, margin }) => {
       setClusterOps([{ value: 0, label: defaultAnno, attr: 'categories' }])
       let annotations = setItemGroup(source, _dims.indexOf('leiden'))
 
-      let defaultBatch = 'in_tissue'
-      let batches = setItemGroup(source, _dims.indexOf(defaultBatch))
-      setBatchCur({ value: 0, label: batches[0], attr: 'categories' })
-      console.log(batches.map((item, id) => ({ value: id, label: item, attr: 'categories' })))
-      setBatchOps(batches.map((item, id) => ({ value: id, label: item, attr: 'categories' })))
+      let batches = []
+      if (_dims.includes(batchName)){
+        batches = setItemGroup(source, _dims.indexOf(batchName))
+        setBatchCur({ value: 0, label: batches[0], attr: 'categories' })
+        setBatchOps(batches.map((item, id) => ({ value: id, label: item, attr: 'categories' })))
+      }else {
+        api.warning({
+          message: `default batch is not find in .obs or .json file`,
+          placement: 'topRight',
+        })
+        setBatchName(null)
+        batches = ['batch 1']
+        setBatchCur({ value: 0, label: batches[0], attr: 'categories' })
+        setBatchOps(batches.map((item, id) => ({ value: id, label: item, attr: 'categories' })))
+      }
+
 
 
       // set embeddings
+
       let axis = setAxis(source, _dims, 'array_row', 'array_col')
       setEmbedCur('spatial')
       setEmbedOps([{ value: 0, label: 'spatial' }])
@@ -1107,6 +1161,31 @@ const SpScatter = ({ theme, height, width, margin }) => {
                         value={embedCur}
                         onChange={(target) => {
                           setEmbedCur({
+                            value: target.value,
+                            label: target.label,
+                            attr: embedOps[target.value].attr,
+                          })
+                          toggleAnno("Setting")
+                        }}
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      label="Coord3D"
+                      labelCol={{
+                        span: 6,
+                      }}>
+                      {' '}
+                      <Select
+                        labelInValue
+                        placeholder="Coord3D"
+                        style={{
+                          width: '100%',
+                        }}
+                        placement="topLeft"
+                        options={embedOps}
+                        value={embed3Dcur}
+                        onChange={(target) => {
+                          setEmbed3Dcur({
                             value: target.value,
                             label: target.label,
                             attr: embedOps[target.value].attr,

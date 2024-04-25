@@ -16,7 +16,6 @@ import {
   Result,
   Modal,
 } from 'antd'
-import * as Yup from 'yup'
 import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import SubmitMeta from './utils/SubmitMeta'

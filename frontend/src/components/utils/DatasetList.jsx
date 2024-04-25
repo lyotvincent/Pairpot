@@ -117,6 +117,23 @@ const DatasetList = ({ src, col }) => {
                 key="list-vertical-visualization-o"
                 attr="Visualize this Dataset"
                 placement="left"
+                onClick={()=>{
+                  let values = Object.fromEntries(
+                    dataCol.map((k, i) => [k, item[i]])
+                  )
+                  let scid = values['has_paired']
+                  let scitem = dataSrc.find((item)=> item[1]===scid)
+                  let state = {
+                    st: values
+                  }
+                  if(typeof scitem !== 'undefined'){
+                    let scvalues = Object.fromEntries(
+                      dataCol.map((k, i) => [k, scitem[i]])
+                    )
+                    state['sc'] = scvalues
+                  }
+                  navigate('/browse', { state: state })
+                }}
               />
               <br />
               <br />

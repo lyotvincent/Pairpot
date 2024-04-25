@@ -7,7 +7,6 @@ import { TooltipComponent, VisualMapComponent } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import { Scatter3DChart } from 'echarts-gl/charts'
 import { Grid3DComponent } from 'echarts-gl/components'
-import $ from 'jquery'
 import { Button, Stack, Badge, Form, Accordion } from 'react-bootstrap'
 
 echarts.use([

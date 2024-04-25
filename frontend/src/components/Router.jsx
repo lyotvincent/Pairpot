@@ -1,8 +1,9 @@
 import React from 'react'
 import { useRoutes } from 'react-router-dom'
-import { Browser } from './Browser'
+import { Tools } from './Tools'
 import Banner from './Banner'
 import { Projects } from './Projects'
+import Browser from './Browser'
 import { Contact } from './Contact'
 import { Database } from './Database'
 import Submit from './Submit'
@@ -22,8 +23,8 @@ export default function Router() {
       element: <Browser />,
     },
     {
-      path: 'projects',
-      element: <Projects />,
+      path: 'tools',
+      element: <Tools />,
     },
     {
       path: 'contact',
