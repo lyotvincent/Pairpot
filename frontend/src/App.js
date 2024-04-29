@@ -19,15 +19,27 @@ function App() {
     <ConfigProvider theme={{
       cssVar: true,
       hashed: false,
-      algorithm: theme.darkAlgorithm,
       token: {
         // Seed Token，影响范围大
-        colorPrimary: '#00b96b',
+        colorPrimary: '#4ab311',
         borderRadius: 2,
-
+        colorTextBase: '#121212',
+        colorTextLabel: '#121212',
+        colorBgBase: '#fff',
+        colorBgElevated: '#f8fff3',
+        fontSize:16,
         // 派生变量，影响范围小
-        colorBgContainer: '#f6ffed',
       },
+      components:{
+        Menu:{
+          colorBgContainer:'#f8fff3',
+        },
+        Layout:{
+          siderBg: '#f8fff3',
+          triggerBg: '#4ab322',
+          headerBg: '#006600',
+        }
+      }
     }}>
       <div className="App">
         <BrowserRouter>

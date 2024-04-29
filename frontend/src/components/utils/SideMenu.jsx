@@ -41,7 +41,7 @@ const InitialItems = [
   ]),
 ]
 
-const SideMenu = ({ theme, title, items }) => {
+const SideMenu = ({ title, items, collapsed }) => {
   const [menuItems, setMenuItems] = useState(InitialItems)
   const [openKeys, setOpenKeys] = useState(['sub1'])
   var rootSubmenuKeys = ['sub1', 'sub2', 'sub4']
@@ -76,8 +76,13 @@ const SideMenu = ({ theme, title, items }) => {
   return (
     <Menu
       mode="inline"
-      theme={theme}
       title={title}
+      style={{
+        width: collapsed ? 80 : 200,
+        height: '95%',
+        borderRight: 0,
+        position: 'fixed'
+      }}
       openKeys={openKeys}
       onOpenChange={onOpenChange}
       items={menuItems}
@@ -86,13 +91,11 @@ const SideMenu = ({ theme, title, items }) => {
 }
 
 SideMenu.defaultProps = {
-  theme: 'dark',
   title: 'Datasets',
   items: { Species: [], Tissues: [], Technologies: [] },
 }
 
 SideMenu.propTypes = {
-  theme: PropTypes.string,
   title: PropTypes.string,
   items: PropTypes.array,
 }

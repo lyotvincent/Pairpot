@@ -108,6 +108,7 @@ const DatasetDetails = (props) => {
   const [title, setTitle] = useState()
   const [state, setState] = useState(State)
   const [dataSource, setDataSource] = useState(Data)
+  const {token} = theme.useToken()
   const formItemLayout = {
     labelCol: {
       span: 3,
@@ -171,23 +172,24 @@ const DatasetDetails = (props) => {
         <h3 style={{ color: 'black', marginBottom: 20 }}>{title}</h3>
         <Row style={{marginBottom:20}} justify="space-evenly">
           <Col span={4} offset={1}>
-            <Statistic title="Samples" value={state.Samples} valueStyle={{ color: "#5e30af"}} />
+            <Statistic title="Samples" value={state.Samples} valueStyle={{ color: token.colorPrimaryActive}} />
           </Col>
           <Col span={4} offset={1}>
-            <Statistic title="Spots" value={state.Spots} valueStyle={{ color: "#5e30af"}} />
+            <Statistic title="Spots" value={state.Spots} valueStyle={{ color: token.colorPrimaryActive}} />
           </Col>
           <Col span={4} offset={1}>
-          <Statistic title="Genes" value={state.Genes} valueStyle={{ color: "#5e30af"}} />
+          <Statistic title="Genes" value={state.Genes} valueStyle={{ color: token.colorPrimaryActive}} />
           </Col>
           <Col span={4} offset={1}>
-          <Statistic title="Cells" value={state.Cells} valueStyle={{ color: "#5e30af"}} />
+          <Statistic title="Cells" value={state.Cells} valueStyle={{ color: token.colorPrimaryActive}} />
           </Col>
         </Row>
         <Table
           columns={Columns}
           dataSource={dataSource}
           bordered
-          size="small" ></Table>
+          size="small" 
+          pagination={false}></Table>
 
       </ConfigProvider>
     </>

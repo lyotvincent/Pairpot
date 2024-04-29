@@ -1,5 +1,5 @@
 /************ Custom Font ************/
-@font-face {
+/* @font-face {
   font-family: Centra;
   src: url('./assets/font/CentraNo2-Bold.ttf');
   font-weight: 700;
@@ -13,7 +13,7 @@
   font-family: Centra;
   src: url('./assets/font/CentraNo2-Book.ttf');
   font-weight: 400;
-}
+} */
 
 /************ Default Css ************/
 * {
@@ -31,8 +31,8 @@ body {
   font-weight: 400;
   overflow-x: hidden;
   position: relative;
-  background-color: #121212 !important;
-  color: #fff !important;
+  background-color: #fff !important;
+  color: #121212 !important;
   font-family: 'Centra', sans-serif !important;
 }
 
@@ -92,38 +92,7 @@ p.success {
 p.danger {
   color: red;
 }
-/************ Navbar Css ************/
-nav.navbar {
-  padding: 18px 0;
-  position: fixed;
-  width: 100%;
-  top: 0;
-  z-index: 9999;
-  transition: 0.32s ease-in-out;
-}
-nav.navbar.scrolled {
-  padding: 0px 0;
-  background-color: #121212;
-}
-nav.navbar a.navbar-brand {
-  width: 9%;
-}
-nav.navbar .navbar-nav .nav-link.navbar-link {
-  font-weight: 400;
-  color: #fff !important;
-  letter-spacing: 0.8px;
-  padding: 0 25px;
-  font-size: 18px;
-  opacity: 0.75;
-}
-nav.navbar .navbar-nav a.nav-link.navbar-link:hover,
-nav.navbar .navbar-nav a.nav-link.navbar-link.active {
-  opacity: 1;
-}
-span.navbar-text {
-  display: flex;
-  align-items: center;
-}
+
 .social-icon {
   display: inline-block;
   margin-left: 14px;

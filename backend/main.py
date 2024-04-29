@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 import sqlite3
 import time
 from server.refine import *
@@ -178,6 +178,10 @@ def submit():
     conn.close()
 
     return jsonify({'state': state, 'message': message})
+
+@app.route('/query', methods=['GET'])
+def query():
+    return send_file('./resources/sp1_meta.h5ad')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5522)

@@ -11,9 +11,12 @@ import {
   theme,
   Result,
   Modal,
-  Divider
+  Divider,
+  Card
 } from 'antd'
+import ToggleAccordion from './utils/ToggleAccordion'
 import { useLocation, useNavigate } from 'react-router-dom'
+
 import axios from 'axios'
 const { Content, Sider } = Layout
 
@@ -57,6 +60,7 @@ const sideMenuItems = [
 
 const MetaInfo = lazy(() => (import('./utils/DatasetDetails')))
 const LayerView = lazy(() => (import('./charts/SpScatter')))
+const PairView = lazy(() => (import('./charts/PairView')))
 
 const Browser = () => {
   const navigate = useNavigate()
@@ -73,13 +77,12 @@ const Browser = () => {
         breakpoint="lg"
         collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
         <Menu
-          theme="dark"
           mode="inline"
           onClick={onClickSideMenu}
           defaultSelectedKeys={'sub1'}
           selectedKeys={selectedKey}
           style={{
-            width: collapsed ? 78 : 198,
+            width: collapsed ? 80 : 200,
             height: '100%',
             borderRight: 0,
             position: 'fixed'
@@ -95,7 +98,43 @@ const Browser = () => {
         </Suspense>
         <Divider />
         <Suspense fallback={<h1>Loading...</h1>}>
-          <LayerView />
+          <Card>
+            <ToggleAccordion header={<h3>Layer View</h3>}>
+              {<div>
+                (left) These are the assignments of each spot-barcode to clusters by an
+                automated clustering algorithm. The clustering groups together spots that
+                have similar expression profiles. In this plot, spots are colored according
+                to their cluster assignment and projected on to the tissue image. Only spots
+                under tissue are used in the clustering algorithm.
+                <br />
+                (right) Spots are colored by clustering assignment and shown in t-SNE space.
+                The axes correspond to the 2-dimensional embedding produced by the t-SNE
+                algorithm. In this space, pairs of spots that are close to each other have
+                more similar gene expression profiles than spots that are distant from each other.
+              </div>}
+            </ToggleAccordion>
+            <LayerView query={true}/>
+          </Card>
+        </Suspense>
+        <Divider />
+        <Suspense fallback={<h1>Loading...</h1>}>
+          <Card>
+            <ToggleAccordion header={<h3>Pair View</h3>}>
+              {<div>
+                (left) These are the assignments of each spot-barcode to clusters by an
+                automated clustering algorithm. The clustering groups together spots that
+                have similar expression profiles. In this plot, spots are colored according
+                to their cluster assignment and projected on to the tissue image. Only spots
+                under tissue are used in the clustering algorithm.
+                <br />
+                (right) Spots are colored by clustering assignment and shown in t-SNE space.
+                The axes correspond to the 2-dimensional embedding produced by the t-SNE
+                algorithm. In this space, pairs of spots that are close to each other have
+                more similar gene expression profiles than spots that are distant from each other.
+              </div>}
+            </ToggleAccordion>
+            <PairView/>
+          </Card>
         </Suspense>
         {/* <div style={{color: 'black'}}>{JSON.stringify(location.state)}</div> */}
       </Content>

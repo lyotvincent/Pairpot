@@ -1,9 +1,6 @@
-import Accordion from 'react-bootstrap/Accordion'
 import { useAccordionButton } from 'react-bootstrap/AccordionButton'
-import Card from 'react-bootstrap/Card'
-import { Stack } from 'react-bootstrap'
 import PropTypes from 'prop-types'
-import { Button } from 'antd'
+import { Collapse, ConfigProvider, Space } from 'antd'
 import { QuestionCircleOutlined } from '@ant-design/icons'
 
 function CustomToggle({ children, eventKey }) {
@@ -18,23 +15,34 @@ function CustomToggle({ children, eventKey }) {
   )
 }
 
-const ToggleAccordion = ({ header, children, border }) => {
+const ToggleAccordion = ({ header, children }) => {
+  const items = [
+    {
+      key: '0',
+      children: children,
+      label: (
+        <Space direction="horizontal" >
+          {header}
+          <QuestionCircleOutlined
+            style={{ size: 'large' }} />
+        </Space>
+      ),
+      style: {
+        marginBottom: 0,
+      }
+    }]
   return (
-    <>
-      <Accordion>
-        <Card bg="secret" border={border}>
-          <Card.Header>
-            <Stack direction="horizontal" gap={2}>
-              {header}
-              <CustomToggle eventKey="0" />
-            </Stack>
-          </Card.Header>
-          <Accordion.Collapse eventKey="0">
-            <Card.Body>{children}</Card.Body>
-          </Accordion.Collapse>
-        </Card>
-      </Accordion>
-    </>
+    <ConfigProvider theme={{
+      components:{
+        Collapse:{
+          headerPadding:0,
+          contentPadding:4,
+        }
+      }
+    }}>
+      <Collapse ghost items={items} expandIcon={<QuestionCircleOutlined
+        style={{ border: 'secondary', size: 'xxl' }} />} expandIconPosition='end' />
+    </ConfigProvider>
   )
 }
 

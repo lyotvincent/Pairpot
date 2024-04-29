@@ -1,8 +1,6 @@
 import React, { useRef, useEffect } from 'react'
 import * as echarts from 'echarts'
 import PropTypes from 'prop-types'
-import '../theme/dark'
-import '../theme/vintage'
 import {
   GraphicComponent,
   GridComponent,
@@ -25,11 +23,11 @@ echarts.use([
   LinesChart,
 ])
 
-const ScHeatmap = ({ theme, title, height, width, margin }) => {
+const ScHeatmap = ({ title, height, width, margin }) => {
   const chartRef = useRef(null) // get current DOM container
 
   useEffect(() => {
-    var myChart = echarts.init(chartRef.current, theme) //init the echart container
+    var myChart = echarts.init(chartRef.current) //init the echart container
     var _data = require('../../assets/data/Mouse-Brain-heatmap-sc.json')
     var _den = require('../../assets/data/Mouse-Brain-dendrogram-sc.json')
 
@@ -284,7 +282,7 @@ const ScHeatmap = ({ theme, title, height, width, margin }) => {
         },
       ],
     })
-  }, [theme, title])
+  }, [ title])
 
   return (
     <div>
@@ -298,7 +296,6 @@ const ScHeatmap = ({ theme, title, height, width, margin }) => {
 }
 
 ScHeatmap.defaultProps = {
-  theme: 'dark',
   title: 'ScHeatmap',
   height: '50rem',
   width: '45rem',
@@ -306,7 +303,6 @@ ScHeatmap.defaultProps = {
 }
 
 ScHeatmap.propTypes = {
-  theme: PropTypes.string,
   title: PropTypes.string,
   height: PropTypes.string,
   width: PropTypes.string,

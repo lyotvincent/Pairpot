@@ -9,8 +9,9 @@ import {
   CloudUploadOutlined,
   CloudDownloadOutlined,
 } from '@ant-design/icons'
-import { Menu, ConfigProvider, Layout, Radio } from 'antd'
+import { Menu, ConfigProvider, Layout, Radio, theme, Space, Divider, Card } from 'antd'
 import { NavLink } from 'react-router-dom'
+import useToken from 'antd/es/theme/useToken'
 const { Header } = Layout
 
 const items = [
@@ -103,55 +104,62 @@ const items = [
 
 const Nav = () => {
   const [themeToken, setThemeToken] = useState("secret")
+  const { token } = theme.useToken()
   const handleThemeChange = (e) => {
     setThemeToken(e.target.value)
   }
   return (
-    <Header
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        backgroundColor: '#100c2a',
-        height: 70,
-        position: 'sticky',
-        top: 0,
-        zIndex: 1060,
-        width: '100%',
-        display: 'flex',
+    <ConfigProvider
+      theme={{
+        components: {
+          Menu: {
+            iconSize: 20,
+            fontSize: 20,
+            colorBgContainer: '#ddf7d4',
+            iconMarginInlineEnd: 2,
+            colorInfoTextHover: token.colorPrimary,
+            itemHoverColor: token.colorPrimary,
+          }
+        },
       }}>
-      <div className="demo-logo" />
-      <ConfigProvider
-        theme={{
-          components: {
-            Menu: {
-              iconSize: 20,
-              fontSize: 20,
-              darkItemSelectedBg: '#000000',
-              horizontalItemSelectedColor: '#001529',
-              colorBgBase: '#100c2a',
-              iconMarginInlineEnd: 8,
-            },
-          },
+      <Header
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          backgroundColor: '#ddf7d4',
+          height: 60,
+          position: 'sticky',
+          top: 0,
+          zIndex: 1060,
+          width: '100%',
         }}>
+
+
+        <div className="demo-logo" style={{ width: 150, backgroundColor: '#cdf3bf', margin: 0 }} />
+
         <Menu
           mode="horizontal"
-          theme="dark"
           style={{
             flex: 1,
-            minWidth: 0,
-            backgroundColor: '#100c2a',
-            color: 'white',
           }}
           items={items}
-          selectable={0}
         />
-        <span>Theme:</span>
-        <Radio.Group value={themeToken} onChange={handleThemeChange} defaultValue="secret" buttonStyle="solid">
-        <Radio.Button value="secret">Secret</Radio.Button>
-        <Radio.Button value="bright">Bright</Radio.Button>
-      </Radio.Group>
-      </ConfigProvider>
-    </Header>
+        <Space>
+          <span>Theme: </span>
+          <Radio.Group
+            value={themeToken}
+            onChange={handleThemeChange}
+            defaultValue="bright"
+            buttonStyle="solid"
+            size="small"
+            style={{ marginRight: 20 }}>
+            <Radio.Button value="bright">Bright</Radio.Button>
+            <Radio.Button value="secret">Secret</Radio.Button>
+
+          </Radio.Group>
+        </Space>
+      </Header>
+    </ConfigProvider>
   )
 }
 export default Nav

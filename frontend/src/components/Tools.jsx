@@ -1,11 +1,10 @@
 import { useState } from "react"
-import { Container, Row, Col, Card } from "react-bootstrap"
 import TrackVisibility from 'react-on-screen'
 import '../App.css'
-import { Layout, Menu, theme, Space, Button, ConfigProvider } from 'antd'
+import { Layout, Menu, theme, Space, Button, ConfigProvider, Card, Row, Col } from 'antd'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import ToggleAccordion from "./utils/ToggleAccordion"
-import { FileUpload } from "./utils/FileUpload"
+//import { FileUpload } from "./utils/FileUpload"
 import SpScatter from "./charts/SpScatter"
 import Landscape3D2 from "./charts/Landscape3D2"
 import ScScatter from "./charts/ScScatter"
@@ -41,7 +40,8 @@ export const Tools = () => {
     setSelectedKey(e.key)
   }
   return (
-    <ConfigProvider theme={{cssVar:true}}>
+    <ConfigProvider theme={{cssVar:true,
+    }}>
       <Layout hasSider
         style={{
           minHeight: '100vh',
@@ -51,12 +51,11 @@ export const Tools = () => {
           breakpoint="lg"
           collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
           <Menu
-            theme="dark"
             mode="inline"
             onClick={onClickSideMenu}
             defaultSelectedKeys={'sub1'}
             style={{
-              width: collapsed ? 78 : 198,
+              width: collapsed ? 80 : 200,
               height: '100%',
               borderRight: 0,
               position: 'fixed'
@@ -69,13 +68,11 @@ export const Tools = () => {
           <Content
             style={{
               padding: '1rem 1rem',
-              backgroundColor: '#100c2a',
             }}>
-            <Container fluid='true'>
               {visible && selectedKey === 'CellPropagation' && (
-                <Card bg='secret' border="secondary">
+                <Card >
                   <ToggleAccordion header={<h3>Cell Propagation</h3>} border={null}>
-                    {<div className="App">
+                    {<div>
                       (left) These are the assignments of each spot-barcode to clusters by an
                       automated clustering algorithm. The clustering groups together spots that
                       have similar expression profiles. In this plot, spots are colored according
@@ -99,7 +96,7 @@ export const Tools = () => {
               )}
 
               <br />
-              <Card bg="secret" border="secondary">
+              <Card >
                 <ToggleAccordion header={<h3>UMI Detection & Decontamination</h3>} border={null}>
                   {<div>
                     (left) Total UMI counts for each spot overlayed on the tissue
@@ -118,7 +115,7 @@ export const Tools = () => {
               </Card>
 
               <br />
-              <Card bg="secret" border="secondary">
+              <Card >
                 <ToggleAccordion header={<h3>Cell Propagation</h3>} border={null}>
                   {<div>
                     (left) These are the assignments of each spot-barcode to clusters by an
@@ -140,7 +137,7 @@ export const Tools = () => {
 
               <br />
 
-              <Card bg="secret" border="secondary">
+              <Card >
                 <ToggleAccordion header={<h3>3D Landscapes</h3>} border={null}>
                   {<div>
                     The generated landscapes curve the outlines of SCSPs in tissues, and display the
@@ -155,18 +152,16 @@ export const Tools = () => {
                 </Row>
               </Card>
               <br />
-              <Card bg="secret" border="secondary">
+              <Card >
                 <ToggleAccordion header={<h3>Data Selection & Submittion</h3>} border={null}>
                   {<div>
                     The Selection module supports .h5spt, .h5ad, .mtx or .zip file with 10X Visium format.
                     Hence, .mtx needs to have genes in rows and barcodes(cells) in columns.
                   </div>}
                 </ToggleAccordion>
-                <FileUpload />
                 <h4 align="center"> Series Gallery</h4>
                 <SeriesGallery />
               </Card>
-            </Container>
           </Content>
         </Layout>
       </Layout>

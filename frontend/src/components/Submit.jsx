@@ -21,6 +21,7 @@ import axios from 'axios'
 import SubmitMeta from './utils/SubmitMeta'
 import SubmitLink from './utils/SubmitLink'
 const { Content, Sider } = Layout
+const { useToken } = theme
 
 const menuItems = [
   {
@@ -76,10 +77,7 @@ const Submit = () => {
         })
       })
   }
-  const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken()
-
+  const { token } = useToken();
   useEffect(() => {
     setVisible(true) // 默认显示第一个Content组件
   }, [])
@@ -110,8 +108,8 @@ const Submit = () => {
           style={{
             padding: 24,
             minHeight: 380,
-            background: colorBgContainer,
-            borderRadius: borderRadiusLG,
+            background:  token.colorBgContainer,
+            borderRadius: token.borderRadiusLG,
           }}>
           {visible && selectedKey === 'link' && (
             <SubmitLink

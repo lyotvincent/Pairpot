@@ -30,6 +30,7 @@ import {
   InputNumber,
   Slider,
   Switch,
+  theme,
   Col,
   Row,
   Form,
@@ -59,8 +60,9 @@ echarts.use([
   UniversalTransition,
 ])
 const { Dragger } = Upload
+const { useToken } = theme
 
-const ScScatter = ({ theme, height, width, margin }) => {
+const ScScatter = ({height, width, margin }) => {
   const [api, contextHolder] = notification.useNotification()
   const [isInit, setInit] = useState(false) // whether echart object is inited
   const chartRef = useRef(null) // current DOM container
@@ -108,6 +110,7 @@ const ScScatter = ({ theme, height, width, margin }) => {
     { value: 2, label: 'LabelPropagation' },
     { value: 3, label: 'LabelSpreading' },
   ])
+  const { token } = useToken()
 
   var vega_20 = [
     '#1f77b4',
@@ -261,6 +264,9 @@ const ScScatter = ({ theme, height, width, margin }) => {
       embd1_y = source.map((item) => {
         return item[yIdx1]
       })
+    } else {
+      xName1 = xName0
+      yName1 = yName0
     }
 
     return {
@@ -497,7 +503,7 @@ const ScScatter = ({ theme, height, width, margin }) => {
             dataset: _datasets,
             series: _series,
             toolbox: {
-              top: yInv ? '2%' : '5%',
+              top: yInv ? '4%' : '7%',
             },
           },
           {
@@ -856,7 +862,7 @@ const ScScatter = ({ theme, height, width, margin }) => {
       }
     } else {
       // init the echart container
-      var myChart = echarts.init(chartRef.current, theme)
+      var myChart = echarts.init(chartRef.current)
       let _dims = [...Object.keys(_data[0]), 'id']
       let source = _data.map((item, id) => {
         return [...Object.entries(item).map(([_, value]) => value), id]
@@ -950,7 +956,7 @@ const ScScatter = ({ theme, height, width, margin }) => {
           iconStyle: {
             borderWidth: 1.5,
           },
-          top: '5%',
+          top: '7%',
         },
 
         color: vega_20,
@@ -967,36 +973,16 @@ const ScScatter = ({ theme, height, width, margin }) => {
         yAxis: axis.yAxis,
         grid: [
           {
-            top: '15%',
+            top: '18%',
             left: '5%',
             width: '43%',
-            bottom: '13%',
-            axisLine: {
-              lineStyle: {
-                color: '#fff',
-              },
-            },
-            axisPointer: {
-              lineStyle: {
-                color: '#ffbd67',
-              },
-            },
+            bottom: '18%',
           },
           {
-            top: '15%',
+            top: '18%',
             width: '43%',
             right: '1%',
-            bottom: '13%',
-            axisLine: {
-              lineStyle: {
-                color: '#fff',
-              },
-            },
-            axisPointer: {
-              lineStyle: {
-                color: '#ffbd67',
-              },
-            },
+            bottom: '18%',
           },
         ],
         legend: {
@@ -1156,7 +1142,7 @@ const ScScatter = ({ theme, height, width, margin }) => {
               <Dragger {...upLoadProps}>
                 <p
                   className="ant-upload-drag-icon"
-                  style={{ fontSize: 16, fontFamily: 'Arial', color: 'white', margin: 10 }}>
+                  style={{ fontSize: 16, margin: 10 }}>
                   <InboxOutlined />
                   <br />
                   Upload
@@ -1538,14 +1524,12 @@ const ScScatter = ({ theme, height, width, margin }) => {
 }
 
 ScScatter.defaultProps = {
-  theme: 'dark',
-  height: '31rem',
+  height: '35rem',
   width: '55rem',
   margin: '1rem',
 }
 
 ScScatter.propTypes = {
-  theme: PropTypes.string,
   height: PropTypes.string,
   width: PropTypes.string,
   margin: PropTypes.string,

@@ -6,6 +6,7 @@ import {
   EyeOutlined,
   LinkOutlined,
   FileTextOutlined,
+  DownloadOutlined,
 } from '@ant-design/icons'
 import React, { useRef, useState, useEffect } from 'react'
 import {
@@ -21,6 +22,7 @@ import {
 import DatasetDescription from './DatasetDescription'
 import TextCollapse from './TextCollapse'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 //import { response } from 'express'
 
 const IconText = ({ icon, text, attr, onClick, placement = 'bottom' }) => (
@@ -93,16 +95,6 @@ const DatasetList = ({ src, col }) => {
           ]}
           extra={
             <div>
-              {item[attr.spots] ? (
-                <div>
-                  <br />
-                  <Button type="primary" size="small" shape="round">
-                    {AddCommas(item[attr.spots])} spots
-                  </Button>
-                </div>
-              ) : (
-                ' '
-              )}
               <br />
               <DatasetDescription
                 descCol={dataCol}
@@ -153,6 +145,38 @@ const DatasetList = ({ src, col }) => {
                   )
                 }}
               />
+              <br/>
+              <br />
+              <IconText
+                icon={DownloadOutlined}
+                text="Download Datasets"
+                key="list-vertical-Download-Datasets-o"
+                attr="Download datasets"
+                placement="left"
+                onClick={() => {
+                  axios
+                  .get('http://localhost:5522/query', {
+                    responseType: 'blob',
+                  })
+                  .then((response) => {
+                    console.log(response)
+                    let blob = response.data
+                    let url = window.URL.createObjectURL(blob);
+                    let a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${item[1]}.h5ad`;
+                    document.body.appendChild(a);
+                    a.click();
+                    
+                    // 清理
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                  })
+                  .catch(error=>{
+                    console.error('Error fetching blob:', error);
+                  })
+                }}
+              />
             </div>
           }>
           <List.Item.Meta
@@ -168,6 +192,7 @@ const DatasetList = ({ src, col }) => {
                   text={item[attr['summary']]}
                   header={<b>Summary: </b>}
                 />
+                <Space>
                 {item[attr['pmid']] ? (
                   <div>
                     <b>PMID: </b> {item[attr['pmid']]}
@@ -175,6 +200,18 @@ const DatasetList = ({ src, col }) => {
                 ) : (
                   ' '
                 )}
+                {
+                  (  item[attr.spots] ? (
+                    <div>
+                      <Button type="primary" size="small" shape="round">
+                        {AddCommas(item[attr.spots])} spots
+                      </Button>
+                    </div>
+                  ) : (
+                    ' '
+                  ))
+                }
+                </Space>
               </div>
             }
           />

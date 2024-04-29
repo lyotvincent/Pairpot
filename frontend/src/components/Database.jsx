@@ -1,13 +1,10 @@
 import { useState, useEffect, View } from 'react'
-import { Container, Row, Col, Tab, Nav } from 'react-bootstrap'
 import TrackVisibility from 'react-on-screen'
-import { LoadingButton } from './utils/LoadingButton'
-import { SwitchButton } from './utils/SwitchButton'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { ReactComponent as Female } from '../assets/img/female.svg'
 import { ReactComponent as FemaleOrgans } from '../assets/img/female-organs.svg'
 import SideMenu from './utils/SideMenu'
-import { Breadcrumb, Layout, Menu, theme, Space, Button, Card } from 'antd'
+import { Breadcrumb, Layout, Menu, theme, Space, Button, ConfigProvider } from 'antd'
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -48,9 +45,7 @@ export const Database = () => {
       icon: <OneToOneOutlined />,
     },
   ]
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken()
+  const {token} = theme.useToken()
   return (
     <Layout
       style={{
@@ -59,38 +54,12 @@ export const Database = () => {
       <Sider
         width={200}
         breakpoint="lg"
-        trigger={null}
         collapsible
-        collapsed={collapsed}>
-        <SideMenu items={srcMeta} />
+        collapsed={collapsed}
+        onCollapse={(value) => setCollapsed(value)}>
+        <SideMenu items={srcMeta} collapsed={collapsed} />
       </Sider>
       <Layout>
-        <Header
-          style={{
-            padding: 0,
-          }}>
-          <Space>
-            <Button
-              type="text"
-              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-              onClick={() => setCollapsed(!collapsed)}
-              style={{
-                fontSize: '16px',
-                width: 64,
-                height: 64,
-                color: '#dddddd',
-              }}
-            />
-            <Menu
-              width={'70%'}
-              onClick={onClickTopMenu}
-              selectedKeys={[selectedKey]}
-              mode="horizontal"
-              items={topMenuItems}
-              theme="dark"
-            />
-          </Space>
-        </Header>
         <Content
           style={{
             padding: '0rem 1rem',

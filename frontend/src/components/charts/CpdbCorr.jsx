@@ -2,8 +2,6 @@
 import React, { useRef, useEffect, useState } from 'react'
 import * as echarts from 'echarts'
 import PropTypes from 'prop-types'
-import '../theme/dark'
-import '../theme/vintage'
 import {
   GraphicComponent,
   GridComponent,
@@ -27,7 +25,7 @@ echarts.use([
   LinesChart,
 ])
 
-const CpdbCorr = ({ theme, height, width, margin }) => {
+const CpdbCorr = ({ height, width, margin }) => {
 
   const [isInit, setInit] = useState(false) // whether echart object is inited
   const chartRef = useRef(null) // current DOM container
@@ -44,7 +42,7 @@ const CpdbCorr = ({ theme, height, width, margin }) => {
   }
 
   useEffect(() => {
-    var chart = echarts.init(chartRef.current, theme) //init the echart container
+    var chart = echarts.init(chartRef.current) //init the echart container
     let _dims = [...Object.keys(_data)]
     let _typeDims = _dims.slice(14)
     let _type = new Set(_typeDims.map((item) => item.split('|')[0]))
@@ -135,7 +133,7 @@ const CpdbCorr = ({ theme, height, width, margin }) => {
         },
       ],
     })
-  }, [theme])
+  }, [])
 
 
   return (
@@ -148,14 +146,12 @@ const CpdbCorr = ({ theme, height, width, margin }) => {
 }
 
 CpdbCorr.defaultProps = {
-  theme: 'dark',
-  height: '31rem',
+  height: '35rem',
   width: '40rem',
   margin: '1rem',
 }
 
 CpdbCorr.propTypes = {
-  theme: PropTypes.string,
   height: PropTypes.string,
   width: PropTypes.string,
   margin: PropTypes.string,
