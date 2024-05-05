@@ -97,7 +97,7 @@ export const Tools = () => {
 
               <br />
               <Card >
-                <ToggleAccordion header={<h3>UMI Detection & Decontamination</h3>} border={null}>
+                <ToggleAccordion header={<h3>LayerLinkages</h3>} border={null}>
                   {<div>
                     (left) Total UMI counts for each spot overlayed on the tissue
                     image. Spots with greater UMI counts likely have higher RNA

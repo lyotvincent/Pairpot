@@ -422,6 +422,9 @@ const ScScatter = ({height, width, margin }) => {
         setItemSize(symbolSizeRef.current)
         // set annotaions or clusters
         let defaultAnno = clusterOps.find((item) => item.label === "annotation")
+        if(typeof defaultAnno === 'undefined'){
+          defaultAnno = clusterOps[0]
+        }
         setClusterCur(defaultAnno)
         let annotations = setItemGroup(source, _dims.indexOf(defaultAnno.label))
 
@@ -748,12 +751,15 @@ const ScScatter = ({height, width, margin }) => {
         brushMode.current = 'Select'
       }
       if (commandRef.current === 'Rename') {
+        let __series = myChart.getOption().series
+        __series[__series.length - 1].name = inputValue
         seriesRef.current.name = inputValue
         let prevName = nameRef.current
         nameRef.current = inputValue
+        seriesRef.current = __series[__series.length - 1]
         _series.push(seriesRef.current)
         myChart.setOption({
-          series: _series,
+          series: __series,
         })
         setInputValue('')
         api.info({

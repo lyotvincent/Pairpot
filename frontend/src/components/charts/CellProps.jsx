@@ -22,11 +22,11 @@ echarts.use([
   UniversalTransition,
 ])
 
-const CellProps = ({ theme, title, height, width, margin }) => {
+const CellProps = ({title, height, width, margin }) => {
   const chartRef = useRef(null) // get current DOM container
 
   useEffect(() => {
-    var myChart = echarts.init(chartRef.current, theme) //init the echart container
+    var myChart = echarts.init(chartRef.current) //init the echart container
     var _props = require('../../assets/data/Mouse-Brain-props.json')
     var vega_20 = [
       '#1f77b4',
@@ -97,7 +97,7 @@ const CellProps = ({ theme, title, height, width, margin }) => {
         min: 0,
         max: 1,
         inRange: {
-          color: ['#79549f', 'yellow'],
+          color:["#104e8b", "#ffdab9", "#8b0a50"],
         },
         text: ['Cell-type\n proportions'],
         textGap: 20,
@@ -258,7 +258,7 @@ const CellProps = ({ theme, title, height, width, margin }) => {
       //   seriesIndex: currentIndex,
       // })
     })
-  }, [theme, title])
+  }, [title])
 
   return (
     <div>
@@ -272,7 +272,6 @@ const CellProps = ({ theme, title, height, width, margin }) => {
 }
 
 CellProps.defaultProps = {
-  theme: 'dark',
   title: 'CellProps',
   height: '35rem',
   width: '35rem',
@@ -280,7 +279,6 @@ CellProps.defaultProps = {
 }
 
 CellProps.propTypes = {
-  theme: PropTypes.string,
   title: PropTypes.string,
   height: PropTypes.string,
   width: PropTypes.string,

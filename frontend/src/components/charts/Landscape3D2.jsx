@@ -1,8 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react'
 import * as echarts from 'echarts'
 import PropTypes from 'prop-types'
-import '../theme/dark'
-import '../theme/vintage'
 import { TooltipComponent, VisualMapComponent } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import { Scatter3DChart } from 'echarts-gl/charts'
@@ -17,7 +15,6 @@ echarts.use([
 ])
 
 export const Landscape3D2 = ({
-  theme,
   title,
   height,
   width,
@@ -29,7 +26,7 @@ export const Landscape3D2 = ({
 
   useEffect(() => {
     var app = {}
-    var myChart = echarts.init(chartRef.current, theme) //init the echart container
+    var myChart = echarts.init(chartRef.current) //init the echart container
     var option
     var data
     var _data = require('../../assets/data/PDAC-3D.json')
@@ -101,16 +98,16 @@ export const Landscape3D2 = ({
       grid3D: {
         left: '-15%',
         top: '-5%',
-        axisLine: {
-          lineStyle: {
-            color: '#fff',
-          },
-        },
-        axisPointer: {
-          lineStyle: {
-            color: '#ffbd67',
-          },
-        },
+        // axisLine: {
+        //   lineStyle: {
+        //     color: '#fff',
+        //   },
+        // },
+        // axisPointer: {
+        //   lineStyle: {
+        //     color: '#ffbd67',
+        //   },
+        // },
         viewControl: {
           autoRotate: true,
           // projection: 'orthographic'
@@ -146,7 +143,7 @@ export const Landscape3D2 = ({
       },
       series: seriesArray,
     })
-  }, [theme, title, visible])
+  }, [ title, visible])
 
   const handleToggle = () => {
     setVisible(!visible)
@@ -164,7 +161,6 @@ export const Landscape3D2 = ({
 }
 
 Landscape3D2.defaultProps = {
-  theme: 'dark',
   title: 'Landscape3D2',
   height: '35rem',
   width: '70rem',
@@ -172,7 +168,6 @@ Landscape3D2.defaultProps = {
 }
 
 Landscape3D2.propTypes = {
-  theme: PropTypes.string,
   title: PropTypes.string,
   height: PropTypes.string,
   width: PropTypes.string,
