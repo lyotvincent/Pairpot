@@ -51,6 +51,18 @@ def input_adata_h5ad(sample):
   adata.var_names_make_unique()
   return adata
 
+def input_adata_txt(sample):
+    adata = sc.read_text(sample, sep='\t')
+    adata.obs_names_make_unique()
+    adata.var_names_make_unique()
+    return adata
+
+def input_adata_csv(sample):
+    adata = sc.read_text(sample, sep=',')
+    adata.obs_names_make_unique()
+    adata.var_names_make_unique()
+    return adata
+
 # 将所有矩阵合并
 def concat_adata(samples, sampleNames, inputFunc=input_adata_10Xh5):
     adatas = []
@@ -68,6 +80,7 @@ def concat_adata(samples, sampleNames, inputFunc=input_adata_10Xh5):
     adata_concat = adatas[0].concatenate(adatas[1:], batch_categories=sampleNames)
     adata_concat
     return adata_concat
+
 
 # 预处理
 def pp(adata:ad.AnnData):
