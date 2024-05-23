@@ -3,7 +3,8 @@ import scanpy as sc
 import pandas as pd
 import numpy as np
 import anndata as ad
-from scipy.stats import kruskal
+from scipy.stats import kruskal,mannwhitneyu
+from joblib import Parallel, delayed
 
 def partition_arg_topK(matrix, K, axis=1):
     """
@@ -103,20 +104,14 @@ def AUCell_calcUC(adata:ad.AnnData, markerList:list, cellType:str, rankings="AUC
   ucell = np.zeros_like(adata.obs_names)
   for i in range(len(rankMat)):
     mat = rankMat.iloc[i, :]
-    intagIdx = mat[mat.isin(markerIdx)]
-    if len(intagIdx) == 0:
+    intagIdx = mat.isin(markerIdx)
+    sum_intagIdx = np.sum(intagIdx)
+    if sum_intagIdx == 0:
        ucell[i]=0
     else:
-      u = np.sum([list(mat).index(s) for s in intagIdx]) + (n-len(intagIdx))*maxRank - smin
+      u = np.sum(np.where(intagIdx)[0])+ (n-sum_intagIdx)*maxRank - smin
       ucell[i] = 1 - u / umax
-
-  # do knn-smooth
-  # knnMat = np.argsort(-adata.obsp["connectivities"].todense(), axis=1)[:,:5]
-  # for i in range(len(ucell)):
-  #   knnCells = list(knnMat[i])
-  #   ucell[i] = np.mean(ucell[knnCells])
-  adata.obs[f"UCell_{cellType}"] = pd.Series(ucell, index=adata.obs_names, dtype=float)
-  return adata
+  return ucell
 
 
 
@@ -136,8 +131,8 @@ def AUCell_UCAssign(adata:ad.AnnData, db:pd.DataFrame, celltype:str, alpha=10e-3
       anno = rank.iloc[i,0]
       sample1 = ucell.loc[ucell['leiden-1'].isin([anno]), f"UCell_{ct}"]
       sample2 = ucell.loc[~ucell['leiden-1'].isin([anno]), f"UCell_{ct}"]
-      w = kruskal(sample1, sample2)
-      if w.pvalue < alpha:
+      u_stat,p_val = kruskal(sample1, sample2)
+      if p_val < alpha:
         candidates.append(anno)
         ucell = ucell[~ucell['leiden-1'].isin([anno])]
       else:
@@ -146,4 +141,52 @@ def AUCell_UCAssign(adata:ad.AnnData, db:pd.DataFrame, celltype:str, alpha=10e-3
       annotation[ct] = candidates
   adata.uns['UCell_Assign'] = annotation
   adata.obsm['AUCell_rankings'].columns = np.array(adata.obsm['AUCell_rankings'].columns, dtype=str)
+  return adata
+
+
+def AUCell_UCAssign(adata, 
+                    db:pd.DataFrame, 
+                    celltype:str, 
+                    alpha=10e-30, 
+                    gene_col='official gene symbol', 
+                    test_func=kruskal,
+                    n_jobs=8):
+  
+  # calculate UCell
+  def AUCell_calcUC_thread(i):
+    ct = celltype[i]
+    markerList = np.array(db[db['cell type'] ==ct][gene_col])
+    markerList = list(set(markerList).intersection(set(adata.var_names)))
+    ucell = AUCell_calcUC(adata, markerList, ct)
+    return ucell
+  ucells = Parallel(n_jobs=n_jobs)(delayed(AUCell_calcUC_thread)(i) for i in range(len(celltype)))
+  ucells_col = [f"UCell_{ct}" for ct in celltype]
+  ucells_df = pd.DataFrame(ucells, index=ucells_col, columns=adata.obs_names).T
+  for ct in ucells_col:
+    adata.obs[ct] = ucells_df[ct]
+  
+  # Assign annotations by UCell
+  def UCAssign_Thread(i):
+    ct = celltype[i]
+    candidates = []
+    ucell = adata.obs[["leiden-1", f"UCell_{ct}"]].copy()
+    rank = ucell.groupby("leiden-1", observed=False).mean()
+    rank = rank.sort_values(by=f"UCell_{ct}", ascending=False)
+    rank = rank.reset_index()
+    assert len(rank) == len(adata.obs['leiden-1'].unique())
+
+    for i in range(len(rank)):
+      anno = rank.iloc[i,0]
+      sample1 = ucell.loc[ucell['leiden-1'] == anno, f"UCell_{ct}"]
+      sample2 = ucell.loc[ucell['leiden-1'] != anno, f"UCell_{ct}"]
+      u_stat,p_val = test_func(sample1, sample2)
+      if p_val < alpha:
+        candidates.append(anno)
+        ucell = ucell[ucell['leiden-1'] != anno]
+      else:
+        break
+    return candidates
+  can = Parallel(n_jobs=n_jobs)(delayed(UCAssign_Thread)(i) for i in range(len(celltype)))
+  annotation = dict(zip(celltype, can))
+  adata.uns['UCell_Assign'] = annotation
   return adata

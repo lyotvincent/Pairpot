@@ -40,8 +40,7 @@ const ToggleAccordion = ({ header, children }) => {
         }
       }
     }}>
-      <Collapse ghost items={items} expandIcon={<QuestionCircleOutlined
-        style={{ border: 'secondary', size: 'xxl' }} />} expandIconPosition='end' />
+      <Collapse ghost items={items} expandIconPosition='end' />
     </ConfigProvider>
   )
 }

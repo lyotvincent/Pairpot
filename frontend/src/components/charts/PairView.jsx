@@ -326,31 +326,62 @@ const PairView = ({ height, width, margin }) => {
   }
 
   const SpH5adLoader = (file) => {
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      let h5info = H5adLoader(file, event)
-      _setSpData(h5info.data)
-      setTitle(h5info.title)
-      setClusterOpsSp(h5info.clusters)
-      setEmbedOpsSp(h5info.embdOps)
-    }
-    reader.onloadend = () => {
-      toggleAnno('Upload')
-    }
-    reader.readAsArrayBuffer(file)
+    return  new Promise((resolve, reject)=>{
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        try{
+          let h5info = H5adLoader(file, event)
+          _setSpData(h5info.data)
+          setTitle(h5info.title)
+          setClusterOpsSp(h5info.clusters)
+          setEmbedOpsSp(h5info.embdOps)
+          return resolve({  
+            data: h5info.data, 
+            title: h5info.title,
+            clusters: h5info.clusters,  
+            embdOps: h5info.embdOps  
+          })
+        }  catch (error) {  
+          reject(error);  
+        } 
+      }
+      reader.onloadend = () => {
+        console.log("Load sp data finished.")
+      }
+      reader.onerror = (error) => {  
+        reject(error);  
+      };  
+      reader.readAsArrayBuffer(file)
+    })
   }
 
   const ScH5adLoader = (file) => {
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      let h5info = H5adLoader(file, event)
-      _setScData(h5info.data)
-      setClusterOpsSc(h5info.clusters)
-      setEmbedOpsSc(h5info.embdOps)
-    }
-    reader.onloadend = () => {
-    }
-    reader.readAsArrayBuffer(file)
+    return new Promise((resolve, reject)=>{
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        try{
+          let h5info = H5adLoader(file, event)
+          _setScData(h5info.data)
+          setClusterOpsSc(h5info.clusters)
+          setEmbedOpsSc(h5info.embdOps)
+          resolve({  
+            data: h5info.data,  
+            clusters: h5info.clusters,  
+            embdOps: h5info.embdOps  
+          }); 
+        } catch (error) {  
+          reject(error);  
+        } 
+      }
+      reader.onloadend = () => {
+        console.log("Load sc data finished.")
+      }
+      reader.onerror = (error) => {  
+        reject(error);  
+      };  
+      reader.readAsArrayBuffer(file)
+    })
+
   }
 
 
@@ -1120,32 +1151,32 @@ const PairView = ({ height, width, margin }) => {
     } else {
       // init the echart container
       var myChart = echarts.init(chartRef.current)
-      // get sc data
-      axios        
-      .get('http://localhost:5522/query/sc', {
-        responseType: 'blob',
-      })
-      .then((response) => {
-        let blob = response.data
-        const file = new File([blob], "sc1_sampled.h5ad")
-        ScH5adLoader(file)
-      })
-      .catch(error => {
-        console.error('Error fetching blob:', error);
-      })
-      // get sp data
-      axios
+
+      // get sc and sp data in async
+      Promise.all([
+        axios        
+        .get('http://localhost:5522/query/sc', {
+          responseType: 'blob',
+        }),
+        axios        
         .get('http://localhost:5522/query/sp', {
           responseType: 'blob',
+        }),
+      ]).then((response)=>{
+        let scblob = response[0].data
+        const scfile = new File([scblob], "sc1_sampled.h5ad")
+        let spblob = response[1].data
+        const spfile = new File([spblob], "sp1_meta.h5ad")
+        Promise.all([ScH5adLoader(scfile),
+          SpH5adLoader(spfile)]).then(()=>{
+            console.log("All data loaded.")
+            toggleAnno("Upload")
         })
-        .then((response) => {
-          let blob = response.data
-          const file = new File([blob], "sp1_meta.h5ad")
-          SpH5adLoader(file)
-        })
-        .catch(error => {
-          console.error('Error fetching blob:', error);
-        })
+      }).catch(error => {
+        console.error('Error fetching blob:', error);
+      })
+
+
       let _scaxis = setEmptyAxis(0)
       let _spaxis = setEmptyAxis(1)
       myChart.setOption({

@@ -46,6 +46,7 @@ def input_adata_10Xh5(sample):
     return adata
 
 def input_adata_h5ad(sample):
+#   print(sample)
   adata = sc.read_h5ad(sample)
   adata.obs_names_make_unique()
   adata.var_names_make_unique()
@@ -128,7 +129,13 @@ def clu(adata, key_added="leiden-1", n_neighbors=50, n_pcs=30, rep='X_pca_harmon
     return adata
 
 
-def rank(adata, organs, method="AUCell", top=0.05, alpha=10e-40):
+def rank(adata, organs, 
+         method="AUCell", 
+         top=0.05, 
+         alpha=10e-40, 
+         n_jobs=16,
+         test_func=mannwhitneyu,
+         ):
   # 对每个细胞的基因表达进行排序并且提取前5%
   adata = AUCell_buildRankings(adata, top=top)
 
@@ -137,7 +144,7 @@ def rank(adata, organs, method="AUCell", top=0.05, alpha=10e-40):
   celltype.sort()
 
   # UCell_Assign
-  adata = AUCell_UCAssign(adata, db=panglaoDB, celltype=celltype, alpha=alpha)
+  adata = AUCell_UCAssign(adata, db=panglaoDB, celltype=celltype, alpha=alpha, n_jobs=n_jobs, test_func=test_func)
   return adata
 
 def anno(adata:ad.AnnData, annoDict:dict):
