@@ -67,7 +67,7 @@ const PairView = ({ height, width, margin }) => {
   const [isInit, setInit] = useState(false) // whether echart object is inited
   const chartRef = useRef(null) // current DOM container
   const [_scdata, _setScData] = useState(
-    require('../../assets/data/CID4971-umap-sc.json')
+    {}
   )
   const [_spdata, _setSpData] = useState(
     {}
@@ -340,6 +340,20 @@ const PairView = ({ height, width, margin }) => {
     reader.readAsArrayBuffer(file)
   }
 
+  const ScH5adLoader = (file) => {
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      let h5info = H5adLoader(file, event)
+      _setScData(h5info.data)
+      setClusterOpsSc(h5info.clusters)
+      setEmbedOpsSc(h5info.embdOps)
+    }
+    reader.onloadend = () => {
+    }
+    reader.readAsArrayBuffer(file)
+  }
+
+
   const setDataset = (source, dims, annoName, annotations, fromIndex = 0) => {
     let _datasets = []
     _datasets.push({
@@ -401,11 +415,12 @@ const PairView = ({ height, width, margin }) => {
       let _series = seriesArray
       if (commandRef.current === 'Upload') {
         let _scdims = [...Object.keys(_scdata[0]), 'id']
-        let _scsource = _scdata.map((item, id) => {
+        let _scsource = _scdata.map((item, id) => {  // 2d array
           return [...Object.entries(item).map(([_, value]) => value), id]
         })
+
         let _spdims = [...Object.keys(_spdata[0]), 'id']
-        let _spsource = _spdata.map((item, id) => {
+        let _spsource = _spdata.map((item, id) => {  // 2d array
           return [...Object.entries(item).map(([_, value]) => value), id]
         })
         symbolSizeRef.current = _scsource.length > 5000 ? 2 : 4
@@ -420,7 +435,7 @@ const PairView = ({ height, width, margin }) => {
         }
         setClusterCurSc({ value: 0, label: scdefaultAnno, attr: 'categories' })
         prevCluster.current = { value: 0, label: scdefaultAnno, attr: 'categories' }
-        setClusterOpsSc([{ value: 0, label: scdefaultAnno, attr: 'categories' }, { value: 1, label: 'umap_0', attr: 'numeric' }])
+        //setClusterOpsSc([{ value: 0, label: scdefaultAnno, attr: 'categories' }, { value: 1, label: 'umap_0', attr: 'numeric' }])
         let _scannotations = setItemGroup(_scsource, _scdims.indexOf(scdefaultAnno), 'categories', true)
         setAnnoCurSc(_scannotations)
 
@@ -437,9 +452,8 @@ const PairView = ({ height, width, margin }) => {
         stAnnoLength.current = _spannotations.length
 
         // set sc embeddings
-        let _scaxis = setAxis(_scsource, _scdims, 'umap_0', 'umap_1', 0)
-        setEmbedCurSc('umap')
-        setEmbedOpsSc([{ value: 0, label: 'umap' }])
+        let _scaxis = setAxis(_scsource, _scdims, 'X_umap_0', 'X_umap_1', 0)
+        setEmbedCurSc('X_umap')
 
         // set sp embeddings
         let _spaxis = setAxis(_spsource, _spdims, 'array_row', 'array_col', 1)
@@ -464,9 +478,8 @@ const PairView = ({ height, width, margin }) => {
             yAxisIndex: 0,
             name: anno,
             encode: {
-              x: 'umap_0',
-              y: 'umap_1',
-              tooltip: [0, 1, 2, 3],
+              x: 'X_umap_0',
+              y: 'X_umap_1',
               itemName: anno,
             },
             emphasis: {
@@ -500,7 +513,6 @@ const PairView = ({ height, width, margin }) => {
           })
         }
         snumRef.current = _snum
-
         // set visualMap
         myChart.setOption({
           color: vega_20,
@@ -918,6 +930,80 @@ const PairView = ({ height, width, margin }) => {
         setBrushModeState('Select')
         brushMode.current = 'Select'
       }
+      if (commandRef.current === 'Deconv') {
+        let starttime = Date.now()
+        axios
+        .post('http://localhost:5522/deconv', {
+          data: {
+            scname: `resources/sc1_sampled.h5ad`,
+            spname: `resources/sp1_meta.h5ad`,
+            anno: brushRef.current,
+            starttime: starttime,
+          },
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }).then((response) => {
+          if (response.data.success) {
+            let endtime = response.data.endtime
+            let props = response.data.props
+            console.log(props)
+            let option = myChart.getOption()
+            // set sp source
+            let _sclen = annoCurSc.length + 1
+            if (annoCurSc.length === 0) {
+              _sclen = _sclen + 1
+            }
+            let _dataset = option.dataset
+            let _spsource = _dataset[_sclen].source
+            let _spdims = _dataset[_sclen].dimensions
+            if(_spdims[_spdims.length - 1] === "Customed Cell Props") { // if exists Cell props
+              _spsource = _spsource.map((item, id) => {  // 2d array
+                item[item.length - 1] = props[id]
+                return item
+              })
+              let _clusterOpsSp = clusterOpsSp
+              _clusterOpsSp[clusterOpsSp.length-1] = {value:clusterOpsSp.length-1, label:"Customed Cell Props", attr:'values'}
+              setClusterOpsSp(_clusterOpsSp)
+              setClusterCurSp({value:clusterOpsSp.length-1, label:"Customed Cell Props", attr:'values'})
+            } else {
+              _spdims = [..._spdims, "Customed Cell Props"]
+              _spsource = _spsource.map((item, id) => {  // 2d array
+                return [...item, props[id]]
+              })
+              setClusterOpsSp([...clusterOpsSp, {value:clusterOpsSp.length, label:"Customed Cell Props", attr:'values'}])
+              setClusterCurSp({value:clusterOpsSp.length, label:"Customed Cell Props", attr:'values'})
+            }
+
+            // set Options
+            _dataset[_sclen] = { 
+              dimensions: _spdims,
+              source: _spsource,
+            }
+            myChart.setOption({
+              dataset: _dataset,
+            })
+            api.success({
+              message: `Annotation Refined in ${(endtime - starttime) / 1000}s`,
+              description: response.data.message,
+              placement: 'topRight',
+            })
+            toggleAnno("spConfigs")
+          } else {
+            let endtime = response.data.endtime
+            api.warning({
+              message: `Annotation does not Refined in ${(endtime - starttime) / 1000}s`,
+              description: response.data.message,
+              placement: 'topRight',
+            })
+          }
+        }).catch((error) => {
+          api.error({
+            message: `Annotation failed for ${error}`,
+            placement: 'topRight',
+          })
+        })
+      }
       if (commandRef.current === 'Rename') {
         seriesRef.current.name = inputValue
         let prevName = nameRef.current
@@ -1034,8 +1120,22 @@ const PairView = ({ height, width, margin }) => {
     } else {
       // init the echart container
       var myChart = echarts.init(chartRef.current)
+      // get sc data
+      axios        
+      .get('http://localhost:5522/query/sc', {
+        responseType: 'blob',
+      })
+      .then((response) => {
+        let blob = response.data
+        const file = new File([blob], "sc1_sampled.h5ad")
+        ScH5adLoader(file)
+      })
+      .catch(error => {
+        console.error('Error fetching blob:', error);
+      })
+      // get sp data
       axios
-        .get('http://localhost:5522/query', {
+        .get('http://localhost:5522/query/sp', {
           responseType: 'blob',
         })
         .then((response) => {
@@ -1136,22 +1236,6 @@ const PairView = ({ height, width, margin }) => {
   const toggleAnno = (command) => {
     commandRef.current = command
     setAction(action + 1)
-  }
-
-  const ScH5adLoader = (file) => {
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      let h5info = H5adLoader(file, event)
-      _setScData(h5info.data)
-      setTitle(h5info.title)
-      setClusterOpsSc(h5info.clusters)
-      setEmbedOpsSc(h5info.embdOps)
-    }
-    reader.onloadend = () => {
-      toggleAnno('Upload')
-      setUploading(false)
-    }
-    reader.readAsArrayBuffer(file)
   }
 
   const JsonLoader = (file) => {
@@ -1594,7 +1678,7 @@ const PairView = ({ height, width, margin }) => {
               <Popconfirm
                 title={`Are you sure about \'${nameRef.current}\'?`}
                 okText="Yes"
-                onConfirm={() => toggleAnno('Confirm')}
+                onConfirm={() => toggleAnno('Deconv')}
                 cancelText="No">
                 <Button
                   block

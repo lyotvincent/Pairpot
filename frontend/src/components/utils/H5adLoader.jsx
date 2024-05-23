@@ -86,6 +86,9 @@ const H5adLoader = (file, event) => {
       if (obsm === 'X_pca') {
         _loadDims = 2
       }
+      if (obsm === 'X_pca_harmony') {
+        _loadDims = 2
+      }
       if (obsm === 'AUCell_rankings') {
         _loadDims = 2
       }

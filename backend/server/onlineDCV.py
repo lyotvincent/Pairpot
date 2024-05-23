@@ -9,7 +9,9 @@ adata_sp = sc.read_h5ad("sp1-deconv.h5ad")
 ucells = [s for s in adata_sc.obs.columns if s.startswith('UCell_')]
 ucells.append('annotation')
 df_sc = adata_sc.obs[ucells]
-A = df_sc.groupby(by='annotation').mean().T
+g = df_sc.groupby(by='annotation')
+anno = g.groups.keys()
+A = g.mean().T
 
 # generate b
 df_sp = adata_sp.obs[[s for s in adata_sc.obs.columns if s.startswith('UCell_')]]

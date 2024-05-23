@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, send_file
 import sqlite3
 import time
 from server.refine import *
+from server.deconvolution import *
 app = Flask(__name__)
 app.debug = True
 
@@ -109,11 +110,32 @@ def refine():
     else:
         response = jsonify({"refined": refined,
                             'success': True,
-                            'message': "Refined by {} successfully.".format(Refiners[refinerID]),
+                            'message': f"Refined by {Refiners[refinerID]} successfully.",
                             "endtime": int(time.time()*1000),
                             })
     return response
 
+@app.route('/deconv', methods=['POST'])
+def deconv():
+    data = request.get_json()['data']
+    print(data)
+    selected = data['anno']
+    scfile = data['scname']
+    spfile = data['spname']
+    try:
+        prop = NNLSDeconvolution(selected, scfile, spfile)
+        response = jsonify({"props": prop,
+                            'success': True,
+                            'message': "Refined by NNLSDeconvolution successfully.",
+                            "endtime": int(time.time()*1000),
+                            })
+    except Exception as e:
+        response = jsonify({
+                    'success': False,
+                    'message': f"Refined by NNLSDeconvolution Failed.{e}",
+                    "endtime": int(time.time()*1000),
+                    })
+    return response
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -182,6 +204,14 @@ def submit():
 @app.route('/query', methods=['GET'])
 def query():
     return send_file('./resources/sp1_meta.h5ad')
+
+@app.route('/query/sp', methods=['GET'])
+def query_sp():
+    return send_file('./resources/sp1_meta.h5ad')
+
+@app.route('/query/sc', methods=['GET'])
+def query_sc():
+    return send_file('./resources/sc1_sampled.h5ad')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5522)
