@@ -3,7 +3,6 @@ import './App.scss'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Nav from './components/Nav'
 import Router from './components/Router'
-import Footer from './components/Footer'
 import {
   BrowserRouter,
   RouterProvider,
@@ -14,7 +13,7 @@ import {
 import { ConfigProvider, theme } from 'antd'
 
 
-function App() {
+function App () {
   return (
     <ConfigProvider theme={{
       cssVar: true,
@@ -27,14 +26,14 @@ function App() {
         colorTextLabel: '#121212',
         colorBgBase: '#fff',
         colorBgElevated: '#f8fff3',
-        fontSize:16,
+        fontSize: 16,
         // 派生变量，影响范围小
       },
-      components:{
-        Menu:{
-          colorBgContainer:'#f8fff3',
+      components: {
+        Menu: {
+          colorBgContainer: '#f8fff3',
         },
-        Layout:{
+        Layout: {
           siderBg: '#f8fff3',
           triggerBg: '#4ab322',
           headerBg: '#006600',
@@ -45,7 +44,6 @@ function App() {
         <BrowserRouter>
           <Nav />
           <Router />
-          <Footer />
         </BrowserRouter>
       </div>
     </ConfigProvider>

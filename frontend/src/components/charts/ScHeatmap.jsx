@@ -100,7 +100,7 @@ const ScHeatmap = ({ title, height, width, margin }) => {
       yAxis: [
         {
           gridIndex: 0,
-          name: 'Top-5 Markers',
+          name: 'Top Markers',
           nameLocation: 'middle',
           nameGap: 70,
           nameRotate: 90,
@@ -144,7 +144,7 @@ const ScHeatmap = ({ title, height, width, margin }) => {
       xAxis: [
         {
           gridIndex: 0,
-          name: 'Cell-types',
+          name: 'Cell Types',
           nameLocation: 'middle',
           nameGap: 70,
           nameRotate: 0,
@@ -223,7 +223,6 @@ const ScHeatmap = ({ title, height, width, margin }) => {
           data: den_data,
           lineStyle: { color: '#fff', width: 2 },
           drawPoint: true,
-
           silent: false,
         },
       ],
@@ -282,7 +281,7 @@ const ScHeatmap = ({ title, height, width, margin }) => {
         },
       ],
     })
-  }, [ title])
+  }, [title])
 
   return (
     <div>

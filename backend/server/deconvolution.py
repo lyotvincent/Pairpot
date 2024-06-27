@@ -8,11 +8,12 @@ def NNLSDeconvolution(selected, scfile, spfile):
   adata_sc = sc.read_h5ad(scfile)
   adata_sp = sc.read_h5ad(spfile)
   adata_sc.obs['annotation'] = list(adata_sc.obs['annotation'])
-  adata_sc.obs['annotation'].iloc[selected]  = "Selected"
+  idx = adata_sc.obs.columns.get_loc('annotation')
+  adata_sc.obs.iloc[selected, idx]  = "Selected"
   # generate A
   ucells = [s for s in adata_sc.obs.columns if s.startswith('UCell_')]
-  ucells.append('annotation')
-  df_sc = adata_sc.obs[ucells]
+  df_sc = adata_sc.obs[ucells].astype("float")
+  df_sc['annotation'] = adata_sc.obs['annotation']
   g = df_sc.groupby(by='annotation')
   anno = list(g.groups.keys())
   A = g.mean().T

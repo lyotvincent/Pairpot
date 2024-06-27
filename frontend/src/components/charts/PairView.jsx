@@ -16,6 +16,8 @@ import { CanvasRenderer } from 'echarts/renderers'
 import axios from 'axios'
 import saveAs from 'file-saver'
 import H5adLoader from '../utils/H5adLoader'
+import Dataset from './Dataset'
+import Loading from './Loading'
 import {
   ConfigProvider,
   Button,
@@ -61,17 +63,14 @@ echarts.use([
 ])
 const { Dragger } = Upload
 const { useToken } = theme
+const { quitLoading, enterLoading } = Loading
 
-const PairView = ({ height, width, margin }) => {
+const PairView = ({ spfile, scfile, location, height, width, margin }) => {
   const [api, contextHolder] = notification.useNotification()
   const [isInit, setInit] = useState(false) // whether echart object is inited
   const chartRef = useRef(null) // current DOM container
-  const [_scdata, _setScData] = useState(
-    {}
-  )
-  const [_spdata, _setSpData] = useState(
-    {}
-  )
+  const [_scdata, _setScData] = useState({})
+  const [_spdata, _setSpData] = useState({})
   const [seriesArray, setSeriesArray] = useState([])
   const [nameArray, setNameArray] = useState([])
   const snumRef = useRef()
@@ -89,11 +88,10 @@ const PairView = ({ height, width, margin }) => {
   const [refineValue, setRefineValue] = useState([])
   const [refineOpen, setRefineOpen] = useState(false)
   const itemGroupRef = useRef([])
-  const [title, setTitle] = useState('CID4971-umap-sc')
+  const [title, setTitle] = useState('PairView Title')
   const FileLoaderRef = useRef('')
   const symbolSizeRef = useRef('')
-  const [loadings, setLoadings] = useState([])
-  const [Uploading, setUploading] = useState(false)
+  const [loadings, setLoadings] = useState([false, false])
   const brushMode = useRef('Select')
   const [brushModeState, setBrushModeState] = useState('Select')
 
@@ -111,13 +109,16 @@ const PairView = ({ height, width, margin }) => {
   const [embedOpsSc, setEmbedOpsSc] = useState({})
   const [annoCurSc, setAnnoCurSc] = useState([])
 
-  // Clusters and Embedings for ST
+  // Clusters, Batches and Embedings for ST
   const [clusterCurSp, setClusterCurSp] = useState({})
   const [embedCurSp, setEmbedCurSp] = useState('')
   const [clusterOpsSp, setClusterOpsSp] = useState({})
   const [embedOpsSp, setEmbedOpsSp] = useState({})
   const [annoCurSp, setAnnoCurSp] = useState([])
   const stAnnoLength = useRef(0)
+  const [batchName, setBatchName] = useState("batch")
+  const [batchCur, setBatchCur] = useState({})
+  const [batchOps, setBatchOps] = useState([])
 
   const [xInv, setxInv] = useState(false)
   const [yInv, setyInv] = useState(false)
@@ -307,7 +308,8 @@ const PairView = ({ height, width, margin }) => {
         id: gridIndex,
         gridIndex: gridIndex,
         name: yName,
-        nameLocation: yInv ? 'start' : 'end',
+        nameLocation: 'center',
+        nameGap: 30,
         nameTextStyle: {
           fontSize: 16,
         },
@@ -326,118 +328,66 @@ const PairView = ({ height, width, margin }) => {
   }
 
   const SpH5adLoader = (file) => {
-    return  new Promise((resolve, reject)=>{
+    return new Promise((resolve, reject) => {
       const reader = new FileReader()
       reader.onload = (event) => {
-        try{
-          let h5info = H5adLoader(file, event)
+        try {
+          let h5info = H5adLoader(file, event, ['meta'])
           _setSpData(h5info.data)
           setTitle(h5info.title)
+          if (h5info.clusters.map((item) => item.label).includes('batch'))
+            setBatchName('batch')
           setClusterOpsSp(h5info.clusters)
           setEmbedOpsSp(h5info.embdOps)
-          return resolve({  
-            data: h5info.data, 
+          return resolve({
+            data: h5info.data,
             title: h5info.title,
-            clusters: h5info.clusters,  
-            embdOps: h5info.embdOps  
+            clusters: h5info.clusters,
+            embdOps: h5info.embdOps
           })
-        }  catch (error) {  
-          reject(error);  
-        } 
+        } catch (error) {
+          reject(error)
+        }
       }
       reader.onloadend = () => {
         console.log("Load sp data finished.")
       }
-      reader.onerror = (error) => {  
-        reject(error);  
-      };  
+      reader.onerror = (error) => {
+        reject(error)
+      }
       reader.readAsArrayBuffer(file)
     })
   }
 
   const ScH5adLoader = (file) => {
-    return new Promise((resolve, reject)=>{
+    return new Promise((resolve, reject) => {
       const reader = new FileReader()
       reader.onload = (event) => {
-        try{
-          let h5info = H5adLoader(file, event)
+        try {
+          let h5info = H5adLoader(file, event, ['meta'])
           _setScData(h5info.data)
           setClusterOpsSc(h5info.clusters)
           setEmbedOpsSc(h5info.embdOps)
-          resolve({  
-            data: h5info.data,  
-            clusters: h5info.clusters,  
-            embdOps: h5info.embdOps  
-          }); 
-        } catch (error) {  
-          reject(error);  
-        } 
+          resolve({
+            data: h5info.data,
+            clusters: h5info.clusters,
+            embdOps: h5info.embdOps
+          })
+        } catch (error) {
+          reject(error)
+        }
       }
       reader.onloadend = () => {
         console.log("Load sc data finished.")
       }
-      reader.onerror = (error) => {  
-        reject(error);  
-      };  
+      reader.onerror = (error) => {
+        reject(error)
+      }
       reader.readAsArrayBuffer(file)
     })
 
   }
 
-
-  const setDataset = (source, dims, annoName, annotations, fromIndex = 0) => {
-    let _datasets = []
-    _datasets.push({
-      dimensions: dims,
-      source: source,
-    })
-    if (annotations.length === 0) {
-      // if no annotations, all the data are annotated by a label.
-      _datasets.push({
-        // 这个 dataset 的 index 是 `1`。
-        transform: {
-          type: 'sort',
-          config: { dimension: annoName, order: 'desc' },
-        },
-        fromDatasetIndex: fromIndex,
-      })
-    } else {
-      for (let anno of annotations) {
-        _datasets.push({
-          // 这个 dataset 的 index 是 `1`。
-          transform: {
-            type: 'filter',
-            config: { dimension: annoName, value: anno },
-          },
-          fromDatasetIndex: fromIndex,
-        })
-      }
-    }
-    return _datasets
-  }
-
-  const enterLoading = (index) => {
-    setLoadings((prevLoadings) => {
-      let newLoadings = [...prevLoadings]
-      newLoadings[index] = true
-      return newLoadings
-    })
-    setTimeout(() => {
-      setLoadings((prevLoadings) => {
-        let newLoadings = [...prevLoadings]
-        newLoadings[index] = false
-        return newLoadings
-      })
-    }, 60000)
-  }
-
-  const quitLoading = (index) => {
-    setLoadings((prevLoadings) => {
-      let newLoadings = [...prevLoadings]
-      newLoadings[index] = false
-      return newLoadings
-    })
-  }
 
   useEffect(() => {
     if (isInit) {
@@ -445,6 +395,7 @@ const PairView = ({ height, width, margin }) => {
       var myChart = echarts.getInstanceByDom(chartRef.current)
       let _series = seriesArray
       if (commandRef.current === 'Upload') {
+        enterLoading(1, setLoadings)
         let _scdims = [...Object.keys(_scdata[0]), 'id']
         let _scsource = _scdata.map((item, id) => {  // 2d array
           return [...Object.entries(item).map(([_, value]) => value), id]
@@ -482,6 +433,20 @@ const PairView = ({ height, width, margin }) => {
         setAnnoCurSp(_spannotations)
         stAnnoLength.current = _spannotations.length
 
+        // set sp batches
+        let batches = []
+        if (_spdims.includes(batchName)) {
+          batches = setItemGroup(_spsource, _spdims.indexOf(batchName), 'categories', false)
+          setBatchCur({ value: 0, label: batches[0], attr: 'categories' })
+          setBatchOps(batches.map((item, id) => ({ value: id, label: item, attr: 'categories' })))
+        }
+        else {
+          setBatchName(null)
+          batches = ['batch 1']
+          setBatchCur({ value: 0, label: batches[0], attr: 'categories' })
+          setBatchOps(batches.map((item, id) => ({ value: id, label: item, attr: 'categories' })))
+        }
+
         // set sc embeddings
         let _scaxis = setAxis(_scsource, _scdims, 'X_umap_0', 'X_umap_1', 0)
         setEmbedCurSc('X_umap')
@@ -492,8 +457,8 @@ const PairView = ({ height, width, margin }) => {
 
 
         // set datasets
-        let _scdatasets = setDataset(_scsource, _scdims, scdefaultAnno, _scannotations, 0)
-        let _spdatasets = setDataset(_spsource, _spdims, spdefaultAnno, _spannotations, _scdatasets.length)
+        let _scdatasets = Dataset.setDataset(_scsource, _scdims, scdefaultAnno, _scannotations, 0)
+        let _spdatasets = Dataset.setBatchDataset(_spsource, _spdims, spdefaultAnno, _spannotations, batches[0], batchName, _scdatasets.length, false)
         let _datasets = [..._scdatasets, ..._spdatasets]
         let _series = []
         let _snum = 0
@@ -549,6 +514,24 @@ const PairView = ({ height, width, margin }) => {
           color: vega_20,
           title: [
             {
+              text: "Single-cell Data",
+              left: '18%',
+              top: '8%',
+              textStyle: {
+                fontSize: 20,
+                fontWeight: 'normal',
+              },
+            },
+            {
+              text: "Spatial Omics Data",
+              right: '11%',
+              top: '8%',
+              textStyle: {
+                fontSize: 20,
+                fontWeight: 'normal',
+              },
+            },
+            {
               text: title,
               left: 'center',
               textStyle: {
@@ -556,20 +539,29 @@ const PairView = ({ height, width, margin }) => {
               },
             },
           ],
+          toolbox: {
+            feature: {
+              saveAsImage: {
+                show: true,
+                pixelRatio: 4,
+                name: `PairView_${title}`,
+              },
+            }
+          },
           xAxis: [_scaxis.xAxis, _spaxis.xAxis],
           yAxis: [_scaxis.yAxis, _spaxis.yAxis],
           grid: [
             {
-              top: '18%',
+              top: '15%',
               left: '5%',
-              width: '43%',
-              bottom: '18%',
+              width: '42%',
+              bottom: '15%',
             },
             {
-              top: '18%',
-              width: '43%',
+              top: '15%',
+              width: '42%',
               right: '1%',
-              bottom: '18%',
+              bottom: '15%',
             },
           ],
           dataset: _datasets,
@@ -577,7 +569,7 @@ const PairView = ({ height, width, margin }) => {
           legend: {
             type: 'scroll',
             animation: false,
-            pageIconColor: '#4096ff',
+            pageIconColor: token.colorPrimaryActive,
             orient: 'horizontal',
             bottom: '1%',
             padding: 0,
@@ -588,6 +580,7 @@ const PairView = ({ height, width, margin }) => {
         }, {
           replaceMerge: ['dataset', 'series', 'visualMap'],  // enable replaceMerge for datasets
         })
+        quitLoading(1, setLoadings)
       }
       if (commandRef.current === 'scConfigs') {
         let option = myChart.getOption()
@@ -618,7 +611,7 @@ const PairView = ({ height, width, margin }) => {
         let clu = clusterCurSc.label
         let annotations = setItemGroup(_scsource, scclusterIdx, clusterCurSc.attr, true)
         let prevAnnoLen = stAnnoLength.current + _sclen + 1
-        if(stAnnoLength.current === 0){
+        if (stAnnoLength.current === 0) {
           prevAnnoLen = prevAnnoLen + 1
         }
         let annoLenOffset = _sclen - 1 - annotations.length
@@ -626,7 +619,7 @@ const PairView = ({ height, width, margin }) => {
         if (annotations.length === 0) {
           annoLenOffset = annoLenOffset - 1
         }
-        let _scdatasets = setDataset(_scsource, _scdims, clu, annotations, 0)
+        let _scdatasets = Dataset.setDataset(_scsource, _scdims, clu, annotations, 0)
         let _spdatasets = option.dataset.slice(_sclen, prevAnnoLen)
         for (let i = 1; i < _spdatasets.length; i++) {
           _spdatasets[i].fromDatasetIndex = _scdatasets.length
@@ -773,7 +766,7 @@ const PairView = ({ height, width, margin }) => {
         // set sp Axis
         let xName = embedCurSp + '_0'
         let yName = embedCurSp + '_1'
-        if(embedCurSp === 'spatial' && _spdims.includes("array_row") && _spdims.includes("array_col")){
+        if (embedCurSp === 'spatial' && _spdims.includes("array_row") && _spdims.includes("array_col")) {
           xName = 'array_row'
           yName = 'array_col'
         }
@@ -790,19 +783,19 @@ const PairView = ({ height, width, margin }) => {
         let clu = clusterCurSp.label
         let cluIdx = _spdims.indexOf(clusterCurSp.label)
         let prevAnnoLen = stAnnoLength.current + _sclen + 1
-        if(stAnnoLength.current === 0){
+        if (stAnnoLength.current === 0) {
           prevAnnoLen = prevAnnoLen + 1
         }
         let annotations = setItemGroup(_spsource, cluIdx, clusterCurSp.attr, false)  // spconfig do not change the item group
         let annoLenOffset = stAnnoLength.current - annotations.length
-        if(stAnnoLength.current === 0){
+        if (stAnnoLength.current === 0) {
           annoLenOffset = annoLenOffset + 1
         }
         stAnnoLength.current = annotations.length
         setAnnoCurSp(annotations)
-        let _spdatasets = setDataset(_spsource, _spdims, clu, annotations, _sclen)
-        let _datasets = [...option.dataset.slice(0, _sclen), ..._spdatasets, ...option.dataset.slice(prevAnnoLen)]
-        console.log("dataset-prevAnnolen",option.dataset.slice(prevAnnoLen))
+        let _spdatasets = Dataset.setBatchDataset(_spsource, _spdims, clu, annotations, batchCur.label, batchName, _sclen, false)
+        let _datasets = [...option.dataset.slice(0, _sclen), ..._spdatasets, ...option.dataset.slice(prevAnnoLen, prevAnnoLen + 1)]
+        console.log(prevAnnoLen, _datasets)
         // set series and VisualMap
         let _spSeries = []
         let _snum = _sclen
@@ -846,7 +839,7 @@ const PairView = ({ height, width, margin }) => {
             itemStyle: {
               opacity: itemOpacitySp,
             },
-            datasetIndex: _snum,
+            datasetIndex: _snum + 1,
           })
 
           myVisualMap.push({
@@ -855,8 +848,8 @@ const PairView = ({ height, width, margin }) => {
             calculable: true,
             dimension: clu,
             seriesIndex: _sclen - 1,
-            right: '0%',
-            top: '5%',
+            right: '3%',
+            top: '0%',
             orient: 'horizontal',
             precision: 2,
             calculable: true,
@@ -886,7 +879,7 @@ const PairView = ({ height, width, margin }) => {
             manualSeries[i].datasetIndex - annoLenOffset
         }
         console.log(manualSeries)
-        let _series = [...option.series.slice(0, _sclen-1), ..._spSeries, ...manualSeries]
+        let _series = [...option.series.slice(0, _sclen - 1), ..._spSeries, ...manualSeries]
 
         // set VisualMap
         let preVisualMap = option.visualMap
@@ -904,19 +897,9 @@ const PairView = ({ height, width, margin }) => {
             _visualMap = myVisualMap
           }
         }
-        console.log("sp", _visualMap)
+        //console.log("sp", _visualMap)
 
         myChart.setOption({
-          title: [
-            {
-              text: title,
-              top: '0%',
-              left: 'center',
-              textStyle: {
-                fontSize: token.fontSizeHeading4,
-              },
-            },
-          ],
           xAxis: [option.xAxis[0], spaxis.xAxis],
           yAxis: [option.yAxis[0], spaxis.yAxis],
           series: _series,
@@ -964,76 +947,75 @@ const PairView = ({ height, width, margin }) => {
       if (commandRef.current === 'Deconv') {
         let starttime = Date.now()
         axios
-        .post('http://localhost:5522/deconv', {
-          data: {
-            scname: `resources/sc1_sampled.h5ad`,
-            spname: `resources/sp1_meta.h5ad`,
-            anno: brushRef.current,
-            starttime: starttime,
-          },
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }).then((response) => {
-          if (response.data.success) {
-            let endtime = response.data.endtime
-            let props = response.data.props
-            console.log(props)
-            let option = myChart.getOption()
-            // set sp source
-            let _sclen = annoCurSc.length + 1
-            if (annoCurSc.length === 0) {
-              _sclen = _sclen + 1
-            }
-            let _dataset = option.dataset
-            let _spsource = _dataset[_sclen].source
-            let _spdims = _dataset[_sclen].dimensions
-            if(_spdims[_spdims.length - 1] === "Customed Cell Props") { // if exists Cell props
-              _spsource = _spsource.map((item, id) => {  // 2d array
-                item[item.length - 1] = props[id]
-                return item
-              })
-              let _clusterOpsSp = clusterOpsSp
-              _clusterOpsSp[clusterOpsSp.length-1] = {value:clusterOpsSp.length-1, label:"Customed Cell Props", attr:'values'}
-              setClusterOpsSp(_clusterOpsSp)
-              setClusterCurSp({value:clusterOpsSp.length-1, label:"Customed Cell Props", attr:'values'})
-            } else {
-              _spdims = [..._spdims, "Customed Cell Props"]
-              _spsource = _spsource.map((item, id) => {  // 2d array
-                return [...item, props[id]]
-              })
-              setClusterOpsSp([...clusterOpsSp, {value:clusterOpsSp.length, label:"Customed Cell Props", attr:'values'}])
-              setClusterCurSp({value:clusterOpsSp.length, label:"Customed Cell Props", attr:'values'})
-            }
+          .post('http://localhost:5522/deconv', {
+            data: {
+              id: location.state?.st?.dataset_id,
+              anno: brushRef.current,
+              starttime: starttime,
+            },
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }).then((response) => {
+            if (response.data.success) {
+              let endtime = response.data.endtime
+              let props = response.data.props
+              console.log(props)
+              let option = myChart.getOption()
+              // set sp source
+              let _sclen = annoCurSc.length + 1
+              if (annoCurSc.length === 0) {
+                _sclen = _sclen + 1
+              }
+              let _dataset = option.dataset
+              let _spsource = _dataset[_sclen].source
+              let _spdims = _dataset[_sclen].dimensions
+              if (_spdims[_spdims.length - 1] === "Customed Cell Props") { // if exists Cell props
+                _spsource = _spsource.map((item, id) => {  // 2d array
+                  item[item.length - 1] = props[id]
+                  return item
+                })
+                let _clusterOpsSp = clusterOpsSp
+                _clusterOpsSp[clusterOpsSp.length - 1] = { value: clusterOpsSp.length - 1, label: "Customed Cell Props", attr: 'values' }
+                setClusterOpsSp(_clusterOpsSp)
+                setClusterCurSp({ value: clusterOpsSp.length - 1, label: "Customed Cell Props", attr: 'values' })
+              } else {
+                _spdims = [..._spdims, "Customed Cell Props"]
+                _spsource = _spsource.map((item, id) => {  // 2d array
+                  return [...item, props[id]]
+                })
+                setClusterOpsSp([...clusterOpsSp, { value: clusterOpsSp.length, label: "Customed Cell Props", attr: 'values' }])
+                setClusterCurSp({ value: clusterOpsSp.length, label: "Customed Cell Props", attr: 'values' })
+              }
 
-            // set Options
-            _dataset[_sclen] = { 
-              dimensions: _spdims,
-              source: _spsource,
+              // set Options
+              _dataset[_sclen] = {
+                dimensions: _spdims,
+                source: _spsource,
+              }
+              myChart.setOption({
+                dataset: _dataset,
+              })
+              api.success({
+                message: `Annotation Refined in ${(endtime - starttime) / 1000}s`,
+                description: response.data.message,
+                placement: 'topRight',
+              })
+              toggleAnno("spConfigs")
+            } else {
+              let endtime = response.data.endtime
+              api.warning({
+                message: `Annotation does not Refined in ${(endtime - starttime) / 1000}s`,
+                description: response.data.message,
+                placement: 'topRight',
+              })
             }
-            myChart.setOption({
-              dataset: _dataset,
-            })
-            api.success({
-              message: `Annotation Refined in ${(endtime - starttime) / 1000}s`,
-              description: response.data.message,
+          }).catch((error) => {
+            api.error({
+              message: `Annotation failed for ${error}`,
               placement: 'topRight',
             })
-            toggleAnno("spConfigs")
-          } else {
-            let endtime = response.data.endtime
-            api.warning({
-              message: `Annotation does not Refined in ${(endtime - starttime) / 1000}s`,
-              description: response.data.message,
-              placement: 'topRight',
-            })
-          }
-        }).catch((error) => {
-          api.error({
-            message: `Annotation failed for ${error}`,
-            placement: 'topRight',
           })
-        })
       }
       if (commandRef.current === 'Rename') {
         seriesRef.current.name = inputValue
@@ -1056,7 +1038,7 @@ const PairView = ({ height, width, margin }) => {
         axios
           .post('http://localhost:5522/refine', {
             data: {
-              name: `resources/${title}.h5ad`,
+              name: `resources/235/${title}.h5ad`,
               anno: brushRef.current,
               refiner: refineValue.value,
               starttime: starttime,
@@ -1096,7 +1078,7 @@ const PairView = ({ height, width, margin }) => {
               placement: 'topRight',
             })
           })
-        quitLoading(0)
+        quitLoading(0, setLoadings)
       }
       if (commandRef.current === 'Delete') {
         let option = myChart.getOption()
@@ -1151,35 +1133,22 @@ const PairView = ({ height, width, margin }) => {
     } else {
       // init the echart container
       var myChart = echarts.init(chartRef.current)
-
       // get sc and sp data in async
-      Promise.all([
-        axios        
-        .get('http://localhost:5522/query/sc', {
-          responseType: 'blob',
-        }),
-        axios        
-        .get('http://localhost:5522/query/sp', {
-          responseType: 'blob',
-        }),
-      ]).then((response)=>{
-        let scblob = response[0].data
-        const scfile = new File([scblob], "sc1_sampled.h5ad")
-        let spblob = response[1].data
-        const spfile = new File([spblob], "sp1_meta.h5ad")
-        Promise.all([ScH5adLoader(scfile),
-          SpH5adLoader(spfile)]).then(()=>{
-            console.log("All data loaded.")
-            toggleAnno("Upload")
-        })
+      enterLoading(1, setLoadings)
+      Promise.all([spfile.then((file) => SpH5adLoader(file)),
+      scfile.then((file) => ScH5adLoader(file))]).then(() => {
+        console.log("All data loaded.")
+        toggleAnno("Upload")
       }).catch(error => {
-        console.error('Error fetching blob:', error);
+        console.error('Error fetching blob in PairView:', error)
       })
-
 
       let _scaxis = setEmptyAxis(0)
       let _spaxis = setEmptyAxis(1)
       myChart.setOption({
+        textStyle: {
+          fontFamily: 'Arial',
+        },
         tooltip: {},
         brush: {
           toolbox: ['rect', 'polygon', 'clear'],
@@ -1201,7 +1170,12 @@ const PairView = ({ height, width, margin }) => {
             mark: { show: true },
             dataView: { show: true, readOnly: true },
             restore: { show: true },
-            saveAsImage: { show: true },
+            saveAsImage: {
+              show: true,
+              pixelRatio: 3,
+              name: `PairView_${title}`,
+
+            },
             dataZoom: {},
           },
           iconStyle: {
@@ -1214,16 +1188,16 @@ const PairView = ({ height, width, margin }) => {
         yAxis: [_scaxis.yAxis, _spaxis.yAxis],
         grid: [
           {
-            top: '18%',
+            top: '15%',
             left: '5%',
             width: '43%',
-            bottom: '18%',
+            bottom: '15%',
           },
           {
-            top: '18%',
+            top: '15%',
             width: '43%',
             right: '1%',
-            bottom: '18%',
+            bottom: '15%',
           },
         ],
       })
@@ -1298,7 +1272,7 @@ const PairView = ({ height, width, margin }) => {
       {contextHolder}
 
       <Flex justify="center" gap='middle'>
-        <Spin spinning={Uploading} size="large">
+        <Spin spinning={loadings[1]} size="large" tip="Loading">
           <div
             ref={chartRef}
             className="chart"
@@ -1599,6 +1573,28 @@ const PairView = ({ height, width, margin }) => {
                           }}
                         />
                       </Form.Item>
+                      <Form.Item
+                        label="Batch"
+                        labelCol={{
+                          span: 6,
+                        }}>
+                        {' '}
+                        <Select
+                          labelInValue
+                          placeholder="Batch"
+                          placement="topLeft"
+                          options={batchOps}
+                          value={batchCur}
+                          onChange={(target) => {
+                            setBatchCur({
+                              value: target.value,
+                              label: target.label,
+                              attr: batchOps[target.value].attr,
+                            })
+                            toggleAnno("spConfigs")
+                          }}
+                        />
+                      </Form.Item>
                     </Form>
                     <Space size="small">
                       <Button icon={<ReloadOutlined />}>Reset</Button>
@@ -1689,7 +1685,7 @@ const PairView = ({ height, width, margin }) => {
                         disabled={!allowConfirm}
                         loading={loadings[0]}
                         onClick={() => {
-                          enterLoading(0)
+                          enterLoading(0, setLoadings)
                           toggleAnno('Refine')
                         }}>
                         {loadings[0] ? "Refining" : "Refine"}
@@ -1803,12 +1799,15 @@ const PairView = ({ height, width, margin }) => {
 }
 
 PairView.defaultProps = {
-  height: '35rem',
+  height: '30rem',
   width: '55rem',
   margin: '1rem',
 }
 
 PairView.propTypes = {
+  spfile: PropTypes.object,
+  scfile: PropTypes.object,
+  location: PropTypes.object,
   height: PropTypes.string,
   width: PropTypes.string,
   margin: PropTypes.string,

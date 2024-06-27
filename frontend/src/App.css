@@ -36,7 +36,9 @@ body {
   font-family: 'Centra', sans-serif !important;
 }
 
-h1,
+h1 {
+  font-size: 24;
+}
 h2,
 h3,
 h4,
@@ -214,43 +216,139 @@ nav.navbar .navbar-toggler[aria-expanded='true'] .navbar-toggler-icon {
 /************ Banner Css ************/
 .banner {
   margin-top: 0;
-  padding: 260px 0 100px 0;
-  background-image: url('./assets/img/banner-bg.png');
+  padding: 30px;
   background-position: top center;
   background-size: cover;
+  background-color: #f2f7efff;
   background-repeat: no-repeat;
 }
+.banner .headline {
+  margin-top: -5%;
+  margin-left: -5%;
+  width: 2000px;
+  height: 280px;
+  /* background-color: seagreen; */
+  /* background-image: url('assets/img/color-green.png'); */
+  /* background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), 
+  url('assets/img/color-green.png'); */
+}
 .banner .tagline {
+  /* width: 50%; */
   font-weight: 700;
   letter-spacing: 0.8px;
   padding: 8px 10px;
-  background: linear-gradient(
+  /* background: linear-gradient(
     90.21deg,
     rgba(170, 54, 124, 0.5) -5.91%,
     rgba(74, 47, 189, 0.5) 111.58%
-  );
+  ); */
+  /* border: 1px solid rgba(255, 255, 255, 0.5); */
+  font-size: 20px;
+  margin-bottom: 16px;
+  display: inline-block;
+}
+.banner .section-title {
+  /* width: 50%; */
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  padding: 8px 10px;
+  background-image: url('assets/img/color-green.png');;
   border: 1px solid rgba(255, 255, 255, 0.5);
   font-size: 20px;
   margin-bottom: 16px;
   display: inline-block;
 }
+
+.banner .datashow{
+  /* width: fit-content; */
+  height: 800px;
+  box-sizing: border-box;
+}
+.banner .datalist{
+  background-color: #f3f5f4;
+
+  width: 1000px;
+  height: 600px;
+  display: flex;
+  flex-wrap: nowrap; 
+  border: 2px solid #000;
+  margin-right: 50px;
+}
+.banner .dataprop{
+  width: 200px;
+  height: 600px;
+  display: flex;
+  flex-wrap: nowrap; 
+  border: 2px solid #000;
+}
+
+.banner .fig-display{
+  width: fit-content;
+  height: 900px;
+  /* background-color: aquamarine; */
+  /* background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), 
+  url('assets/img/color-green1.png'); */
+  background: url('assets/img/color-green1.png');
+  box-sizing: border-box;
+
+}
+
+.banner .fig-display .fig-block{
+  display: flex;
+  flex-direction: column; /* 图和文字垂直排列 */
+  /* align-items: center; */
+  /* border: 2px solid #000;  */
+  /* padding: 10px; */
+  flex-wrap: nowrap; /* 确保模块在同一行内不换行 */
+  gap: 20px; /* 模块之间的间距 */
+}
+.fig-block img {
+  /* align-items: center; */
+  width: '60%';
+  height: auto;
+  margin-bottom: 0px; /* 图片和文字之间的间距 */
+  border: 1px solid #08903c; 
+}
+.fig-block .content {
+  margin: 0;
+  text-align: center; /* 文字居中 */
+  width: 100%;
+  background: linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), 
+  url('assets/img/color-green.png');
+
+}
+/* .banner .fig-display .Row{
+
+} */
+
 .banner h1 {
-  font-size: 65px;
+  margin-left: 2%;
+  font-size: 42px;
   font-weight: 700;
   letter-spacing: 0.8px;
   line-height: 1;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   display: block;
 }
-.banner p {
-  color: #b8b8b8;
-  font-size: 18px;
+.banner h3{
+  text-align: left; /* 文字居中 */
+  margin-left: 2%;
   letter-spacing: 0.8px;
   line-height: 1.5em;
-  width: 96%;
+  margin-bottom: 10px;
+  width: 39%;
+  /* font-family:Georgia, 'Times New Roman', Times, serif; */
+  /* color: #09662c; */
+}
+.banner p {
+  font-size: 18px;
+  letter-spacing: 0.6px;
+  line-height: 1.5em;
+  /* width: 96%; */
+  width: 38%;
+  margin-left: 2%;
 }
 .banner button {
-  color: #fff;
   font-weight: 700;
   font-size: 20px;
   margin-top: 60px;
@@ -268,8 +366,18 @@ nav.navbar .navbar-toggler[aria-expanded='true'] .navbar-toggler-icon {
   margin-left: 25px;
 }
 .banner img {
-  animation: updown 3s linear infinite;
+  /*animation: updown 3s linear infinite;*/
 }
+
+.banner table{
+  line-height: 40px;
+}
+
+.banner tr{
+}
+
+
+
 @keyframes updown {
   0% {
     transform: translateY(-20px);
@@ -536,8 +644,8 @@ nav.navbar .navbar-toggler[aria-expanded='true'] .navbar-toggler-icon {
 
 /************ Footer Css ************/
 .footer {
-  padding: 0 0 50px 0;
-  background-image: url('./assets/img/footer-bg.png');
+  padding: 0 0 20px 0;
+  background-color: #e6eee0;
   background-position: center center;
   background-size: cover;
   background-repeat: no-repeat;

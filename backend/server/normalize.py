@@ -53,13 +53,13 @@ def input_adata_h5ad(sample):
   return adata
 
 def input_adata_txt(sample):
-    adata = sc.read_text(sample, sep='\t')
+    adata = sc.read_text(sample)
     adata.obs_names_make_unique()
     adata.var_names_make_unique()
     return adata
 
 def input_adata_csv(sample):
-    adata = sc.read_text(sample, sep=',')
+    adata = sc.read_text(sample, delimiter=',')
     adata.obs_names_make_unique()
     adata.var_names_make_unique()
     return adata
@@ -88,7 +88,7 @@ def pp(adata:ad.AnnData):
     mito_genes = adata.var_names.str.startswith('MT-')
     # the `.A1` is only necessary as X is sparse (to transform to a dense array after summing)
     adata.obs['mt_frac'] = np.sum(
-        adata[:, mito_genes].X, axis=1).A1 / np.sum(adata.X, axis=1).A1
+        adata[:, mito_genes].X, axis=1) / np.sum(adata.X, axis=1)
     
     # 过滤低表达的基因
     sc.pp.filter_cells(adata, min_genes=5)  # 过滤一个细胞中表达少于五个基因的细胞样本 
@@ -118,9 +118,11 @@ def clu(adata, key_added="leiden-1", n_neighbors=50, n_pcs=30, rep='X_pca_harmon
     else:
         print("Ignoring processing doublet cells...")
     sc.pp.pca(adata, svd_solver='arpack', use_highly_variable=True)
-    if do_har:
+    if do_har and len(adata.obs[har_key].cat.categories) > 1:
         sc.external.pp.harmony_integrate(adata, key=har_key,max_iter_harmony=max_iter)
-    sc.pp.neighbors(adata, n_neighbors=n_neighbors, n_pcs=n_pcs, use_rep=rep)
+        sc.pp.neighbors(adata, n_neighbors=n_neighbors, n_pcs=n_pcs, use_rep=rep)
+    else:
+        sc.pp.neighbors(adata, n_neighbors=n_neighbors, n_pcs=n_pcs)
     # Run UMAP
     sc.tl.umap(adata)
     sc.tl.tsne(adata)
@@ -155,7 +157,7 @@ def anno(adata:ad.AnnData, annoDict:dict):
 
 def marker(adata, groupby="annotation", method='wilcoxon'):
     sc.tl.rank_genes_groups(adata, groupby = groupby, method = method)
-    sc.tl.dendrogram(adata, groupby=groupby, use_rep='X_pca_harmony')
+    sc.tl.dendrogram(adata, groupby=groupby)
     sc.pl.rank_genes_groups_dotplot(adata, groupby = groupby)
     return adata
 
@@ -195,7 +197,7 @@ def Cell2Location_rg_sc(adata_sc, max_epoches=250, batch_size=2500, train_size=1
 
 
 def Cell2Location_rg_sp(adata_sp, inf_aver, N_cells_per_location=30, detection_alpha=20,
-                        max_epoches=10000, batch_size=None, train_size=1, lr=0.002,
+                        max_epoches=5000, batch_size=None, train_size=1, lr=0.002,
                         num_samples=1000, use_gpu=True):
     # do spatial mapping
     # find shared genes and subset both anndata and reference signatures
@@ -249,8 +251,8 @@ def Cell2Location_run(adata_sc, adata_sp, sc_max_epoches=250, sc_batch_size=2500
     nonz_mean_cutoff=1.12
     adata_sc = adata_sc.copy()
     adata_sp = adata_sp.copy()
-    adata_sc.X = adata_sc.layers['Raw']
-    adata_sp.X = adata_sp.layers['Raw']
+    adata_sc.X = adata_sc.layers['Raw'].astype('int')
+    adata_sp.X = adata_sp.layers['Raw'].astype('int')
     selected = cell2location.utils.filtering.filter_genes(adata_sc,
                         cell_count_cutoff=cell_count_cutoff,
                         cell_percentage_cutoff2=cell_percentage_cutoff2,

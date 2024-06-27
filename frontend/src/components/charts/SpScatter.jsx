@@ -3,8 +3,8 @@ import * as echarts from 'echarts'
 import PropTypes from 'prop-types'
 import '../theme/dark'
 import '../theme/vintage'
-import * as hdf5 from 'jsfive'
 import { TooltipComponent, VisualMapComponent } from 'echarts/components'
+import Axis from './Axis'
 import {
   ConfigProvider,
   Button,
@@ -25,7 +25,7 @@ import {
   Row,
   Spin,
   Form,
-  Flex
+  Flex,
 } from 'antd'
 import {
   GraphicComponent,
@@ -36,8 +36,8 @@ import { LineChart } from 'echarts/charts'
 import { UniversalTransition } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
 import H5adLoader from '../utils/H5adLoader'
+import Loading from './Loading'
 import { CloudDownloadOutlined, FileAddOutlined, FileOutlined, InboxOutlined, SettingOutlined, ReloadOutlined } from '@ant-design/icons'
-import axios from 'axios'
 echarts.use([
   GraphicComponent,
   TooltipComponent,
@@ -50,9 +50,10 @@ echarts.use([
 
 const { Dragger } = Upload
 const { useToken } = theme
+const { quitLoading, enterLoading } = Loading
 
 // left figure is umap2 and right figure is spatial3
-const SpScatter = ({ query, height, width, margin }) => {
+const SpScatter = ({ query, spfile, height, width, margin }) => {
   const chartRef = useRef(null) // get current DOM container
   const commandRef = useRef('') // get the current command for useEffect
   const [action, setAction] = useState(0)
@@ -66,7 +67,7 @@ const SpScatter = ({ query, height, width, margin }) => {
   const [clusterOps, setClusterOps] = useState([])
   const [embedOps, setEmbedOps] = useState([])
   const [batchOps, setBatchOps] = useState([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState([false])
   const [itemSize, setItemSize] = useState(2)
   const [itemOpacity, setItemOpacity] = useState(0.8)
   const [xInv, setxInv] = useState(false)
@@ -77,10 +78,8 @@ const SpScatter = ({ query, height, width, margin }) => {
   const FileLoaderRef = useRef('')
   const prevCluster = useRef('')
   const [title, setTitle] = useState('Mouse-Brain')
-  const [_data, _setData] = useState(
-    require('../../assets/data/Mouse-Brain-umap.json')
-  )
-  const { token } = theme.useToken()
+  const [_data, _setData] = useState([])
+  const { token } = useToken()
   var vega_20 = [
     '#1f77b4',
     '#aec7e8',
@@ -209,34 +208,6 @@ const SpScatter = ({ query, height, width, margin }) => {
     return annotations
   }
 
-  const setDataset = (source, dims, annoName, annotations) => {
-    let _datasets = []
-    _datasets.push({
-      dimensions: dims,
-      source: source,
-    })
-    if (annotations.length === 0) {
-      // if no annotations, all the data are annotated by a label.
-      _datasets.push({
-        // 这个 dataset 的 index 是 `1`。
-        transform: {
-          type: 'sort',
-          config: { dimension: annoName, order: 'desc' },
-        },
-      })
-    } else {
-      for (let anno of annotations) {
-        _datasets.push({
-          // 这个 dataset 的 index 是 `1`。
-          transform: {
-            type: 'filter',
-            config: { dimension: annoName, value: anno },
-          },
-        })
-      }
-    }
-    return _datasets
-  }
 
   const setBatchDataset = (source, dims, annoName, annotations, batch, batchName) => {
     let _datasets = []
@@ -311,21 +282,35 @@ const SpScatter = ({ query, height, width, margin }) => {
   }
 
   const SpH5adLoader = (file) => {
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      let h5info = H5adLoader(file, event)
-      _setData(h5info.data)
-      setTitle(h5info.title)
-      setClusterOps(h5info.clusters)
-      if(h5info.clusters.map((item)=>item.label).includes('batch'))
-      setBatchName('batch')
-      setEmbedOps(h5info.embdOps)
-    }
-    reader.onloadend = () => {
-      toggleAnno('Upload')
-      setLoading(false)
-    }
-    reader.readAsArrayBuffer(file)
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        try {
+          let h5info = H5adLoader(file, event, ['meta'])
+          _setData(h5info.data)
+          setTitle(h5info.title)
+          setClusterOps(h5info.clusters)
+          if (h5info.clusters.map((item) => item.label).includes('batch'))
+            setBatchName('batch')
+          setEmbedOps(h5info.embdOps)
+          resolve({
+            data: h5info.data,
+            title: h5info.title,
+            clusters: h5info.clusters,
+            embdOps: h5info.embdOps
+          })
+        } catch (error) {
+          reject(error)
+        }
+      }
+      reader.onloadend = () => {
+        console.log("Load sp data finished.")
+      }
+      reader.onerror = (error) => {
+        reject(error)
+      }
+      reader.readAsArrayBuffer(file)
+    })
   }
 
   const beforeUpload = (file) => {
@@ -340,7 +325,6 @@ const SpScatter = ({ query, height, width, margin }) => {
 
   const onUpload = (info) => {
     const file = info.file
-    setLoading(true)
     FileLoaderRef.current(file)
   }
 
@@ -358,17 +342,18 @@ const SpScatter = ({ query, height, width, margin }) => {
   }
 
   useEffect(() => {
+
     if (isInit) {
       console.log("Is Inited.")
       var myChart = echarts.getInstanceByDom(chartRef.current)
       if (commandRef.current === "Upload") {
-
+        enterLoading(0, setLoading)
         // 1.set source
         let _dims = [...Object.keys(_data[0]), 'id']
         let source = _data.map((item, id) => {
           return [...Object.entries(item).map(([_, value]) => value), id]
         })
-        symbolSizeRef.current = source.length > 5000 ? 2 : 4
+        symbolSizeRef.current = source.length > 5000 ? 3 : 6
         setItemSize(symbolSizeRef.current)
         setCellNum(source.length)
 
@@ -379,12 +364,14 @@ const SpScatter = ({ query, height, width, margin }) => {
         let annotations = setItemGroup(source, _dims.indexOf(defaultAnno))
 
         let batches = []
-        if (_dims.includes(batchName)) {
-          batches = setItemGroup(source, _dims.indexOf(batchName))
+        let _batchName = batchName
+        if (_dims.includes(_batchName)) {
+          batches = setItemGroup(source, _dims.indexOf(_batchName))
           setBatchCur({ value: 0, label: batches[0], attr: 'categories' })
           setBatchOps(batches.map((item, id) => ({ value: id, label: item, attr: 'categories' })))
         }
         else {
+          _batchName = null
           setBatchName(null)
           batches = ['batch 1']
           setBatchCur({ value: 0, label: batches[0], attr: 'categories' })
@@ -403,15 +390,14 @@ const SpScatter = ({ query, height, width, margin }) => {
         setEmbed3Dcur(_embd)
 
         // 4.set datasets
-        let _datasets = setBatchDataset(source, _dims, defaultAnno, annotations, batches[0], batchName)
+        let _datasets = setBatchDataset(source, _dims, defaultAnno, annotations, batches[0], _batchName)
         //console.log(_datasets)
         // 5.set 3D series
         let _series = []
         let _snum = 0
         let _3DSeries = {
           type: 'scatter3D',
-          coordinateSystem: 'cartesian3D',
-          symbolSize: symbolSizeRef.current,
+          symbolSize: symbolSizeRef.current / 2,
           name: "batch",
           encode: {
             x: xName,
@@ -421,10 +407,10 @@ const SpScatter = ({ query, height, width, margin }) => {
           },
           itemStyle: {
             color: 'gray',
-            opacity: 0.8,
+            opacity: 0.5,
           },
           datasetIndex: _snum,
-          zlevel: -1,
+          zlevel: -10,
         }
         _series.push(_3DSeries)
         // 6.set anno series with batch
@@ -459,7 +445,7 @@ const SpScatter = ({ query, height, width, margin }) => {
           _snum = _snum + 1
           _series.push({
             type: 'scatter3D',
-            symbolSize: symbolSizeRef.current,
+            symbolSize: symbolSizeRef.current / 2,
             name: anno,
             encode: {
               x: xName,
@@ -503,20 +489,23 @@ const SpScatter = ({ query, height, width, margin }) => {
           title: [
             {
               text: title,
-              top: '0%',
-              left: 'center',
-              textStyle: {
-                fontSize: token.fontSizeHeading4,
-              },
             },
           ],
           grid3D: {
-            top: 'top',
-            width: '55%',
+            boxHeight: 135,
+            top: '-8%',
+            width: '60%',
+            bottom: '20%',
           },
+          grid: [{
+            top: '14%',
+            width: '40%',
+            right: '1%',
+            bottom: '18%',
+          }],
           xAxis3D: axis.xAxis3D,
           yAxis3D: axis.yAxis3D,
-          zAxis3D: { type: 'category' },
+          zAxis3D: { type: 'category', name: 'Batch', nameLocation: 'top' },
           xAxis: axis.xAxis,
           yAxis: axis.yAxis,
           dataset: _datasets,
@@ -541,6 +530,7 @@ const SpScatter = ({ query, height, width, margin }) => {
             })
           }
         })
+        quitLoading(0, setLoading)
       }
       else if (commandRef.current === "Setting") {
         let option = myChart.getOption()
@@ -566,8 +556,8 @@ const SpScatter = ({ query, height, width, margin }) => {
         // set series
         let myVisualMap = []
         let _3DSeries = _series[0]
-        _3DSeries.symbolSize = itemSize
-        _3DSeries.itemStyle.opacity = itemOpacity
+        _3DSeries.symbolSize = itemSize / 2
+        _3DSeries.itemStyle.opacity = itemOpacity / 2
         _3DSeries.encode = {
           x: `${embd3D}_0`,
           y: `${embd3D}_1`,
@@ -605,7 +595,7 @@ const SpScatter = ({ query, height, width, margin }) => {
           for (let anno in annotations) {
             _newSeries.push({
               type: 'scatter3D',
-              symbolSize: itemSize,
+              symbolSize: itemSize / 2,
               grid3DIndex: 0,
               name: anno,
               encode: {
@@ -649,7 +639,7 @@ const SpScatter = ({ query, height, width, margin }) => {
           _newSeries.push({
             type: 'scatter3D',
             name: clusterCur.label,
-            symbolSize: itemSize,
+            symbolSize: itemSize / 2,
             grid3DIndex: 0,
             encode: {
               // annotations are displayed in left chart
@@ -670,7 +660,7 @@ const SpScatter = ({ query, height, width, margin }) => {
             dimension: clusterCur.label,
             seriesIndex: [1, 2],
             left: '0%',
-            top: '10%',
+            bottom: '0%',
             orient: 'horizontal',
             precision: 2,
             calculable: true,
@@ -719,169 +709,26 @@ const SpScatter = ({ query, height, width, margin }) => {
       }
     } else {
       var myChart = echarts.init(chartRef.current) //init the echart container
-      if(query){
-        axios
-        .get('http://localhost:5522/query', {
-          responseType: 'blob',
-        })
-        .then((response) => {
-          let blob = response.data
-          const file = new File([blob], "sp1_meta.h5ad")
-          SpH5adLoader(file)
-        })
-        .catch(error=>{
-          console.error('Error fetching blob:', error);
-        })
-      }
-      let _dims = [...Object.keys(_data[0]), 'id']
-      let source = _data.map((item, id) => {
-        return [...Object.entries(item).map(([_, value]) => value), id]
-      })
-      symbolSizeRef.current = source.length > 5000 ? 2 : 4
-      setCellNum(source.length)
-      // set annotations
-      let defaultAnno = 'leiden'
-      setClusterCur({ value: 0, label: defaultAnno, attr: 'categories' })
-      prevCluster.current = { value: 0, label: defaultAnno, attr: 'categories' }
-      setClusterOps([{ value: 0, label: defaultAnno, attr: 'categories' }])
-      let annotations = setItemGroup(source, _dims.indexOf('leiden'))
-
-      let batches = []
-      if (_dims.includes(batchName)) {
-        batches = setItemGroup(source, _dims.indexOf(batchName))
-        setBatchCur({ value: 0, label: batches[0], attr: 'categories' })
-        setBatchOps(batches.map((item, id) => ({ value: id, label: item, attr: 'categories' })))
-      } else {
-        api.warning({
-          message: `default batch is not find in .obs or .json file`,
-          placement: 'topRight',
-        })
-        setBatchName(null)
-        batches = ['batch 1']
-        setBatchCur({ value: 0, label: batches[0], attr: 'categories' })
-        setBatchOps(batches.map((item, id) => ({ value: id, label: item, attr: 'categories' })))
-      }
-
-
-
-      // set embeddings
-
-      let axis = setAxis(source, _dims, 'array_row', 'array_col')
-      setEmbedCur('spatial')
-      setEmbedOps([{ value: 0, label: 'spatial' }])
-
-      // set datasets
-      let _datasets = setDataset(source, _dims, 'annotation', annotations)
-
-      // set Series
-      let _series = []
-      let _snum = 0
-      _series.push({
-        type: 'scatter',
-        xAxisIndex: 1,
-        yAxisIndex: 1,
-        symbolSize: symbolSizeRef.current,
-        encode: {
-          x: 'umap_0',
-          y: 'umap_1',
-          z: 'batch',
-        },
-        tooltip: { show: false },
-        itemStyle: {
-          color: 'gray',
-          opacity: 0.3,
-        },
-        large: true,
-        largeThreshold: 0,
-        datasetIndex: _snum,
-      })
-
-
-      var batchSeries = [
-        {
-          type: 'scatter3D',
-          name: "batch",
-          encode: {
-            x: 'array_row',
-            y: 'array_col',
-            z: 'in_tissue',
-            tooltip: [0, 1, 2],
-          },
-          itemStyle: {
-            color: 'gray',
-            opacity: 0.3,
-          },
-          datasetIndex: _snum,
-        }
-      ]
-
-      var umapSeries = [
-        {
-          type: 'scatter',
-          symbolSize: 6,
-          name: 'SOView',
-          datasetIndex: _snum,
-          encode: {
-            x: 'array_col',
-            y: 'array_row',
-            tooltip: [0, 1, 2, 3, 4],
-          },
-          itemStyle: {
-            color: (params) => {
-              return (
-                'rgba(' +
-                params.data[1] * 255 +
-                ',' +
-                params.data[2] * 255 +
-                ',' +
-                params.data[3] * 255 +
-                ',1)'
-              )
-            },
-          },
-        },
-      ]
-      var legendData = []
-      var cluSeries = []
-      var item = _data[0]
-      for (let key of Object.keys(item)) {
-        if (
-          [
-            'BayesSpace',
-            'SEDR',
-            'stlearn',
-            'Giotto',
-            'Seurat',
-            'leiden',
-            'SpaGCN',
-            'annotation',
-          ].includes(key)
-        ) {
-          legendData.push(key)
-          cluSeries.push({
-            type: 'scatter',
-            symbolSize: 6,
-            name: key,
-            dimensions: ['array_col', 'array_row', 'Cluster'],
-            data: _data.map((item) => {
-              return [item['array_col'], item['array_row'], item[key]]
-            }),
-            encode: {
-              x: 'array_col',
-              y: 'array_row',
-              tooltip: [0, 1, 2],
-            },
-            itemStyle: {
-              color: (params) => {
-                return vega_20[params.data[2]]
-              },
-            },
+      if (query) {
+        enterLoading(0, setLoading)
+        spfile.then((file) => {
+          SpH5adLoader(file).then(() => {
+            console.log("All sp data loaded.")
+            toggleAnno("Upload")
           })
-        }
+        }).catch(error => {
+          console.error('Error fetching blob in LayerView:', error)
+        })
       }
-      _series = [...batchSeries, ...cluSeries]
+
+      let axis = Axis.setEmptyAxis(0)
+      let axis3D = Axis.setEmptyAxis3D(0)
       myChart.setOption({
+        textStyle: {
+          fontFamily: 'Arial'
+        },
         tooltip: {},
+        animation: false,
         title: [
           {
             text: title,
@@ -893,12 +740,14 @@ const SpScatter = ({ query, height, width, margin }) => {
           },
         ],
         grid3D: {
-          top: 'top',
-          width: '55%',
+          boxHeight: 150,
+          top: '-5%',
+          width: '60%',
+          bottom: '25%',
         },
-        xAxis3D: axis.xAxis3D,
-        yAxis3D: axis.yAxis3D,
-        zAxis3D: { type: 'category' },
+        xAxis3D: axis3D.xAxis3D,
+        yAxis3D: axis3D.yAxis3D,
+        zAxis3D: axis3D.zAxis3D,
         xAxis: axis.xAxis,
         yAxis: axis.yAxis,
         grid: [{
@@ -916,26 +765,31 @@ const SpScatter = ({ query, height, width, margin }) => {
           textStyle: {
             fontSize: 16,
           },
+          pageIconColor: token.colorPrimaryActive,
           selector: [{ type: 'all', title: "All" }, { type: 'inverse', title: 'Inverse' }],
         },
         toolbox: {
           show: true,
           itemSize: 20,
           itemGap: 10,
+          right: '0%',
+          top: '0%',
           feature: {
             mark: { show: true },
             dataView: { show: true, readOnly: true },
             restore: { show: true },
-            saveAsImage: { show: true },
+            saveAsImage: {
+              show: true,
+              pixelRatio: 4,
+              name: `LayerView_${title}`,
+
+            },
             dataZoom: {},
           },
           iconStyle: {
             borderWidth: 1.5,
           },
-          top: '5%',
         },
-        dataset: _datasets,
-        series: _series,
       })
       setInit(true)
     }
@@ -943,7 +797,7 @@ const SpScatter = ({ query, height, width, margin }) => {
 
   return (
     <Flex justify="center" gap='middle'>
-      <Spin spinning={loading} size="large" tip="Loading">
+      <Spin spinning={loading[0]} size="large" tip="Loading">
         <div
           ref={chartRef}
           className="chart"
@@ -1180,13 +1034,14 @@ const SpScatter = ({ query, height, width, margin }) => {
 
 SpScatter.defaultProps = {
   query: false,
-  height: '35rem',
+  height: '30rem',
   width: '55rem',
   margin: '1rem',
 }
 
 SpScatter.propTypes = {
   query: PropTypes.bool,
+  spfile: PropTypes.object,
   height: PropTypes.string,
   width: PropTypes.string,
   margin: PropTypes.string,

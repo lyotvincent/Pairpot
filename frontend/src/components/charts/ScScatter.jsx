@@ -3,6 +3,7 @@ import * as echarts from 'echarts'
 import PropTypes from 'prop-types'
 import '../theme/dark'
 import '../theme/vintage'
+import Axis from './Axis'
 import {
   GraphicComponent,
   GridComponent,
@@ -62,13 +63,16 @@ echarts.use([
 const { Dragger } = Upload
 const { useToken } = theme
 
-const ScScatter = ({height, width, margin }) => {
+const ScScatter = ({ scfile, spfile, location, height, width, margin }) => {
   const [api, contextHolder] = notification.useNotification()
   const [isInit, setInit] = useState(false) // whether echart object is inited
   const chartRef = useRef(null) // current DOM container
-  const [_data, _setData] = useState(
-    require('../../assets/data/CID4971-umap-sc.json')
-  )
+  const [_data, _setData] = useState({})
+
+  const [_scdata, setScData] = useState({})
+  const [_spdata, setSpData] = useState({})
+  const [_datakey, setDatakey] = useState(true)
+
   const [seriesArray, setSeriesArray] = useState([])
   const [nameArray, setNameArray] = useState([])
   const snumRef = useRef()
@@ -91,6 +95,9 @@ const ScScatter = ({height, width, margin }) => {
   const symbolSizeRef = useRef('')
   const [loadings, setLoadings] = useState([])
   const [Uploading, setUploading] = useState(false)
+  const [batchName, setBatchName] = useState("batch")
+  const [batchCur, setBatchCur] = useState({})
+  const [batchOps, setBatchOps] = useState([])
   const brushMode = useRef('Select')
   const [brushModeState, setBrushModeState] = useState('Select')
   const [itemSize, setItemSize] = useState(2)
@@ -138,7 +145,7 @@ const ScScatter = ({height, width, margin }) => {
   vega_20 = [...vega_20, ...vega_20]
   //var VisualColors = JSON.parse(JSON.stringify(vega_20)).reverse()
 
-  const setItemGroup = (source, annoIdx, type = 'categories') => {
+  const setItemGroup = (source, annoIdx, type = 'categories', doSet = true) => {
     let itemGroup = []
     let annotations = []
     if (type === 'categories') {
@@ -163,8 +170,9 @@ const ScScatter = ({height, width, margin }) => {
     } else {
       itemGroup.push(source.map((item) => item[item.length - 1]))
     }
-
-    itemGroupRef.current = itemGroup
+    if (doSet) {
+      itemGroupRef.current = itemGroup
+    }
     return annotations
   }
 
@@ -364,7 +372,6 @@ const ScScatter = ({height, width, margin }) => {
     if (annotations.length === 0) {
       // if no annotations, all the data are annotated by a label.
       _datasets.push({
-        // 这个 dataset 的 index 是 `1`。
         transform: {
           type: 'sort',
           config: { dimension: annoName, order: 'desc' },
@@ -373,7 +380,6 @@ const ScScatter = ({height, width, margin }) => {
     } else {
       for (let anno of annotations) {
         _datasets.push({
-          // 这个 dataset 的 index 是 `1`。
           transform: {
             type: 'filter',
             config: { dimension: annoName, value: anno },
@@ -422,11 +428,26 @@ const ScScatter = ({height, width, margin }) => {
         setItemSize(symbolSizeRef.current)
         // set annotaions or clusters
         let defaultAnno = clusterOps.find((item) => item.label === "annotation")
-        if(typeof defaultAnno === 'undefined'){
+        if (typeof defaultAnno === 'undefined') {
           defaultAnno = clusterOps[0]
         }
         setClusterCur(defaultAnno)
         let annotations = setItemGroup(source, _dims.indexOf(defaultAnno.label))
+
+        // set batches
+        let batches = []
+        if (_dims.includes(batchName)) {
+          batches = setItemGroup(source, _dims.indexOf(batchName), 'categories', false)
+          setBatchCur({ value: 0, label: batches[0], attr: 'categories' })
+          setBatchOps(batches.map((item, id) => ({ value: id, label: item, attr: 'categories' })))
+        }
+        else {
+          setBatchName(null)
+          batches = ['batch 1']
+          setBatchCur({ value: 0, label: batches[0], attr: 'categories' })
+          setBatchOps(batches.map((item, id) => ({ value: id, label: item, attr: 'categories' })))
+        }
+
 
         // set embeddings and axis
         let defaultEmbd = embedOps.map((item) => item.label).includes('X_umap')
@@ -521,6 +542,7 @@ const ScScatter = ({height, width, margin }) => {
         brushRef.current = []
         datasetRef.current = null
         seriesRef.current = null
+        quitLoading(0)
       }
       if (commandRef.current === 'Setting') {
         let option = myChart.getOption()
@@ -774,7 +796,8 @@ const ScScatter = ({height, width, margin }) => {
         axios
           .post('http://localhost:5522/refine', {
             data: {
-              name: `resources/${title}.h5ad`,
+              id: location.state?.st?.dataset_id,
+              type: _datakey ? "sc" : "sp",
               anno: brushRef.current,
               refiner: refineValue.value,
               starttime: starttime,
@@ -869,71 +892,30 @@ const ScScatter = ({height, width, margin }) => {
     } else {
       // init the echart container
       var myChart = echarts.init(chartRef.current)
-      let _dims = [...Object.keys(_data[0]), 'id']
-      let source = _data.map((item, id) => {
-        return [...Object.entries(item).map(([_, value]) => value), id]
-      })
-      symbolSizeRef.current = source.length > 5000 ? 2 : 4
-      setCellNum(source.length)
-
-      // set annotations
-      let defaultAnno = 'annotation'
-      setClusterCur({ value: 0, label: defaultAnno, attr: 'categories' })
-      prevCluster.current = { value: 0, label: defaultAnno, attr: 'categories' }
-      setClusterOps([{ value: 0, label: defaultAnno, attr: 'categories' }])
-      let annotations = setItemGroup(source, 3)
-
-      // set embeddings
-      let axis = setAxis(source, _dims, 'umap_0', 'umap_1')
-      setEmbedCur('umap')
-      setEmbedCur1('umap')
-      setEmbedOps([{ value: 0, label: 'umap' }])
-
-      // set datasets
-      let _datasets = setDataset(source, _dims, 'annotation', annotations)
-
-      let _series = []
-      let _snum = 0
-      _series.push({
-        type: 'scatter',
-        xAxisIndex: 1,
-        yAxisIndex: 1,
-        symbolSize: symbolSizeRef.current,
-        encode: {
-          x: 'umap_0',
-          y: 'umap_1',
-        },
-        tooltip: { show: false },
-        itemStyle: {
-          color: 'gray',
-          opacity: 0.3,
-        },
-        large: true,
-        largeThreshold: 0,
-        datasetIndex: _snum,
-      })
-      for (let anno of annotations) {
-        // seperate the _data into subgroups by cell-types
-        _snum = _snum + 1
-        _series.push({
-          type: 'scatter',
-          symbolSize: symbolSizeRef.current,
-          name: anno,
-          encode: {
-            x: 'umap_0',
-            y: 'umap_1',
-            tooltip: [0, 1, 2, 3],
-            itemName: anno,
-          },
-          emphasis: {
-            focus: 'series',
-          },
-          large: true,
-          largeThreshold: 5000,
-          datasetIndex: _snum,
+      enterLoading(0, setLoadings)
+      spfile.then((file) => {
+        SpH5adLoader(file).then((h5info) => {
+          console.log("sp data loaded.")
+          setSpData(h5info)
         })
-      }
-      snumRef.current = _snum
+      }).catch(error => {
+        console.error('Error fetching blob in LassoView:', error)
+      })
+      scfile.then((file) => {
+        SpH5adLoader(file).then((h5info) => {
+          console.log("sc data loaded.")
+          _setData(h5info.data)
+          setTitle(h5info.title)
+          setClusterOps(h5info.clusters)
+          setEmbedOps(h5info.embdOps)
+          setScData(h5info)
+          toggleAnno("Upload")
+        })
+      }).catch(error => {
+        console.error('Error fetching blob in LassoView:', error)
+      })
+      let axis0 = Axis.setEmptyAxis(0)
+      let axis1 = Axis.setEmptyAxis(1)
       myChart.setOption({
         tooltip: {},
         brush: {
@@ -956,7 +938,7 @@ const ScScatter = ({height, width, margin }) => {
             mark: { show: true },
             dataView: { show: true, readOnly: true },
             restore: { show: true },
-            saveAsImage: { show: true },
+            saveAsImage: { show: true, pixelRatio: 3, },
             dataZoom: {},
           },
           iconStyle: {
@@ -975,8 +957,6 @@ const ScScatter = ({height, width, margin }) => {
             },
           },
         ],
-        xAxis: axis.xAxis,
-        yAxis: axis.yAxis,
         grid: [
           {
             top: '18%',
@@ -1002,11 +982,9 @@ const ScScatter = ({height, width, margin }) => {
             fontSize: 16,
           },
         },
-        dataset: _datasets,
-        series: _series,
       })
       setInit(true)
-      setSeriesArray(_series)
+      // setSeriesArray(_series)
 
       myChart.on('brushSelected', function (params) {
         let brushed = []
@@ -1065,6 +1043,38 @@ const ScScatter = ({height, width, margin }) => {
     reader.readAsArrayBuffer(file)
   }
 
+  const SpH5adLoader = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        try {
+          let h5info = H5adLoader(file, event, ['meta'])
+          _setData(h5info.data)
+          setTitle(h5info.title)
+          setClusterOps(h5info.clusters)
+          if (h5info.clusters.map((item) => item.label).includes('batch'))
+            setBatchName('batch')
+          setEmbedOps(h5info.embdOps)
+          resolve({
+            data: h5info.data,
+            title: h5info.title,
+            clusters: h5info.clusters,
+            embdOps: h5info.embdOps
+          })
+        } catch (error) {
+          reject(error)
+        }
+      }
+      reader.onloadend = () => {
+        console.log("Load sp data finished.")
+      }
+      reader.onerror = (error) => {
+        reject(error)
+      }
+      reader.readAsArrayBuffer(file)
+    })
+  }
+
   const JsonLoader = (file) => {
     let newTitle = file.name.replace(/\.json$/, '')
     setTitle(newTitle)
@@ -1120,7 +1130,7 @@ const ScScatter = ({height, width, margin }) => {
       {contextHolder}
 
       <Flex justify="center" gap='middle'>
-        <Spin spinning={Uploading} size="large">
+        <Spin spinning={loadings[0]} size="large" tip="Loading">
           <div
             ref={chartRef}
             className="chart"
@@ -1154,6 +1164,24 @@ const ScScatter = ({height, width, margin }) => {
                   Upload
                 </p>
               </Dragger>
+              <Segmented block
+                options={[
+                  { label: 'SC', value: true },
+                  { label: 'SP', value: false },
+                ]}
+                defaultValue={true}
+                value={_datakey}
+                onChange={(value) => {
+                  setDatakey(value)
+                  let h5info = value ? _scdata : _spdata
+                  console.log("_spdata:", h5info)
+                  _setData(h5info.data)
+                  setTitle(h5info.title)
+                  setClusterOps(h5info.clusters)
+                  setEmbedOps(h5info.embdOps)
+                  toggleAnno("Upload")
+                }}
+              />
               <Popover
                 title={<>Setting Figure Options:</>}
                 placement="topLeft"
@@ -1283,6 +1311,28 @@ const ScScatter = ({height, width, margin }) => {
                               label: target.label,
                               attr: clusterOps[target.value].attr,
                             })
+                          }}
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        label="Batch"
+                        labelCol={{
+                          span: 6,
+                        }}>
+                        {' '}
+                        <Select
+                          labelInValue
+                          placeholder="Batch"
+                          placement="topLeft"
+                          options={batchOps}
+                          value={batchCur}
+                          onChange={(target) => {
+                            setBatchCur({
+                              value: target.value,
+                              label: target.label,
+                              attr: batchOps[target.value].attr,
+                            })
+                            toggleAnno("Settings")
                           }}
                         />
                       </Form.Item>
@@ -1522,6 +1572,7 @@ const ScScatter = ({height, width, margin }) => {
               <div>Annotated Clusters: {snumRef.current}</div>
               <div>Cell number: {cellNum}</div>
             </div>
+            <div>{JSON.stringify(_spdata[0])}</div>
           </Space>
         </ConfigProvider>
       </Flex>
@@ -1536,6 +1587,9 @@ ScScatter.defaultProps = {
 }
 
 ScScatter.propTypes = {
+  scfile: PropTypes.object,
+  spfile: PropTypes.object,
+  location: PropTypes.object,
   height: PropTypes.string,
   width: PropTypes.string,
   margin: PropTypes.string,

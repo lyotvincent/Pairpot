@@ -45,7 +45,7 @@ export const Database = () => {
       icon: <OneToOneOutlined />,
     },
   ]
-  const {token} = theme.useToken()
+  const { token } = theme.useToken()
   return (
     <Layout
       style={{
@@ -74,7 +74,7 @@ export const Database = () => {
           style={{
             textAlign: 'center',
           }}>
-          pairST ©2023 Created by zhihan Ruan
+          PairPot Copyright © 2024. Centre for Bioinformatics and Intelligent Medicine, Nankai University.
         </Footer>
       </Layout>
     </Layout>

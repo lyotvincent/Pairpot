@@ -3,6 +3,7 @@ import sqlite3
 import time
 from server.refine import *
 from server.deconvolution import *
+from id import builtID
 app = Flask(__name__)
 app.debug = True
 
@@ -13,7 +14,7 @@ def add_cors_headers(response):
     return response
 
 
-@app.route('/', methods=['GET'])
+@app.route('/hello', methods=['GET'])
 def hello_world():
     return 'Hello, World!'
 
@@ -91,7 +92,16 @@ def refine():
     data = request.get_json()['data']
     # print(data)
     selected = data['anno']
-    file = data['name']
+    type = data['type']
+    id = data["id"]
+    if id is not None:
+        if id[:2] == "ST":
+            id = id[-3:]
+    if id not in builtID:
+        id = '235'
+    print(type)
+    ft = "sc_sampled" if type == 'sc' else 'sp_deconv'
+    file = f'./resources/{id}/{ft}.h5ad'
     refinerID = data['refiner']
 
     if refinerID == 0:
@@ -118,21 +128,26 @@ def refine():
 @app.route('/deconv', methods=['POST'])
 def deconv():
     data = request.get_json()['data']
-    print(data)
     selected = data['anno']
-    scfile = data['scname']
-    spfile = data['spname']
+    id = data['id']
+    if id[:2] == "ST":
+        id = id[-3:]
+    if id not in builtID:
+        id = '235'
+    scfile = f'./resources/{id}/sc_sampled.h5ad'
+    spfile = f'./resources/{id}/sp_deconv.h5ad'
+    print(id)
     try:
         prop = NNLSDeconvolution(selected, scfile, spfile)
         response = jsonify({"props": prop,
                             'success': True,
-                            'message': "Refined by NNLSDeconvolution successfully.",
+                            'message': "Refined by PairView successfully.",
                             "endtime": int(time.time()*1000),
                             })
     except Exception as e:
         response = jsonify({
                     'success': False,
-                    'message': f"Refined by NNLSDeconvolution Failed.{e}",
+                    'message': f"Refined by PairView Failed.{e}",
                     "endtime": int(time.time()*1000),
                     })
     return response
@@ -203,15 +218,36 @@ def submit():
 
 @app.route('/query', methods=['GET'])
 def query():
-    return send_file('./resources/sp1_meta.h5ad')
+    id = request.args.get("id")
+    if id is not None:
+        if id[:2] == "ST":
+            id = id[-3:]
+    print(id)
+    if id not in builtID:
+        id = '235'
+    return send_file(f'./resources/{id}/sp_meta.h5ad')
 
 @app.route('/query/sp', methods=['GET'])
 def query_sp():
-    return send_file('./resources/sp1_meta.h5ad')
+    id = request.args.get("id")
+    if id is not None:
+        if id[:2] == "ST":
+            id = id[-3:]
+    print(id)
+    if id not in builtID:
+        id = '235'
+    return send_file(f'./resources/{id}/sp_meta.h5ad')
 
 @app.route('/query/sc', methods=['GET'])
 def query_sc():
-    return send_file('./resources/sc1_sampled.h5ad')
+    id = request.args.get("id")
+    if id is not None:
+        if id[:2] == "ST":
+            id = id[-3:]
+    print(id)
+    if id not in builtID:
+        id = '235'
+    return send_file(f'./resources/{id}/sc_meta.h5ad')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5522)
