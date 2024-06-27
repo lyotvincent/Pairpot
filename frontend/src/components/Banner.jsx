@@ -1,11 +1,5 @@
 import { useState, useEffect } from 'react'
-import headerImg from '../assets/img/header-img.svg'
-import propImg from "../assets/img/database-logo.jpg"
-import spImg from "../assets/img/spatial3.png"
-import helpImg from "../assets/img/help.png"
-import funcImg from "../assets/img/func.png"
 import contactImg from "../assets/img/contact.png"
-import displayImg from "../assets/img/display.png"
 import layerImg from "../assets/img/LayerView.png"
 import pairImg from "../assets/img/pair.png"
 import lassoImg from "../assets/img/lasso.png"
@@ -13,14 +7,11 @@ import netImg from "../assets/img/network.png"
 import heatImg from "../assets/img/heatmap.png"
 import coverImg from "../assets/img/cover-figure.svg"
 
-import Species from './Species'
-import { Layout } from 'antd'
+import { ConfigProvider, Layout } from 'antd'
 import { ArrowRightCircle } from 'react-bootstrap-icons'
 import 'animate.css'
 import TrackVisibility from 'react-on-screen'
-import { Avatar, Card, Row, Col } from 'antd'
-import { SettingOutlined, EditOutlined, EllipsisOutlined } from '@ant-design/icons'
-import Landscape3D2 from "./charts/Landscape3D2-1"
+import {Card, Row, Col } from 'antd'
 const { Meta } = Card
 
 const { Content, Footer } = Layout
@@ -80,11 +71,22 @@ const Banner = () => {
   }
 
   return (
+    <ConfigProvider theme={{
+      components:{
+        Card:{
+          colorBgContainer: "#fff",
+          headerFontSize:32,
+          headerHeight: 48,
+          borderRadiusLG: 12,
+          colorTextDescription: "rgba(0, 0, 0, 0.6)",
+        }
+      }
+    }}>
     <Layout>
       <Content>
         <section className="banner" id="home">
           <Row>
-            <Col span={16}>
+            <Col span={13} offset={1}>
               <TrackVisibility>
                 {({ isVisible }) => (
                   <div
@@ -107,14 +109,17 @@ const Banner = () => {
                       </h3>
                       <p>
                       Spatial Transcriptomics analysis requires paired single-cell references for cell-type annotation, cell-proportion inference, and cell co-localization detection.
-                      However, lacking of paired single-cell and spatial transcriptomics data hinders the in-depth deciphering of tissue architectures and functions. PairPOT curated currently available paired single-cell and spatially resolved transcriptomics data, and performed in-depth analysis including batch effects correction, spatial clustering, markers detection, cell-proportion inference, and cell-cell interaction.
+                      However, lacking of paired single-cell and spatial transcriptomics data hinders the in-depth deciphering of tissue architectures and functions. 
+                      Pairpot curated currently available paired single-cell and spatially resolved transcriptomics data including nearly 830,000 spots from 80 paired studies. 
+                      Pairpot performed in-depth analysis including batch effects correction, spatial clustering, markers detection, cell-proportion inference, and cell-cell interaction for the paired data.
+                      Moreover, Pairpot designed LassoView, LayerView, and PairView module that enables lasso-based online spatial segmentation/clustering and deconvolution for multiple slices in millisecond-level response time.
                       </p>
                     </div>
                   </div>
                 )}
               </TrackVisibility>
             </Col>
-            <Col span={8}>
+            <Col span={8} offset={1}>
               <TrackVisibility>
                 {({ isVisible }) => (
                   <div
@@ -258,43 +263,44 @@ const Banner = () => {
               
           <br/>
           <Row>
-          <h2>What can Pairpot provide?</h2>
-          <img src={displayImg} style={{width:'4%'}}></img>
+          <h2 style={{paddingLeft: '1.5rem'}}>What can Pairpot provide?</h2>
           </Row>
-
-          <div className='fig-display'>
           <Row>
-            <div className='fig-block' style={{width:'43%',margin:'3%'}}>
-              <a href="browse#LayerView"><img src={layerImg} ></img></a>
-              <h3>Layer View</h3>
-              <div className='content'>test: this is the introduction for this fig.</div>
-            </div>
-            <div className='fig-block'style={{width:'43%',margin:'3%'}}>
-              <img src={pairImg} ></img>
-              <h3>Pair View</h3>
-              <div className='content'>test: this is the introduction for this fig.</div>
-            </div>
+            <Card hoverable 
+              style={{width:'46%',margin:'2%', paddingLeft: '1rem', paddingRight: '1rem'}} 
+              title={<h3 style={{marginTop:"1rem", padding:0}}> Layer View</h3>}
+              cover={<img src={layerImg} ></img>}>
+            <Card.Meta classNames='header' description={"The users can explore spatial clusters, cell-type proportions, and gene expression of multiple slices from a study in 3D hierarchical layouts."}></Card.Meta>
+            </Card>
+            <Card hoverable 
+              style={{width:'46%',margin:'2%', paddingLeft: '1rem', paddingRight: '1rem'}} 
+              title={<h3 style={{marginTop:"1rem", padding:0}}> Pair View</h3>}
+              cover={<img src={pairImg} ></img>}>
+            <Card.Meta classNames='header' description={"The users can infer cell-type proportions of spots (right) online using the user-lassoed cells from single-cell data (left) in real time."}></Card.Meta>
+            </Card>
           </Row>
 
           <Row>
-            <div className='fig-block' style={{width:'35%',margin:'2%'}}>
-              <img src={lassoImg}></img>
-              <h3>Lasso View</h3>
-              <div className='content'>test: this is the introduction for this fig.</div>
-            </div>
-            <div className='fig-block' style={{width:'23.3%',margin:'2%'}}>
-              <img src={netImg}></img>
-              <h3>Network</h3>
-              <div className='content'>test: this is the introduction for this fig.</div>
-            </div>
-            <div className='fig-block' style={{width:'26.3%',margin:'2%'}}>
-              <img src={heatImg} ></img>
-              <h3>Heatmap</h3>
-              <div className='content'>test: this is the introduction for this fig.</div>
-            </div>
+          <Card hoverable 
+              style={{width:'40%',margin:'2%',marginLeft:'2%', marginRight:'1%', paddingLeft: '1rem', paddingRight: '1rem'}} 
+              title={<h3 style={{marginTop:"1rem", padding:0}}> Lasso View</h3>}
+              cover={<img src={lassoImg} ></img>}>
+            <Card.Meta classNames='header' description={"The users can select the customized domains/cells using lasso tools. These domains/cells can be precisely refined in millisecond-level response time."}></Card.Meta>
+            </Card>
+            <Card hoverable 
+              style={{width:'26%',margin:'2%', marginRight:'1%', marginLeft:'1%', paddingLeft: '1rem', paddingRight: '1rem'}} 
+              title={<h3 style={{marginTop:"1rem", padding:0}}> Network</h3>}
+              cover={<img src={netImg} ></img>}>
+            <Card.Meta classNames='header' description={"The users can explore the cell-cell communication network both in single-cell and spaital data."}></Card.Meta>
+            </Card>
+            <Card hoverable 
+              style={{width:'25%',margin:'2%', marginRight:'2%', marginLeft:'1%', paddingLeft: '1rem', paddingRight: '1rem'}} 
+              title={<h3 style={{marginTop:"1rem", padding:0}}> Heatmap</h3>}
+              cover={<img src={heatImg} ></img>}>
+            <Card.Meta classNames='header' description={"The users can explore L-R pairs, single-cell marker genes and spatial variable genes via heatmap in versatile format."}></Card.Meta>
+            </Card>
           </Row>
 
-          </div>
           
         </section>
       </Content>
@@ -321,6 +327,7 @@ const Banner = () => {
         </Row>
       </Footer>
     </Layout>
+    </ConfigProvider>
   )
 }
 

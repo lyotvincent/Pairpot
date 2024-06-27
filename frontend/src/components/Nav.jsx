@@ -96,10 +96,6 @@ const items = [
     key: 'help',
     icon: <QuestionCircleOutlined />,
   },
-  {
-    label: 'About',
-    key: 'about',
-  },
 ]
 
 const Nav = () => {
@@ -113,8 +109,8 @@ const Nav = () => {
       theme={{
         components: {
           Menu: {
-            iconSize: 20,
-            fontSize: 20,
+            iconSize: 24,
+            fontSize: 24,
             colorBgContainer: '#ddf7d4',
             iconMarginInlineEnd: 2,
             colorInfoTextHover: token.colorPrimary,
@@ -144,7 +140,7 @@ const Nav = () => {
           }}
           items={items}
         />
-        <Space>
+        {/* <Space>
           <span>Theme: </span>
           <Radio.Group
             value={themeToken}
@@ -157,7 +153,7 @@ const Nav = () => {
             <Radio.Button value="secret">Secret</Radio.Button>
 
           </Radio.Group>
-        </Space>
+        </Space> */}
       </Header>
     </ConfigProvider>
   )

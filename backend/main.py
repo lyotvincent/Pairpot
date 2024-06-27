@@ -90,16 +90,17 @@ def get_strategies():
 def refine():
     Refiners = ['Eager Refiner', 'Lazy Refiner', 'LabelPropagation','LabelSpreading']
     data = request.get_json()['data']
-    # print(data)
     selected = data['anno']
     type = data['type']
-    id = data["id"]
-    if id is not None:
-        if id[:2] == "ST":
-            id = id[-3:]
-    if id not in builtID:
-        id = '235'
-    print(type)
+    if "id" in data.keys():
+        id = data["id"]
+        if id is not None:
+            if id[:2] == "ST":
+                id = id[-3:]
+        if id not in builtID:
+            id = '235'
+    else:
+        id='235'
     ft = "sc_sampled" if type == 'sc' else 'sp_deconv'
     file = f'./resources/{id}/{ft}.h5ad'
     refinerID = data['refiner']
@@ -129,11 +130,15 @@ def refine():
 def deconv():
     data = request.get_json()['data']
     selected = data['anno']
-    id = data['id']
-    if id[:2] == "ST":
-        id = id[-3:]
-    if id not in builtID:
-        id = '235'
+    if "id" in data.keys():
+        id = data["id"]
+        if id is not None:
+            if id[:2] == "ST":
+                id = id[-3:]
+        if id not in builtID:
+            id = '235'
+    else:
+        id='235'
     scfile = f'./resources/{id}/sc_sampled.h5ad'
     spfile = f'./resources/{id}/sp_deconv.h5ad'
     print(id)

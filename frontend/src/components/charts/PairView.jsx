@@ -515,8 +515,8 @@ const PairView = ({ spfile, scfile, location, height, width, margin }) => {
           title: [
             {
               text: "Single-cell Data",
-              left: '18%',
-              top: '8%',
+              left: '16%',
+              top: '10%',
               textStyle: {
                 fontSize: 20,
                 fontWeight: 'normal',
@@ -524,8 +524,8 @@ const PairView = ({ spfile, scfile, location, height, width, margin }) => {
             },
             {
               text: "Spatial Omics Data",
-              right: '11%',
-              top: '8%',
+              right: '9%',
+              top: '10%',
               textStyle: {
                 fontSize: 20,
                 fontWeight: 'normal',
@@ -552,16 +552,16 @@ const PairView = ({ spfile, scfile, location, height, width, margin }) => {
           yAxis: [_scaxis.yAxis, _spaxis.yAxis],
           grid: [
             {
-              top: '15%',
+              top: '18%',
               left: '5%',
               width: '42%',
-              bottom: '15%',
+              bottom: '18%',
             },
             {
-              top: '15%',
+              top: '18%',
               width: '42%',
               right: '1%',
-              bottom: '15%',
+              bottom: '18%',
             },
           ],
           dataset: _datasets,
@@ -1188,16 +1188,16 @@ const PairView = ({ spfile, scfile, location, height, width, margin }) => {
         yAxis: [_scaxis.yAxis, _spaxis.yAxis],
         grid: [
           {
-            top: '15%',
+            top: '18%',
             left: '5%',
             width: '43%',
-            bottom: '15%',
+            bottom: '18%',
           },
           {
-            top: '15%',
+            top: '18%',
             width: '43%',
             right: '1%',
-            bottom: '15%',
+            bottom: '18%',
           },
         ],
       })
@@ -1799,7 +1799,7 @@ const PairView = ({ spfile, scfile, location, height, width, margin }) => {
 }
 
 PairView.defaultProps = {
-  height: '30rem',
+  height: '35rem',
   width: '55rem',
   margin: '1rem',
 }
