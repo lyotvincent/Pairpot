@@ -155,7 +155,7 @@ const DatasetList = ({ src, col }) => {
                 placement="left"
                 onClick={() => {
                   axios
-                  .get('http://localhost:5522/query', {
+                  .get('/api/query', {
                     responseType: 'blob',
                   })
                   .then((response) => {

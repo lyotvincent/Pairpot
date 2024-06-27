@@ -45,7 +45,7 @@ export const Tools = () => {
     setSelectedKey(e.key)
   }
   const fetchSPData = () => (
-    axios.get('http://localhost:5522/query/sp', {
+    axios.get('/api/query/sp', {
       responseType: 'blob',
     }).then((response) => {
       let spblob = response.data

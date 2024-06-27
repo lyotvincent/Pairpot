@@ -63,7 +63,7 @@ const Submit = () => {
   const onFinish = (values) => {
     console.log('Received values of form: ', values)
     axios
-      .post('http://localhost:5522/submit', {
+      .post('/api/submit', {
         data: values,
         headers: {
           'Content-Type': 'application/json',

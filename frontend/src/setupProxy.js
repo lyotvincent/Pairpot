@@ -1,12 +1,13 @@
-import createProxyMiddleware from "http-proxy-middleware"
-
-module.exports = function (app) {
+const { createProxyMiddleware } = require('http-proxy-middleware');
+ 
+module.exports = function(app) {
   app.use(
-    createProxyMiddleware('/api', {
-      target: 'http://localhost:5522',
+    '/api',
+    createProxyMiddleware({
+      target: 'http://127.0.0.1:5522',
       changeOrigin: true,
-      ws: true,
-      pathRewrite: { '^/api': '' }  // 这句话是将你请求中的/api换成/api
+      pathRewrite: {'^/api': ''}
     })
-  )
-}
+  );
+};
+

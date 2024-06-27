@@ -947,7 +947,7 @@ const PairView = ({ spfile, scfile, location, height, width, margin }) => {
       if (commandRef.current === 'Deconv') {
         let starttime = Date.now()
         axios
-          .post('http://localhost:5522/deconv', {
+          .post('/api/deconv', {
             data: {
               id: location.state?.st?.dataset_id,
               anno: brushRef.current,
@@ -1036,7 +1036,7 @@ const PairView = ({ spfile, scfile, location, height, width, margin }) => {
       if (commandRef.current === 'Refine') {
         let starttime = Date.now()
         axios
-          .post('http://localhost:5522/refine', {
+          .post('/api/refine', {
             data: {
               name: `resources/235/${title}.h5ad`,
               anno: brushRef.current,

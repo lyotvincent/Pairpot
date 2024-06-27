@@ -791,7 +791,7 @@ const ScScatter = ({ scfile, spfile, location, height, width, margin }) => {
       if (commandRef.current === 'Refine') {
         let starttime = Date.now()
         axios
-          .post('http://localhost:5522/refine', {
+          .post('/api/refine', {
             data: {
               id: location.state?.st?.dataset_id,
               type: _datakey ? "sc" : "sp",

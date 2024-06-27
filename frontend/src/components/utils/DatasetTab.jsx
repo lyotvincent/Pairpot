@@ -68,7 +68,7 @@ const DatasetTab = (props) => {
       console.log('loading data')
       axios({
         method: 'GET',
-        url: 'http://localhost:5522/datasets',
+        url: '/api/datasets',
       })
         .then((response) => {
           console.log("GET Datasets there.")

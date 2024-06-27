@@ -76,7 +76,7 @@ const Browser = () => {
 
   }
   const fetchSPData = () => (
-    axios.get('http://localhost:5522/query/sp', {
+    axios.get('/api/query/sp', {
       params: {
         id: location.state?.st?.dataset_id
       },
@@ -89,7 +89,7 @@ const Browser = () => {
   )
 
   const fetchSCData = () => (
-    axios.get('http://localhost:5522/query/sc', {
+    axios.get('/api/query/sc', {
       params: {
         id: location.state?.st?.dataset_id
       },
