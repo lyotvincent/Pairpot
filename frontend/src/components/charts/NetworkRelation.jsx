@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState, useImperativeHandle } from 'react'
 import * as echarts from 'echarts/core'
 import PropTypes from 'prop-types'
 import H5adLoader from '../utils/H5adLoader'
@@ -30,7 +30,7 @@ const { enterLoading, quitLoading } = Loading
 
 
 
-const NetworkRelation = ({ spfile, scfile, title, height, width, margin }) => {
+const NetworkRelation = ({ spfile, scfile, onRef, title, height, width, margin }) => {
   const chartRef = useRef(null)
   const commandRef = useRef('')
   const [action, setAction] = useState(0)
@@ -85,10 +85,30 @@ const NetworkRelation = ({ spfile, scfile, title, height, width, margin }) => {
     setAction(action + 1)
   }
 
+  useImperativeHandle(onRef, () => ({  // explode trigger for parent components
+    "Trigger": toggleAnno, // Trigger for useEffect
+  }))
+
   useEffect(() => {
     if (Init) {
       console.log("Is Inited.")
       var myChart = echarts.getInstanceByDom(chartRef.current)
+      if (commandRef.current === "Reload") {
+        enterLoading(0, setLoadings)
+        scfile.then((loadedFile) => {
+          ScH5adLoader(loadedFile).then((res) => {
+            setSCGraph(res)
+          })
+        })
+        spfile.then((loadedFile) => {
+          ScH5adLoader(loadedFile).then((res) => {
+            console.log("All data reloaded in Network.")
+            setSPGraph(res)
+            setGraph(res)
+            toggleAnno("Upload")
+          })
+        })
+      }
       if (commandRef.current === "Upload") {
         enterLoading(0, setLoadings)
         myChart.setOption({
@@ -152,7 +172,6 @@ const NetworkRelation = ({ spfile, scfile, title, height, width, margin }) => {
       enterLoading(0, setLoadings)
       scfile.then((loadedFile) => {
         ScH5adLoader(loadedFile).then((res) => {
-          console.log("NetWork data loaded.")
           setSCGraph(res)
         })
       })
@@ -232,6 +251,7 @@ NetworkRelation.defaultProps = {
 NetworkRelation.propTypes = {
   spfile: PropTypes.object,
   scfile: PropTypes.object,
+  onRef: PropTypes.any,
   title: PropTypes.string,
   height: PropTypes.string,
   width: PropTypes.string,

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState, useImperativeHandle } from 'react'
 import PropTypes from 'prop-types'
 import {
   DownloadOutlined,
@@ -36,7 +36,7 @@ echarts.use([
 
 const { enterLoading, quitLoading } = Loading
 
-const MarkerTable = ({ file, title, height, width, margin }) => {
+const MarkerTable = ({ file, onRef, title, height, width, margin }) => {
   const commandRef = useRef('')  // current command
   const [action, setAction] = useState(0)
   const [Init, setInit] = useState(false)  // is Inited
@@ -249,11 +249,27 @@ const MarkerTable = ({ file, title, height, width, margin }) => {
     setAction(action + 1)
   }
 
+  useImperativeHandle(onRef, () => ({  // explode trigger for parent components
+    "Trigger": toggleAnno, // Trigger for useEffect
+  }))
+
   useEffect(() => {
     if (Init) {
       console.log("Is Inited.")
       var myChart = echarts.getInstanceByDom(chartRef.current)
       /*...deal with data */
+      if (commandRef.current === 'Reload') {
+        file.then((file) => {
+          enterLoading(0, setLoadings)
+          enterLoading(1, setLoadings)
+          ScH5adLoader(file).then(() => {
+            console.log("All data reloaded in MarkerTable.")
+            toggleAnno("Upload")
+          })
+        }).catch(error => {
+          console.error('Error fetching blob in LayerView:', error)
+        })
+      }
       if (commandRef.current === "Upload") {
         enterLoading(0, setLoadings)
         enterLoading(1, setLoadings)
@@ -320,7 +336,6 @@ const MarkerTable = ({ file, title, height, width, margin }) => {
             }),
           })
         }
-        console.log(den_data)
         // set heatmap in dendrogram order
         let cells = den.ivl
         let genes_unsorted = _data.map((item) => {
@@ -338,7 +353,6 @@ const MarkerTable = ({ file, title, height, width, margin }) => {
           ]
         }
         genes = genes.reverse()
-        console.log(cells)
         _data = _data.sort((a, b) => cells.indexOf(a.clu) - cells.indexOf(b.clu))
         _data = _data.sort((a, b) => genes.indexOf(a.name) - genes.indexOf(b.name))
         myChart.setOption({

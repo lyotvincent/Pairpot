@@ -5,12 +5,9 @@ import {
   LinkOutlined,
   SearchOutlined,
 } from '@ant-design/icons'
-import React, { useEffect, useRef, useState } from 'react'
-import Highlighter from 'react-highlight-words'
-import { Button, Statistic, Space, ConfigProvider, theme, Row, Col, Table} from 'antd'
-import { useNavigate } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { Statistic, ConfigProvider, theme, Row, Col, Table } from 'antd'
 import TextCollapse from './TextCollapse'
-import DatasetDescription from './DatasetDescription'
 import './bg.scss'
 
 const Columns = [
@@ -22,7 +19,7 @@ const Columns = [
     align: 'right',
   },
   {
-    title: 'Spatial Omics data',
+    title: 'Spatial Transcriptomics data',
     dataIndex: 'st',
     key: 'st',
     width: '45%',
@@ -34,7 +31,7 @@ const Columns = [
     key: 'sc',
     align: 'center',
   },
-];
+]
 const Data = [
   {
     key: '1',
@@ -108,7 +105,7 @@ const DatasetDetails = (props) => {
   const [title, setTitle] = useState()
   const [state, setState] = useState(State)
   const [dataSource, setDataSource] = useState(Data)
-  const {token} = theme.useToken()
+  const { token } = theme.useToken()
   const formItemLayout = {
     labelCol: {
       span: 3,
@@ -120,15 +117,15 @@ const DatasetDetails = (props) => {
 
   var dataIndex = ["dataset_id", "title", "contributors", "summary", "species", "tissues", "technologies", "contacts", "citation", "accessions"]
   useEffect(() => {
-    if(location.state !== null){
+    if (location.state !== null) {
       let stateKeys = Object.keys(location.state)
       let set_sc = stateKeys.includes('sc')
-      if(stateKeys.includes('st')){
+      if (stateKeys.includes('st')) {
         let st_state = location.state.st
         let _dataSource = dataIndex.map((item, index) => {
           let _data = Data[index]
           _data.st = item === 'summary' ? <TextCollapse text={st_state[item]} /> : st_state[item]
-          if(set_sc){
+          if (set_sc) {
             let sc_state = location.state.sc
             _data.sc = item === 'summary' ? <TextCollapse text={sc_state[item]} /> : sc_state[item]
           }
@@ -163,32 +160,32 @@ const DatasetDetails = (props) => {
               padding: 0,
             },
             Statistic: {
-              titleFontSize:18,
-              contentFontSize:36,
-              
+              titleFontSize: 18,
+              contentFontSize: 36,
+
             }
           },
         }}>
         <h3 style={{ color: 'black', marginBottom: 20 }}>{title}</h3>
-        <Row style={{marginBottom:20}} justify="space-evenly">
+        <Row style={{ marginBottom: 20 }} justify="space-evenly">
           <Col span={4} offset={1}>
-            <Statistic title="Samples" value={state.Samples} valueStyle={{ color: token.colorPrimaryActive}} />
+            <Statistic title="Samples" value={state.Samples} valueStyle={{ color: token.colorPrimaryActive }} />
           </Col>
           <Col span={4} offset={1}>
-            <Statistic title="Spots" value={state.Spots} valueStyle={{ color: token.colorPrimaryActive}} />
+            <Statistic title="Spots" value={state.Spots} valueStyle={{ color: token.colorPrimaryActive }} />
           </Col>
           <Col span={4} offset={1}>
-          <Statistic title="Genes" value={state.Genes} valueStyle={{ color: token.colorPrimaryActive}} />
+            <Statistic title="Genes" value={state.Genes} valueStyle={{ color: token.colorPrimaryActive }} />
           </Col>
           <Col span={4} offset={1}>
-          <Statistic title="Cells" value={state.Cells} valueStyle={{ color: token.colorPrimaryActive}} />
+            <Statistic title="Cells" value={state.Cells} valueStyle={{ color: token.colorPrimaryActive }} />
           </Col>
         </Row>
         <Table
           columns={Columns}
           dataSource={dataSource}
           bordered
-          size="small" 
+          size="small"
           pagination={false}></Table>
 
       </ConfigProvider>

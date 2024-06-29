@@ -9,7 +9,7 @@ app.debug = True
 
 @app.after_request
 def add_cors_headers(response):
-    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:6634')
+    response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type, x-requested-with')
     return response
 
@@ -27,32 +27,60 @@ def add_numbers():
     result = num1 + num2
     return jsonify({'result': result})
 
+@app.route('/example', methods=['GET'])
+def example():
 
-@app.route('/datasets', methods=['GET'])
-def init_dataset():
-    """
+    # get study id
+    id = request.args.get("id")
+    if id is None:
+        id = 'STDS0000235'
 
-    """
-
-    # 连接到数据库
+    # connect to database
     conn = sqlite3.connect('resources/STpair.db')
     cursor = conn.cursor()
 
-    # 执行PRAGMA命令来获取表的属性名
+    # fetch attributes of datasets
     cursor.execute("PRAGMA table_info(datasets)")
-
-    # 获取结果并输出属性名
     attributes = [row[1] for row in cursor.fetchall()]
 
-    # 执行查询语句，获取所有数据
-    cursor.execute("SELECT * FROM datasets")
+    # get data from through a specific ID
+    cursor.execute(f"SELECT * FROM datasets WHERE dataset_id = \"{id}\"")
+    row1 = cursor.fetchall()
 
-    # 获取查询结果
+    scid = row1[0][-1]
+    cursor.execute(f"SELECT * FROM datasets WHERE dataset_id = \"{scid}\"")
+    row2 = cursor.fetchall()
+    print(len(row2))
+    # return query results
+    response = jsonify({'attributes': attributes, 'data': [row1[0], row2[0]]})
+    
+    # close connection
+    cursor.close()
+    conn.close()
+
+    return response
+
+
+
+@app.route('/datasets', methods=['GET'])
+def init_dataset():
+
+    # connect to database
+    conn = sqlite3.connect('resources/STpair.db')
+    cursor = conn.cursor()
+
+    # fetch attributes of datasets
+    cursor.execute("PRAGMA table_info(datasets)")
+    attributes = [row[1] for row in cursor.fetchall()]
+
+    # fetch all data
+    cursor.execute("SELECT * FROM datasets")
     rows = cursor.fetchall()
 
+    # return query results
     response = jsonify({'attributes': attributes, 'data': rows})
 
-    # 关闭游标和连接
+    # close connection
     cursor.close()
     conn.close()
 

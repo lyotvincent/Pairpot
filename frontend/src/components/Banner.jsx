@@ -6,12 +6,16 @@ import lassoImg from "../assets/img/lasso.png"
 import netImg from "../assets/img/network.png"
 import heatImg from "../assets/img/heatmap.png"
 import coverImg from "../assets/img/cover-figure.svg"
-
-import { ConfigProvider, Layout } from 'antd'
+import axios from 'axios'
+import { Button, ConfigProvider, Layout, Space } from 'antd'
 import { ArrowRightCircle } from 'react-bootstrap-icons'
 import 'animate.css'
 import TrackVisibility from 'react-on-screen'
-import {Card, Row, Col } from 'antd'
+import { Card, Row, Col } from 'antd'
+import { DeliveredProcedureOutlined, SyncOutlined } from '@ant-design/icons'
+import { useLocation, useNavigate } from 'react-router-dom'
+import Loading from './charts/Loading'
+const { enterLoading, quitLoading } = Loading
 const { Meta } = Card
 
 const { Content, Footer } = Layout
@@ -24,6 +28,9 @@ const Banner = () => {
   const [index, setIndex] = useState(1)
   const toRotate = ['Web Developer', 'Web Designer', 'UI/UX Designer']
   const period = 2000
+  const navigate = useNavigate()
+  const [loading, setLoading] = useState([])
+  const [loadText, setLoadText] = useState("Try an example >>>")
   const contentStyle = {
     height: '160px',
     color: '#fff',
@@ -72,70 +79,111 @@ const Banner = () => {
 
   return (
     <ConfigProvider theme={{
-      components:{
-        Card:{
+      components: {
+        Card: {
           colorBgContainer: "#fff",
-          headerFontSize:32,
+          headerFontSize: 32,
           headerHeight: 48,
           borderRadiusLG: 12,
           colorTextDescription: "rgba(0, 0, 0, 0.6)",
         }
       }
     }}>
-    <Layout>
-      <Content>
-        <section className="banner" id="home">
-          <Row>
-            <Col span={13} offset={1}>
-              <TrackVisibility>
-                {({ isVisible }) => (
-                  <div
-                    className={
-                      isVisible ? 'animate__animated animate__fadeIn' : ''
-                    }>
-                    <div className='headline'>
-                      <span className="tagline"></span>
-                      <h1>
-                        {`Welcome to Pairpot!`}
-                        {/* <span
+      <Layout>
+        <Content>
+          <section className="banner" id="home">
+            <Row>
+              <Col span={14} offset={0}>
+                <TrackVisibility>
+                  {({ isVisible }) => (
+                    <div
+                      className={
+                        isVisible ? 'animate__animated animate__fadeIn' : ''
+                      }>
+                      <div className='headline'>
+                        <h1>
+                          {`Welcome to Pairpot!`}
+                          {/* <span
                           className="txt-rotate"
                           dataPeriod="1000"
                           data-rotate='[ "Web Developer", "Web Designer", "UI/UX Designer" ]'>
                           <span className="wrap">{text}</span>
                         </span> */}
-                      </h1>
-                      <h3>
-                        {`A Database and Lasso-Based Platform Tailored for Paired Single-cell and Spatial Transcriptomics`}
-                      </h3>
-                      <p>
-                      Spatial Transcriptomics analysis requires paired single-cell references for cell-type annotation, cell-proportion inference, and cell co-localization detection.
-                      However, lacking of paired single-cell and spatial transcriptomics data hinders the in-depth deciphering of tissue architectures and functions. 
-                      Pairpot curated currently available paired single-cell and spatially resolved transcriptomics data including nearly 830,000 spots from 80 paired studies. 
-                      Pairpot performed in-depth analysis including batch effects correction, spatial clustering, markers detection, cell-proportion inference, and cell-cell interaction for the paired data.
-                      Moreover, Pairpot designed LassoView, LayerView, and PairView module that enables lasso-based online spatial segmentation/clustering and deconvolution for multiple slices in millisecond-level response time.
-                      </p>
+                        </h1>
+                        <h3>
+                          {`A Database with Real-time Lasso-Based Analysis Tailored for Paired Single-cell and Spatial Transcriptomics`}
+                        </h3>
+                        <p>
+                          Spatial Transcriptomics analysis requires paired single-cell references for cell-type annotation, cell-proportion inference, and cell co-localization detection.
+                          However, lacking of paired single-cell and spatial transcriptomics data hinders the in-depth deciphering of tissue architectures and functions.
+                          Pairpot curated currently available paired single-cell and spatially resolved transcriptomics data including nearly 830,000 spots from 80 paired studies.
+                          Pairpot performed in-depth analysis including batch effects correction, spatial clustering, markers detection, cell-proportion inference, and cell-cell interaction for the paired data.
+                          Moreover, Pairpot designed LassoView, LayerView, and PairView module that enables lasso-based online spatial segmentation/clustering and deconvolution for multiple slices in millisecond-level response time.
+                        </p>
+                        <Button style={{ margin: 0, fontWeight: 500 }}
+                          size='large'
+                          type='primary'
+                          icon={loading[0] ? <SyncOutlined spin /> : <DeliveredProcedureOutlined />}
+                          loading={loading[0]}
+                          onClick={() => {
+                            enterLoading(0, setLoading)
+                            setLoadText("Loading Example...")
+                            axios({
+                              method: 'GET',
+                              url: '/api/example',
+                              params: {
+                                id: "STDS0000235"
+                              },
+                            }).then((response) => {
+                              let dataCol = response.data.attributes
+                              let spitem = response.data.data[0]
+                              let values = Object.fromEntries(
+                                dataCol.map((k, i) => [k, spitem[i]])
+                              )
+                              let scitem = response.data.data[1]
+                              let state = {
+                                st: values
+                              }
+                              if (typeof scitem !== 'undefined') {
+                                let scvalues = Object.fromEntries(
+                                  dataCol.map((k, i) => [k, scitem[i]])
+                                )
+                                state['sc'] = scvalues
+                              }
+                              quitLoading(0, setLoading)
+                              setLoadText("Example Prepared.")
+                              navigate('/browse', { state: state })
+                            })
+                          }
+                          }
+                        >{loadText}</Button>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </TrackVisibility>
-            </Col>
-            <Col span={8} offset={1}>
-              <TrackVisibility>
-                {({ isVisible }) => (
-                  <div
-                    className={
-                      isVisible ? 'animate__animated animate__zoomIn' : ''
-                    }>
-                    <img src={coverImg} alt="Header Img" />
-                  </div>
-                )}
-              </TrackVisibility>
-            </Col>
-          </Row>
-          <br />
+                  )}
+                </TrackVisibility>
+              </Col>
+              <Col span={9} offset={1}>
+                <TrackVisibility>
+                  {({ isVisible }) => (
+                    <div
+                      className={
+                        isVisible ? 'animate__animated animate__zoomIn' : ''
+                      }
+                      style={{
+                        margin: "1rem",
+                        marginRight: '2rem',
+                      }}
+                    >
+                      <img src={coverImg} alt="Header Img" />
+                    </div>
+                  )}
+                </TrackVisibility>
+              </Col>
+            </Row>
+            <br />
 
-          <Row gutter={16}>
-            {/* 
+            <Row gutter={16}>
+              {/* 
                       <Row>
             <h2>Web Function</h2>
             <img src={funcImg} style={{width:'4%'}}></img>
@@ -163,7 +211,7 @@ const Banner = () => {
                 />
               </Card>
             </Col> */}
-            {/* <Col span={6}>
+              {/* <Col span={6}>
               <Card 
               cover={
                 <img
@@ -192,7 +240,7 @@ const Banner = () => {
                 Some cell data correspondence plots.
               </Card>
             </Col> */}
-            {/* <Col span={8}>
+              {/* <Col span={8}>
               <Card 
               cover={
                 <img
@@ -206,9 +254,9 @@ const Banner = () => {
                 Get in touch with us for question help.
               </Card>
             </Col> */}
-          </Row>
+            </Row>
 
-          {/* <br/>
+            {/* <br/>
           <Row>
           <h2>Some data</h2>
           <img src={displayImg} style={{width:'4%'}}></img>
@@ -260,73 +308,79 @@ const Banner = () => {
               <div className='dataprop'></div>
             </Row>
           </div> */}
-              
-          <br/>
+
+            <br />
+            <Row>
+              <h2 style={{ paddingLeft: '1.5rem' }}>
+                {"What can Pairpot provide?"}
+              </h2>
+            </Row>
+            <Row>
+              <Card hoverable
+                style={{ width: '46%', margin: '2%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Layer View</h3>}
+                cover={<img src={layerImg} ></img>}>
+                <Card.Meta classNames='header' description={"The users can explore spatial clusters, cell-type proportions, and gene expression of multiple slices from a study in 3D hierarchical layouts."}></Card.Meta>
+              </Card>
+              <Card hoverable
+                style={{ width: '46%', margin: '2%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Pair View</h3>}
+                cover={<img src={pairImg} ></img>}>
+                <Card.Meta classNames='header' description={"The users can infer cell-type proportions of spots (right) online using the user-lassoed cells from single-cell data (left) in real time."}></Card.Meta>
+              </Card>
+            </Row>
+
+            <Row>
+              <Card hoverable
+                style={{ width: '40%', margin: '2%', marginLeft: '2%', marginRight: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Lasso View</h3>}
+                cover={<img src={lassoImg} ></img>}>
+                <Card.Meta classNames='header' description={"The users can select the customized domains/cells using lasso tools. These domains/cells can be precisely refined in millisecond-level response time."}></Card.Meta>
+              </Card>
+              <Card hoverable
+                style={{ width: '26%', margin: '2%', marginRight: '1%', marginLeft: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Network</h3>}
+                cover={<img src={netImg} ></img>}>
+                <Card.Meta classNames='header' description={"The users can explore the cell-cell communication network both in single-cell and spaital data."}></Card.Meta>
+              </Card>
+              <Card hoverable
+                style={{ width: '25%', margin: '2%', marginRight: '2%', marginLeft: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Heatmap</h3>}
+                cover={<img src={heatImg} ></img>}>
+                <Card.Meta classNames='header' description={"The users can explore L-R pairs, single-cell marker genes and spatial variable genes via heatmap in versatile format."}></Card.Meta>
+              </Card>
+            </Row>
+
+
+          </section>
+        </Content>
+
+        <Footer>
           <Row>
-          <h2 style={{paddingLeft: '1.5rem'}}>What can Pairpot provide?</h2>
+
           </Row>
           <Row>
-            <Card hoverable 
-              style={{width:'46%',margin:'2%', paddingLeft: '1rem', paddingRight: '1rem'}} 
-              title={<h3 style={{marginTop:"1rem", padding:0}}> Layer View</h3>}
-              cover={<img src={layerImg} ></img>}>
-            <Card.Meta classNames='header' description={"The users can explore spatial clusters, cell-type proportions, and gene expression of multiple slices from a study in 3D hierarchical layouts."}></Card.Meta>
-            </Card>
-            <Card hoverable 
-              style={{width:'46%',margin:'2%', paddingLeft: '1rem', paddingRight: '1rem'}} 
-              title={<h3 style={{marginTop:"1rem", padding:0}}> Pair View</h3>}
-              cover={<img src={pairImg} ></img>}>
-            <Card.Meta classNames='header' description={"The users can infer cell-type proportions of spots (right) online using the user-lassoed cells from single-cell data (left) in real time."}></Card.Meta>
-            </Card>
+            <Col span={4}>
+              <Space direction='horizontal'>
+                <h3>Contact us
+                  {' '}
+                  <img src={contactImg} style={{ width: '20%', height: '20%' }}></img>
+                </h3>
+
+              </Space>
+            </Col>
+            <Col offset={1}>
+              <p>
+                *Zhihan Ruan, Centre for Bioinformatics and Intelligent
+                Medicine, Nankai University, rrrzhan@nankai.edu.cn
+              </p>
+              <p>
+                *Jian Liu, State Key Laboratory of Medical Chemical Biology, College of Computer Science, Nankai University, jianliu@nankai.edu.cn
+              </p>
+            </Col>
           </Row>
-
-          <Row>
-          <Card hoverable 
-              style={{width:'40%',margin:'2%',marginLeft:'2%', marginRight:'1%', paddingLeft: '1rem', paddingRight: '1rem'}} 
-              title={<h3 style={{marginTop:"1rem", padding:0}}> Lasso View</h3>}
-              cover={<img src={lassoImg} ></img>}>
-            <Card.Meta classNames='header' description={"The users can select the customized domains/cells using lasso tools. These domains/cells can be precisely refined in millisecond-level response time."}></Card.Meta>
-            </Card>
-            <Card hoverable 
-              style={{width:'26%',margin:'2%', marginRight:'1%', marginLeft:'1%', paddingLeft: '1rem', paddingRight: '1rem'}} 
-              title={<h3 style={{marginTop:"1rem", padding:0}}> Network</h3>}
-              cover={<img src={netImg} ></img>}>
-            <Card.Meta classNames='header' description={"The users can explore the cell-cell communication network both in single-cell and spaital data."}></Card.Meta>
-            </Card>
-            <Card hoverable 
-              style={{width:'25%',margin:'2%', marginRight:'2%', marginLeft:'1%', paddingLeft: '1rem', paddingRight: '1rem'}} 
-              title={<h3 style={{marginTop:"1rem", padding:0}}> Heatmap</h3>}
-              cover={<img src={heatImg} ></img>}>
-            <Card.Meta classNames='header' description={"The users can explore L-R pairs, single-cell marker genes and spatial variable genes via heatmap in versatile format."}></Card.Meta>
-            </Card>
-          </Row>
-
-          
-        </section>
-      </Content>
-
-      <Footer>
-        <Row>
-          <h2>Contact us</h2>
-          <img src={contactImg} style={{width:'5%'}}></img>
-        </Row>
-        <Row>
-          <button onClick={() => console.log('connect')}>
-            Let’s Connect <ArrowRightCircle size={25} />
-          </button>
-          <Col offset={3}>
-            <p>
-              *Zhihan Ruan, Centre for Bioinformatics and Intelligent
-              Medicine, Nankai University, rrrzhan@nankai.edu.cn
-            </p>
-            <p>
-              *Jian Liu, Centre for Bioinformatics and Intelligent
-              Medicine, Nankai University, jianliu@nankai.edu.cn
-            </p>
-          </Col>
-        </Row>
-      </Footer>
-    </Layout>
+        </Footer>
+      </Layout>
     </ConfigProvider>
   )
 }

@@ -71,7 +71,6 @@ const DatasetTab = (props) => {
         url: '/api/datasets',
       })
         .then((response) => {
-          console.log("GET Datasets there.")
           setDataSrc(response.data.data)
           setDataCol(response.data.attributes)
           setFresh(false)

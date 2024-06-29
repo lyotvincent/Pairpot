@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import '../App.css'
 import {
   HomeOutlined,
@@ -11,6 +11,7 @@ import {
 } from '@ant-design/icons'
 import { Menu, ConfigProvider, Layout, Radio, theme, Space, Divider, Card } from 'antd'
 import { NavLink } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import useToken from 'antd/es/theme/useToken'
 const { Header } = Layout
 
@@ -21,7 +22,7 @@ const items = [
         Home
       </NavLink>
     ),
-    key: 'home',
+    key: '/home',
     icon: <HomeOutlined />,
   },
   {
@@ -30,7 +31,7 @@ const items = [
         Browse
       </NavLink>
     ),
-    key: 'browse',
+    key: '/browse',
     icon: <SearchOutlined />,
   },
   {
@@ -39,71 +40,58 @@ const items = [
         Database
       </NavLink>
     ),
-    key: 'db',
+    key: '/database',
     icon: <DatabaseOutlined />,
   },
-  {
-    label: (
-      <NavLink to="/tools" style={{ textDecorationLine: 'none' }}>
-        Tools
-      </NavLink>
-    ),
-    key: 'tools',
-    icon: <ToolOutlined />,
-    // children: [
-    //   {
-    //     label: 'Lasso-Refine',
-    //     key: 'lr',
-    //   },
-    //   {
-    //     label: 'Spatial Variable Genes',
-    //     key: 'svg',
-    //   },
-    //   {
-    //     label: 'Lasso-Deconvolution',
-    //     key: 'ld',
-    //   },
-    //   {
-    //     label: 'Cell Communication',
-    //     key: 'cc',
-    //   },
-    //   {
-    //     label: 'Function Analysis',
-    //     key: 'fa',
-    //   },
-    // ],
-  },
+  // {
+  //   label: (
+  //     <NavLink to="/tools" style={{ textDecorationLine: 'none' }}>
+  //       Tools
+  //     </NavLink>
+  //   ),
+  //   key: 'tools',
+  //   icon: <ToolOutlined />,
+  // },
   {
     label: 'Download',
-    key: 'dl',
+    key: '/download',
     icon: <CloudDownloadOutlined />,
   },
-  {
-    label: (
-      <NavLink to={`/submit`} style={{ textDecorationLine: 'none' }}>
-        Submit
-      </NavLink>
-    ),
-    key: 'submit',
-    icon: <CloudUploadOutlined />,
-  },
+  // {
+  //   label: (
+  //     <NavLink to={`/submit`} style={{ textDecorationLine: 'none' }}>
+  //       Submit
+  //     </NavLink>
+  //   ),
+  //   key: 'submit',
+  //   icon: <CloudUploadOutlined />,
+  // },
   {
     label: (
       <NavLink to={`/contact`} style={{ textDecorationLine: 'none' }}>
         Help
       </NavLink>
     ),
-    key: 'help',
+    key: '/contact',
     icon: <QuestionCircleOutlined />,
   },
 ]
 
 const Nav = () => {
   const [themeToken, setThemeToken] = useState("secret")
+  const [key, setKey] = useState("home")
+  const location = useLocation()
   const { token } = theme.useToken()
   const handleThemeChange = (e) => {
     setThemeToken(e.target.value)
   }
+
+  useEffect(() => {
+    if (location.pathname !== key) {
+      setKey(location.pathname)
+    }
+  }, [location])
+
   return (
     <ConfigProvider
       theme={{
@@ -139,6 +127,11 @@ const Nav = () => {
             flex: 1,
           }}
           items={items}
+          selectedKeys={key}
+          defaultSelectedKeys="home"
+          onSelect={(e) => {
+            setKey(e.key)
+          }}
         />
         {/* <Space>
           <span>Theme: </span>

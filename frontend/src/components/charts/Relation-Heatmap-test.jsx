@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState, useImperativeHandle } from 'react'
 import * as echarts from 'echarts'
 import PropTypes from 'prop-types'
 import { Space, Spin, Switch } from 'antd'
@@ -28,7 +28,7 @@ echarts.use([
 
 const { enterLoading, quitLoading } = Loading
 
-const RelHeat = ({ spfile, scfile, title, height, width, margin }) => {
+const RelHeat = ({ spfile, scfile, onRef, title, height, width, margin }) => {
   const chartRef = useRef(null) // get current DOM container
   const commandRef = useRef('')
   const [action, setAction] = useState(0)
@@ -82,20 +82,44 @@ const RelHeat = ({ spfile, scfile, title, height, width, margin }) => {
     setAction(action + 1)
   }
 
+  useImperativeHandle(onRef, () => ({  // explode trigger for parent components
+    "Trigger": toggleAnno, // Trigger for useEffect
+  }))
 
   useEffect(() => {
     if (Init) {
       console.log("Is Inited.")
       var myChart = echarts.getInstanceByDom(chartRef.current)
 
+      if (commandRef.current === "Reload") {
+        enterLoading(0, setLoadings)
+        scfile.then((loadedFile) => {
+          ScH5adLoader(loadedFile).then((h5info) => {
+            setScHeatmap(h5info)
+          })
+        })
+        spfile.then((file) => {
+          ScH5adLoader(file).then((h5info) => {
+            console.log("All data reloaded in CPDB.")
+            setSpHeatmap(h5info)
+            setDataArray(h5info.dataArray)
+            setCellArray(h5info.cellArray)
+            setIntArray(h5info.intArray)
+            setmyCells(h5info.cellType)
+            setDataKeys(h5info.dataKeys)
+            setCurrentData(h5info.dataArray[h5info.cellType[0]])
+            setCurrentInt(h5info.intArray[h5info.cellType[0]])
+            setCurrentCell(h5info.cellArray[h5info.cellType[0]])
+            toggleAnno("Upload")
+          })
+        }).catch(error => {
+          console.error('Error fetching blob in LayerView:', error)
+        })
+      }
       if (commandRef.current === "Upload") {
         enterLoading(0, setLoadings)
         const interactions = currentInt
         const celltypes = currentCell
-        // const interactions = currentInt.map(item => item["0"])
-        // const celltypes = currentCell.map(item => item["0"])
-        //console.log(interactions)
-
 
         myChart.setOption({
           tooltip: {},
@@ -298,8 +322,6 @@ const RelHeat = ({ spfile, scfile, title, height, width, margin }) => {
       else if (commandRef.current === "Setting") {
         let interactions = currentInt
         let celltypes = currentCell
-        // let interactions = currentInt.map(item => item["0"])
-        // let celltypes = currentCell.map(item => item["0"])
 
         myChart.setOption({
           dataset: [{
@@ -343,15 +365,13 @@ const RelHeat = ({ spfile, scfile, title, height, width, margin }) => {
       enterLoading(0, setLoadings)
       scfile.then((loadedFile) => {
         ScH5adLoader(loadedFile).then((h5info) => {
-          console.log("CPDB scHeatmap data loaded.")
           setScHeatmap(h5info)
         })
       })
       spfile.then((file) => {
         ScH5adLoader(file).then((h5info) => {
-          console.log("CPDB spHeatmap data loaded.")
+          console.log("All CPDB Heatmap data loaded.")
           setSpHeatmap(h5info)
-          //console.log(h5info)
           setDataArray(h5info.dataArray)
           setCellArray(h5info.cellArray)
           setIntArray(h5info.intArray)
@@ -545,7 +565,7 @@ const RelHeat = ({ spfile, scfile, title, height, width, margin }) => {
 }
 
 RelHeat.defaultProps = {
-  title: 'ScHeatmap',
+  title: 'L-R Pairs Heatmap',
   height: '60rem',
   width: '60rem',
   margin: '2rem',
@@ -554,6 +574,7 @@ RelHeat.defaultProps = {
 RelHeat.propTypes = {
   file: PropTypes.object,
   title: PropTypes.string,
+  onRef: PropTypes.any,
   height: PropTypes.string,
   width: PropTypes.string,
   margin: PropTypes.string,

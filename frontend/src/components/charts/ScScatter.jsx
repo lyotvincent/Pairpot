@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect, useImperativeHandle } from 'react'
 import * as echarts from 'echarts'
 import PropTypes from 'prop-types'
 import '../theme/dark'
@@ -63,7 +63,7 @@ echarts.use([
 const { Dragger } = Upload
 const { useToken } = theme
 
-const ScScatter = ({ scfile, spfile, location, height, width, margin }) => {
+const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) => {
   const [api, contextHolder] = notification.useNotification()
   const [isInit, setInit] = useState(false) // whether echart object is inited
   const chartRef = useRef(null) // current DOM container
@@ -410,11 +410,39 @@ const ScScatter = ({ scfile, spfile, location, height, width, margin }) => {
     })
   }
 
+  useImperativeHandle(onRef, () => ({  // explode trigger for parent components
+    "Trigger": toggleAnno, // Trigger for useEffect
+  }))
+
   useEffect(() => {
     if (isInit) {
       // get the echart container
       var myChart = echarts.getInstanceByDom(chartRef.current)
       let _series = seriesArray
+      if (commandRef.current === 'Reload') {
+        enterLoading(0, setLoadings)
+        spfile.then((file) => {
+          SpH5adLoader(file).then((h5info) => {
+            //console.log("sp data loaded.")
+            setSpData(h5info)
+          })
+        }).catch(error => {
+          console.error('Error fetching blob in LassoView:', error)
+        })
+        scfile.then((file) => {
+          SpH5adLoader(file).then((h5info) => {
+            console.log("All data loaded in LassoView.")
+            _setData(h5info.data)
+            setTitle(h5info.title)
+            setClusterOps(h5info.clusters)
+            setEmbedOps(h5info.embdOps)
+            setScData(h5info)
+            toggleAnno("Upload")
+          })
+        }).catch(error => {
+          console.error('Error fetching blob in LassoView:', error)
+        })
+      }
       if (commandRef.current === 'Upload') {
         let _dims = [...Object.keys(_data[0]), 'id']
         let source = _data.map((item, id) => {
@@ -712,7 +740,7 @@ const ScScatter = ({ scfile, spfile, location, height, width, margin }) => {
               replaceMerge: ['dataset', 'series', 'visualMap'],
             }
           )
-          console.log(myChart.getOption())
+          //console.log(myChart.getOption())
           prevCluster.current = clusterCur
         } else {
           // set series only
@@ -733,12 +761,12 @@ const ScScatter = ({ scfile, spfile, location, height, width, margin }) => {
             yAxis: axis.yAxis,
             series: _series,
           })
-          console.log(myChart.getOption())
+          //console.log(myChart.getOption())
         }
       }
       if (commandRef.current === 'Confirm') {
         snumRef.current = snumRef.current + 1
-        console.log(`seriesNum ${snumRef.current}`)
+        //console.log(`seriesNum ${snumRef.current}`)
         _series.push(seriesRef.current)
         setSeriesArray(_series)
         setBrushArray([
@@ -861,7 +889,7 @@ const ScScatter = ({ scfile, spfile, location, height, width, margin }) => {
         )
         setSeriesArray(__series)
         setDeleteValue([])
-        console.log(myChart.getOption())
+        //console.log(myChart.getOption())
         api.warning({
           message: 'Annotation Deleted',
           description:
@@ -892,7 +920,7 @@ const ScScatter = ({ scfile, spfile, location, height, width, margin }) => {
       enterLoading(0, setLoadings)
       spfile.then((file) => {
         SpH5adLoader(file).then((h5info) => {
-          console.log("sp data loaded.")
+          //console.log("sp data loaded.")
           setSpData(h5info)
         })
       }).catch(error => {
@@ -900,7 +928,7 @@ const ScScatter = ({ scfile, spfile, location, height, width, margin }) => {
       })
       scfile.then((file) => {
         SpH5adLoader(file).then((h5info) => {
-          console.log("sc data loaded.")
+          console.log("All data loaded in LassoView.")
           _setData(h5info.data)
           setTitle(h5info.title)
           setClusterOps(h5info.clusters)
@@ -1063,7 +1091,7 @@ const ScScatter = ({ scfile, spfile, location, height, width, margin }) => {
         }
       }
       reader.onloadend = () => {
-        console.log("Load sp data finished.")
+        //console.log("Load sp data finished.")
       }
       reader.onerror = (error) => {
         reject(error)
@@ -1155,7 +1183,7 @@ const ScScatter = ({ scfile, spfile, location, height, width, margin }) => {
               <Dragger {...upLoadProps}>
                 <p
                   className="ant-upload-drag-icon"
-                  style={{ fontSize: 16, margin: 10 }}>
+                  style={{ fontSize: 16, marginTop: 10, marginBottom: 10, alignItems: "center" }}>
                   <InboxOutlined />
                   <br />
                   Upload
@@ -1166,12 +1194,10 @@ const ScScatter = ({ scfile, spfile, location, height, width, margin }) => {
                   { label: 'SC', value: true },
                   { label: 'SP', value: false },
                 ]}
-                defaultValue={true}
                 value={_datakey}
                 onChange={(value) => {
                   setDatakey(value)
                   let h5info = value ? _scdata : _spdata
-                  console.log("_spdata:", h5info)
                   _setData(h5info.data)
                   setTitle(h5info.title)
                   setClusterOps(h5info.clusters)
@@ -1587,6 +1613,7 @@ ScScatter.propTypes = {
   scfile: PropTypes.object,
   spfile: PropTypes.object,
   location: PropTypes.object,
+  onRef: PropTypes.any,
   height: PropTypes.string,
   width: PropTypes.string,
   margin: PropTypes.string,

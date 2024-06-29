@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect, useImperativeHandle } from 'react'
 import * as echarts from 'echarts'
 import PropTypes from 'prop-types'
 import '../theme/dark'
@@ -65,7 +65,7 @@ const { Dragger } = Upload
 const { useToken } = theme
 const { quitLoading, enterLoading } = Loading
 
-const PairView = ({ spfile, scfile, location, height, width, margin }) => {
+const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) => {
   const [api, contextHolder] = notification.useNotification()
   const [isInit, setInit] = useState(false) // whether echart object is inited
   const chartRef = useRef(null) // current DOM container
@@ -350,7 +350,7 @@ const PairView = ({ spfile, scfile, location, height, width, margin }) => {
         }
       }
       reader.onloadend = () => {
-        console.log("Load sp data finished.")
+        //console.log("Load sp data finished.")
       }
       reader.onerror = (error) => {
         reject(error)
@@ -378,7 +378,7 @@ const PairView = ({ spfile, scfile, location, height, width, margin }) => {
         }
       }
       reader.onloadend = () => {
-        console.log("Load sc data finished.")
+        //console.log("Load sc data finished.")
       }
       reader.onerror = (error) => {
         reject(error)
@@ -388,12 +388,25 @@ const PairView = ({ spfile, scfile, location, height, width, margin }) => {
 
   }
 
+  useImperativeHandle(onRef, () => ({  // explode trigger for parent components
+    "Trigger": toggleAnno, // Trigger for useEffect
+  }))
 
   useEffect(() => {
     if (isInit) {
       // get the echart container
       var myChart = echarts.getInstanceByDom(chartRef.current)
       let _series = seriesArray
+      if (commandRef.current === 'Reload') {
+        enterLoading(1, setLoadings)
+        Promise.all([spfile.then((file) => SpH5adLoader(file)),
+        scfile.then((file) => ScH5adLoader(file))]).then(() => {
+          console.log("All data reloaded in PairView.")
+          toggleAnno("Upload")
+        }).catch(error => {
+          console.error('Error fetching blob in PairView:', error)
+        })
+      }
       if (commandRef.current === 'Upload') {
         enterLoading(1, setLoadings)
         let _scdims = [...Object.keys(_scdata[0]), 'id']
@@ -1038,7 +1051,8 @@ const PairView = ({ spfile, scfile, location, height, width, margin }) => {
         axios
           .post('/api/refine', {
             data: {
-              name: `resources/235/${title}.h5ad`,
+              id: location.state?.st?.dataset_id,
+              type: "sc",
               anno: brushRef.current,
               refiner: refineValue.value,
               starttime: starttime,
@@ -1137,7 +1151,7 @@ const PairView = ({ spfile, scfile, location, height, width, margin }) => {
       enterLoading(1, setLoadings)
       Promise.all([spfile.then((file) => SpH5adLoader(file)),
       scfile.then((file) => ScH5adLoader(file))]).then(() => {
-        console.log("All data loaded.")
+        console.log("All data loaded in PairView.")
         toggleAnno("Upload")
       }).catch(error => {
         console.error('Error fetching blob in PairView:', error)
@@ -1808,6 +1822,7 @@ PairView.propTypes = {
   spfile: PropTypes.object,
   scfile: PropTypes.object,
   location: PropTypes.object,
+  onRef: PropTypes.any,
   height: PropTypes.string,
   width: PropTypes.string,
   margin: PropTypes.string,

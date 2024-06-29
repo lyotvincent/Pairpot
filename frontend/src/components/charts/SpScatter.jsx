@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState, useImperativeHandle } from 'react'
 import * as echarts from 'echarts'
 import PropTypes from 'prop-types'
 import '../theme/dark'
@@ -53,7 +53,7 @@ const { useToken } = theme
 const { quitLoading, enterLoading } = Loading
 
 // left figure is umap2 and right figure is spatial3
-const SpScatter = ({ query, spfile, height, width, margin }) => {
+const SpScatter = ({ query, spfile, onRef, height, width, margin }) => {
   const chartRef = useRef(null) // get current DOM container
   const commandRef = useRef('') // get the current command for useEffect
   const [action, setAction] = useState(0)
@@ -304,7 +304,7 @@ const SpScatter = ({ query, spfile, height, width, margin }) => {
         }
       }
       reader.onloadend = () => {
-        console.log("Load sp data finished.")
+        //console.log("Load sp data finished.")
       }
       reader.onerror = (error) => {
         reject(error)
@@ -341,11 +341,26 @@ const SpScatter = ({ query, spfile, height, width, margin }) => {
     setAction(action + 1)
   }
 
+  useImperativeHandle(onRef, () => ({  // explode trigger for parent components
+    "Trigger": toggleAnno, // Trigger for useEffect
+  }))
+
   useEffect(() => {
 
     if (isInit) {
       console.log("Is Inited.")
       var myChart = echarts.getInstanceByDom(chartRef.current)
+      if (commandRef.current === "Reload") {
+        enterLoading(0, setLoading)
+        spfile.then((file) => {
+          SpH5adLoader(file).then(() => {
+            console.log("LayerView data reloaded.")
+            toggleAnno("Upload")
+          })
+        }).catch(error => {
+          console.error('Error fetching blob in LayerView:', error)
+        })
+      }
       if (commandRef.current === "Upload") {
         enterLoading(0, setLoading)
         // 1.set source
@@ -353,7 +368,7 @@ const SpScatter = ({ query, spfile, height, width, margin }) => {
         let source = _data.map((item, id) => {
           return [...Object.entries(item).map(([_, value]) => value), id]
         })
-        symbolSizeRef.current = source.length > 5000 ? 3 : 6
+        symbolSizeRef.current = source.length > 5000 ? 4 : 6
         setItemSize(symbolSizeRef.current)
         setCellNum(source.length)
 
@@ -397,7 +412,7 @@ const SpScatter = ({ query, spfile, height, width, margin }) => {
         let _snum = 0
         let _3DSeries = {
           type: 'scatter3D',
-          symbolSize: symbolSizeRef.current / 2,
+          symbolSize: (symbolSizeRef.current / 2) > 2 ? (symbolSizeRef.current / 2) : 2,
           name: "batch",
           encode: {
             x: xName,
@@ -445,7 +460,7 @@ const SpScatter = ({ query, spfile, height, width, margin }) => {
           _snum = _snum + 1
           _series.push({
             type: 'scatter3D',
-            symbolSize: symbolSizeRef.current / 2,
+            symbolSize: (symbolSizeRef.current / 2) > 2 ? (symbolSizeRef.current / 2) : 2,
             name: anno,
             encode: {
               x: xName,
@@ -556,7 +571,7 @@ const SpScatter = ({ query, spfile, height, width, margin }) => {
         // set series
         let myVisualMap = []
         let _3DSeries = _series[0]
-        _3DSeries.symbolSize = itemSize / 2
+        _3DSeries.symbolSize = (itemSize / 2) > 2 ? itemSize : 2
         _3DSeries.itemStyle.opacity = itemOpacity / 2
         _3DSeries.encode = {
           x: `${embd3D}_0`,
@@ -595,7 +610,7 @@ const SpScatter = ({ query, spfile, height, width, margin }) => {
           for (let anno in annotations) {
             _newSeries.push({
               type: 'scatter3D',
-              symbolSize: itemSize / 2,
+              symbolSize: (itemSize / 2) > 2 ? itemSize / 2 : 2,
               grid3DIndex: 0,
               name: anno,
               encode: {
@@ -639,7 +654,7 @@ const SpScatter = ({ query, spfile, height, width, margin }) => {
           _newSeries.push({
             type: 'scatter3D',
             name: clusterCur.label,
-            symbolSize: itemSize / 2,
+            symbolSize: (itemSize / 2) > 2 ? (itemSize / 2) : 2,
             grid3DIndex: 0,
             encode: {
               // annotations are displayed in left chart
@@ -713,7 +728,7 @@ const SpScatter = ({ query, spfile, height, width, margin }) => {
         enterLoading(0, setLoading)
         spfile.then((file) => {
           SpH5adLoader(file).then(() => {
-            console.log("All sp data loaded.")
+            console.log("LayerView data loaded.")
             toggleAnno("Upload")
           })
         }).catch(error => {
@@ -825,7 +840,7 @@ const SpScatter = ({ query, spfile, height, width, margin }) => {
             <Dragger {...upLoadProps} style={{ marginTop: 20 }}>
               <p
                 className="ant-upload-drag-icon"
-                style={{ fontSize: 16, fontFamily: 'Arial', margin: 5 }}>
+                style={{ fontSize: 16, marginTop: 10, marginBottom: 10, alignItems: "center" }}>
                 <InboxOutlined />
                 <br />
                 Upload
@@ -1042,6 +1057,7 @@ SpScatter.defaultProps = {
 SpScatter.propTypes = {
   query: PropTypes.bool,
   spfile: PropTypes.object,
+  onRef: PropTypes.any,
   height: PropTypes.string,
   width: PropTypes.string,
   margin: PropTypes.string,
