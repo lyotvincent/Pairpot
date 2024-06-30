@@ -183,7 +183,15 @@ const Browser = () => {
         <Layout>
           <Content style={{ padding: '20px 20px' }}>
             <Col span={6} offset={8} id='Search'>
-              <div style={{ width: "100%", height: 70, marginBottom: 30, marginRight: 5, backgroundImage: `url(${logoFig})`, backgroundSize: 'cover', alignItems: "center" }} />
+              <div style={{
+                width: '300px',
+                height: "70px",
+                marginBottom: 30,
+                backgroundImage: `url(${logoFig})`,
+                objectFit: "cover",
+                backgroundSize: 'cover',
+                alignItems: "center"
+              }} />
             </Col>
             <Col span={18} offset={3}> <Search /> </Col>
 
