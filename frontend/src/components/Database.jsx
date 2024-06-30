@@ -51,14 +51,14 @@ export const Database = () => {
       style={{
         minHeight: '100vh',
       }}>
-      <Sider
+      {/* <Sider
         width={200}
         breakpoint="lg"
         collapsible
         collapsed={collapsed}
         onCollapse={(value) => setCollapsed(value)}>
         <SideMenu items={srcMeta} collapsed={collapsed} />
-      </Sider>
+      </Sider> */}
       <Layout>
         <Content
           style={{

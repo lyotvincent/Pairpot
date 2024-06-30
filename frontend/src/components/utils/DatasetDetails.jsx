@@ -95,10 +95,6 @@ const Data = [
   },
 ]
 const State = {
-  Spots: 6666,
-  Samples: 66,
-  Cells: 66666,
-  Genes: 66666,
 }
 const DatasetDetails = (props) => {
   const { navigate, location } = props

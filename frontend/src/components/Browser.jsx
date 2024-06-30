@@ -1,5 +1,6 @@
 import { DotChartOutlined, FileDoneOutlined, FileSearchOutlined, FileTextOutlined, HeatMapOutlined, LinkOutlined, OneToOneOutlined, SelectOutlined, SlidersOutlined, UnorderedListOutlined } from '@ant-design/icons'
 import React, { useState, useEffect, lazy, Suspense } from 'react'
+import logoFig from "../assets/img/mylogo.png"
 import {
   Menu,
   Button,
@@ -124,7 +125,7 @@ const Browser = () => {
   const [scfile, setSCFile] = useState(sc)
   const [spfile, setSPFile] = useState(sp)
   useEffect(() => {
-    if (Init) {
+    if (Init && location.state !== null) {
       setSCFile(fetchSCData(location))
       setSPFile(fetchSPData(location))
       LassoRef.current.Trigger("Reload")  // call ToggleAnno to trigger reload in useEffect
@@ -137,7 +138,6 @@ const Browser = () => {
     else {
       setInit(true)
     }
-
   }, [location])
 
   return (
@@ -182,7 +182,10 @@ const Browser = () => {
         </Sider>
         <Layout>
           <Content style={{ padding: '20px 20px' }}>
-            <Col span={18} offset={3} id='Search'> <Search /> </Col>
+            <Col span={6} offset={8} id='Search'>
+              <div style={{ width: "100%", height: 70, marginBottom: 30, marginRight: 5, backgroundImage: `url(${logoFig})`, backgroundSize: 'cover', alignItems: "center" }} />
+            </Col>
+            <Col span={18} offset={3}> <Search /> </Col>
 
             <Divider />
             <Suspense fallback={<h1>Loading for MetaInfo...</h1>}>

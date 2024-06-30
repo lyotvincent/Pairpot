@@ -727,11 +727,11 @@ nav.navbar .navbar-toggler[aria-expanded='true'] .navbar-toggler-icon {
 }
 
 .demo-logo {
-  width: 120px;
-  height: 32px;
-  margin-right: 32px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
+  width: 6rem;
+  height: 2.9rem;
+  margin:0;
+  background: transparent;
+  border-radius: 0px;
 }
 
 .demo-logo-vertical {

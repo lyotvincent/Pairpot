@@ -60,7 +60,7 @@ const DatasetTab = (props) => {
         icon={<ReloadOutlined />}>
         Reload
       </Button>
-      <Button icon={<DownloadOutlined />}>Download</Button>
+      {/* <Button icon={<DownloadOutlined />}>Download</Button> */}
     </Space>
   )
   useEffect(() => {

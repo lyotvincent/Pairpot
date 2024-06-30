@@ -57,6 +57,7 @@ const Search = ({ }) => {
   const [loadText, setLoadText] = useState("Search")
   const navigate = useNavigate()
   const [loading, setLoading] = useState([])
+  const [open, setOpen] = useState(false)
   return (
     <ConfigProvider theme={{
       components: {
@@ -72,6 +73,9 @@ const Search = ({ }) => {
           width: "100%"
         }}
         options={options}
+        open={open}
+        onBlur={() => { setOpen(false) }}
+        onSelect={() => { setOpen(false) }}
         size="large"
       >
         <Input.Search
@@ -79,7 +83,9 @@ const Search = ({ }) => {
           placeholder="Search for a Study to Browse."
           enterButton={loadText}
           loading={loading[0]}
+          onClick={() => { setOpen(!open) }}
           onSearch={(e) => {
+            setOpen(false)
             enterLoading(0, setLoading)
             setLoadText("Searching...")
             axios({

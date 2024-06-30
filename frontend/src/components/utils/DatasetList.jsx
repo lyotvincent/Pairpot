@@ -62,10 +62,9 @@ const DatasetList = ({ src, col }) => {
       size="large"
       pagination={{
         showSizeChanger: true,
-        onChange: (page) => {
-          console.log(page)
-        },
-        pageSize: 5,
+        showQuickJumper: true,
+        pageSizeOptions: [5, 10, 20, 50],
+        showTotal: (total) => `Total ${total} items`,
       }}
       dataSource={dataSrc}
       renderItem={(item) => (
@@ -89,7 +88,7 @@ const DatasetList = ({ src, col }) => {
               attr="Technology"
               text={item[attr.technologies]}
               key="list-vertical-message"
-              onClick={() => {}}
+              onClick={() => { }}
             />,
             <Rate defaultValue={2} />,
           ]}
@@ -109,16 +108,16 @@ const DatasetList = ({ src, col }) => {
                 key="list-vertical-visualization-o"
                 attr="Visualize this Dataset"
                 placement="left"
-                onClick={()=>{
+                onClick={() => {
                   let values = Object.fromEntries(
                     dataCol.map((k, i) => [k, item[i]])
                   )
                   let scid = values['has_paired']
-                  let scitem = dataSrc.find((item)=> item[1]===scid)
+                  let scitem = dataSrc.find((item) => item[1] === scid)
                   let state = {
                     st: values
                   }
-                  if(typeof scitem !== 'undefined'){
+                  if (typeof scitem !== 'undefined') {
                     let scvalues = Object.fromEntries(
                       dataCol.map((k, i) => [k, scitem[i]])
                     )
@@ -128,7 +127,7 @@ const DatasetList = ({ src, col }) => {
                 }}
               />
               <br />
-              <br />
+              {/* <br />
               <IconText
                 icon={LinkOutlined}
                 text="Paired Datasets"
@@ -145,7 +144,7 @@ const DatasetList = ({ src, col }) => {
                   )
                 }}
               />
-              <br/>
+              <br/> */}
               <br />
               <IconText
                 icon={DownloadOutlined}
@@ -155,26 +154,26 @@ const DatasetList = ({ src, col }) => {
                 placement="left"
                 onClick={() => {
                   axios
-                  .get('/api/query', {
-                    responseType: 'blob',
-                  })
-                  .then((response) => {
-                    console.log(response)
-                    let blob = response.data
-                    let url = window.URL.createObjectURL(blob);
-                    let a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${item[1]}.h5ad`;
-                    document.body.appendChild(a);
-                    a.click();
-                    
-                    // 清理
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                  })
-                  .catch(error=>{
-                    console.error('Error fetching blob:', error);
-                  })
+                    .get('/api/query', {
+                      responseType: 'blob',
+                    })
+                    .then((response) => {
+                      console.log(response)
+                      let blob = response.data
+                      let url = window.URL.createObjectURL(blob)
+                      let a = document.createElement('a')
+                      a.href = url
+                      a.download = `${item[1]}.h5ad`
+                      document.body.appendChild(a)
+                      a.click()
+
+                      // 清理
+                      window.URL.revokeObjectURL(url)
+                      document.body.removeChild(a)
+                    })
+                    .catch(error => {
+                      console.error('Error fetching blob:', error)
+                    })
                 }}
               />
             </div>
@@ -193,24 +192,24 @@ const DatasetList = ({ src, col }) => {
                   header={<b>Summary: </b>}
                 />
                 <Space>
-                {item[attr['pmid']] ? (
-                  <div>
-                    <b>PMID: </b> {item[attr['pmid']]}
-                  </div>
-                ) : (
-                  ' '
-                )}
-                {
-                  (  item[attr.spots] ? (
+                  {item[attr['pmid']] ? (
                     <div>
-                      <Button type="primary" size="small" shape="round">
-                        {AddCommas(item[attr.spots])} spots
-                      </Button>
+                      <b>PMID: </b> {item[attr['pmid']]}
                     </div>
                   ) : (
                     ' '
-                  ))
-                }
+                  )}
+                  {
+                    (item[attr.spots] ? (
+                      <div>
+                        <Button type="primary" size="small" shape="round">
+                          {AddCommas(item[attr.spots])} spots
+                        </Button>
+                      </div>
+                    ) : (
+                      ' '
+                    ))
+                  }
                 </Space>
               </div>
             }
