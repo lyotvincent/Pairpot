@@ -145,7 +145,32 @@ const Browser = () => {
       CPDBRef.current.Trigger("Reload")
     }
     else {
-      if (location.state !== null) {
+      if (location.state === null) {
+        axios({
+          method: 'GET',
+          url: '/api/example',
+          params: {
+            id: "STDS0000235"
+          },
+        }).then((response) => {
+          let dataCol = response.data.attributes
+          let spitem = response.data.data[0]
+          let values = Object.fromEntries(
+            dataCol.map((k, i) => [k, spitem[i]])
+          )
+          let scitem = response.data.data[1]
+          let state = {
+            st: values
+          }
+          if (typeof scitem !== 'undefined') {
+            let scvalues = Object.fromEntries(
+              dataCol.map((k, i) => [k, scitem[i]])
+            )
+            state['sc'] = scvalues
+          }
+          navigate('/browse', { state: state })
+        })
+      } else {
         setInit(true)
       }
     }
