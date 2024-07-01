@@ -67,7 +67,7 @@ const RelHeat = ({ spfile, scfile, onRef, title, height, width, margin }) => {
         }
       }
       reader.onloadend = () => {
-        console.log("Load heatmap data finished.")
+        //console.log("Load heatmap data finished.")
       }
       reader.onerror = (error) => {
         reject(error)
@@ -88,7 +88,6 @@ const RelHeat = ({ spfile, scfile, onRef, title, height, width, margin }) => {
 
   useEffect(() => {
     if (Init) {
-      console.log("Is Inited.")
       var myChart = echarts.getInstanceByDom(chartRef.current)
 
       if (commandRef.current === "Reload") {

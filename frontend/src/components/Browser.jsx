@@ -1,5 +1,5 @@
 import { DotChartOutlined, FileDoneOutlined, FileSearchOutlined, FileTextOutlined, HeatMapOutlined, LinkOutlined, OneToOneOutlined, SelectOutlined, SlidersOutlined, UnorderedListOutlined } from '@ant-design/icons'
-import React, { useState, useEffect, lazy, Suspense } from 'react'
+import React, { useState, useEffect, lazy, Suspense, useRef } from 'react'
 import logoFig from "../assets/img/mylogo.png"
 import {
   Menu,
@@ -83,6 +83,8 @@ const Browser = () => {
   const [Init, setInit] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const [selectedKey, setSelectedKey] = useState(sideMenuItems[0].key)
+  const [action, setAction] = useState(0)
+  const commandRef = useRef()
   const onClickSideMenu = (e) => {
 
   }
@@ -124,7 +126,14 @@ const Browser = () => {
 
   const [scfile, setSCFile] = useState(sc)
   const [spfile, setSPFile] = useState(sp)
+
+  const toggleAction = (command) => {
+    commandRef.current = command
+    setAction(action + 1)
+  }
+
   useEffect(() => {
+    console.log(location.state)
     if (Init && location.state !== null) {
       setSCFile(fetchSCData(location))
       setSPFile(fetchSPData(location))
@@ -136,7 +145,9 @@ const Browser = () => {
       CPDBRef.current.Trigger("Reload")
     }
     else {
-      setInit(true)
+      if (location.state !== null) {
+        setInit(true)
+      }
     }
   }, [location])
 

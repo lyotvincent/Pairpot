@@ -234,7 +234,7 @@ const MarkerTable = ({ file, onRef, title, height, width, margin }) => {
         }
       }
       reader.onloadend = () => {
-        console.log("Load markers finished!.")
+        //console.log("Load markers finished!.")
       }
       reader.onerror = (error) => {
         reject(error)
@@ -255,7 +255,6 @@ const MarkerTable = ({ file, onRef, title, height, width, margin }) => {
 
   useEffect(() => {
     if (Init) {
-      console.log("Is Inited.")
       var myChart = echarts.getInstanceByDom(chartRef.current)
       /*...deal with data */
       if (commandRef.current === 'Reload') {
@@ -267,7 +266,7 @@ const MarkerTable = ({ file, onRef, title, height, width, margin }) => {
             toggleAnno("Upload")
           })
         }).catch(error => {
-          console.error('Error fetching blob in LayerView:', error)
+          console.error('Error fetching blob in MarkerTable:', error)
         })
       }
       if (commandRef.current === "Upload") {
@@ -452,7 +451,7 @@ const MarkerTable = ({ file, onRef, title, height, width, margin }) => {
         enterLoading(0, setLoadings)
         enterLoading(1, setLoadings)
         ScH5adLoader(file).then(() => {
-          console.log("All markers data loaded.")
+          console.log("All data loaded in MarkerTable.")
           toggleAnno("Upload")
         })
       }).catch(error => {

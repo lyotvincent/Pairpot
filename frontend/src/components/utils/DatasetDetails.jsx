@@ -163,7 +163,7 @@ const DatasetDetails = (props) => {
           },
         }}>
         <h3 style={{ color: 'black', marginBottom: 20 }}>{title}</h3>
-        <Row style={{ marginBottom: 20 }} justify="space-evenly">
+        {/* <Row style={{ marginBottom: 20 }} justify="space-evenly">
           <Col span={4} offset={1}>
             <Statistic title="Samples" value={state.Samples} valueStyle={{ color: token.colorPrimaryActive }} />
           </Col>
@@ -176,7 +176,7 @@ const DatasetDetails = (props) => {
           <Col span={4} offset={1}>
             <Statistic title="Cells" value={state.Cells} valueStyle={{ color: token.colorPrimaryActive }} />
           </Col>
-        </Row>
+        </Row> */}
         <Table
           columns={Columns}
           dataSource={dataSource}

@@ -348,13 +348,12 @@ const SpScatter = ({ query, spfile, onRef, height, width, margin }) => {
   useEffect(() => {
 
     if (isInit) {
-      console.log("Is Inited.")
       var myChart = echarts.getInstanceByDom(chartRef.current)
       if (commandRef.current === "Reload") {
         enterLoading(0, setLoading)
         spfile.then((file) => {
           SpH5adLoader(file).then(() => {
-            console.log("LayerView data reloaded.")
+            console.log("All data reloaded in LayerView.")
             toggleAnno("Upload")
           })
         }).catch(error => {
@@ -728,7 +727,6 @@ const SpScatter = ({ query, spfile, onRef, height, width, margin }) => {
         enterLoading(0, setLoading)
         spfile.then((file) => {
           SpH5adLoader(file).then(() => {
-            console.log("LayerView data loaded.")
             toggleAnno("Upload")
           })
         }).catch(error => {

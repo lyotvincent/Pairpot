@@ -71,7 +71,7 @@ const NetworkRelation = ({ spfile, scfile, onRef, title, height, width, margin }
         }
       }
       reader.onloadend = () => {
-        console.log("Load network data finished.")
+        //console.log("Load network data finished.")
       }
       reader.onerror = (error) => {
       }
@@ -91,7 +91,6 @@ const NetworkRelation = ({ spfile, scfile, onRef, title, height, width, margin }
 
   useEffect(() => {
     if (Init) {
-      console.log("Is Inited.")
       var myChart = echarts.getInstanceByDom(chartRef.current)
       if (commandRef.current === "Reload") {
         enterLoading(0, setLoadings)
@@ -177,7 +176,7 @@ const NetworkRelation = ({ spfile, scfile, onRef, title, height, width, margin }
       })
       spfile.then((loadedFile) => {
         ScH5adLoader(loadedFile).then((res) => {
-          console.log("NetWork data loaded.")
+          console.log("All data loaded in Network.")
           setSPGraph(res)
           setGraph(res)
           toggleAnno("Upload")

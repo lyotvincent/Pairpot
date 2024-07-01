@@ -388,6 +388,11 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
 
   }
 
+  const toggleAnno = (command) => {
+    commandRef.current = command
+    setAction(action + 1)
+  }
+
   useImperativeHandle(onRef, () => ({  // explode trigger for parent components
     "Trigger": toggleAnno, // Trigger for useEffect
   }))
@@ -1251,11 +1256,6 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
       })
     }
   }, [action])
-
-  const toggleAnno = (command) => {
-    commandRef.current = command
-    setAction(action + 1)
-  }
 
   const JsonLoader = (file) => {
     let newTitle = file.name.replace(/\.json$/, '')
