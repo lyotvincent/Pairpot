@@ -3,13 +3,11 @@
 import * as hdf5 from 'jsfive'
 
 const CpdbLoader = (f) => {
-  console.log("CpdbLoader Here.")
 
   // let dataList = dataAttr.map((item) => {
   //   let tempList = f.get(`uns/dataArray/Astrocytes/${item}`).value
   //   return tempList
   // })
-  // console.log(dataList)
 
   // let testttt = f.get('uns/dataArray/Astrocytes').values
   // console.log(testttt)
@@ -234,8 +232,6 @@ const NetLoader = (f) => {
   })
 
   dataNet["nodes"] = dataNodes
-  // console.log(dataNet)
-  // console.log(maxValue)
   return dataNet
 }
 
