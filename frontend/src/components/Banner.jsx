@@ -116,9 +116,12 @@ const Banner = () => {
                         <p>
                           Spatial Transcriptomics analysis requires paired single-cell references for cell-type annotation, cell-proportion inference, and cell co-localization detection.
                           However, lacking of paired single-cell and spatial transcriptomics data hinders the in-depth deciphering of tissue architectures and functions.
-                          Pairpot curated currently available paired single-cell and spatially resolved transcriptomics data including nearly 830,000 spots from 80 paired studies.
+                          Existing databases mainly provide preliminary pre-defined annotations, instead of sufficiently precise annotations for cell sub-types or cell states of user’s interests, which may not conform to user expectations for integrative analysis.
+                         </p>
+                         <p>
+                          Pairpot curated currently available paired single-cell and spatially resolved transcriptomics data including nearly 830,000 spots from 80 paired studies, with precise annotations for cell sub-types or cell states.
                           Pairpot performed in-depth analysis including batch effects correction, spatial clustering, markers detection, cell-proportion inference, and cell-cell interaction for the paired data.
-                          Moreover, Pairpot designed LassoView, LayerView, and PairView module that enables lasso-based online spatial segmentation/clustering and deconvolution for multiple slices in millisecond-level response time.
+                          Moreover, Pairpot proposed three online lasso-based analysis modules and integrated them with pre-analysis results into an easy-to-use webpage. In particular, Pairpot designed a LassoView module to refine the customized domains lassoed by users in millisecond-level response time, a PairView module to infer cell proportions of spots using the user-selected cells from single-cell data in real-time, and a LayerView module to display slices in a 3D hierarchical layout.
                         </p>
                         <Button style={{ margin: 0, fontWeight: 500 }}
                           size='large'
