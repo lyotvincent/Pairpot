@@ -7,6 +7,7 @@ import Browser from './Browser'
 import { Contact } from './Contact'
 import { Database } from './Database'
 import Submit from './Submit'
+import Help from './Help'
 
 export default function Router() {
   let routes = useRoutes([
@@ -26,9 +27,13 @@ export default function Router() {
       path: 'tools',
       element: <Tools />,
     },
+    // {
+    //   path: 'contact',
+    //   element: <Contact />,
+    // },
     {
-      path: 'contact',
-      element: <Contact />,
+      path: 'help',
+      element: <Help />,
     },
     {
       path: 'database',

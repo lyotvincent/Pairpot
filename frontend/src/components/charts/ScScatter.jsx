@@ -16,10 +16,10 @@ import { CanvasRenderer } from 'echarts/renderers'
 import axios from 'axios'
 import saveAs from 'file-saver'
 import H5adLoader from '../utils/H5adLoader'
+import vega_20 from '../theme/vega_20'
 import {
   ConfigProvider,
   Button,
-  Card,
   Space,
   Popconfirm,
   Input,
@@ -28,7 +28,6 @@ import {
   Popover,
   Upload,
   Segmented,
-  InputNumber,
   Slider,
   Switch,
   theme,
@@ -36,7 +35,8 @@ import {
   Row,
   Form,
   Flex,
-  Spin
+  Spin,
+  Tour,
 } from 'antd'
 import {
   CheckOutlined,
@@ -111,35 +111,70 @@ const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) =
   const [xInv, setxInv] = useState(false)
   const [yInv, setyInv] = useState(false)
   const [cellNum, setCellNum] = useState(0)
+  const [tourOpen, setTourOpen] = useState(false)
   const [refineOption, setRefineOption] = useState([
     { value: 2, label: 'LabelPropagation' },
   ])
   const { token } = useToken()
 
-  var vega_20 = [
-    '#1f77b4',
-    '#aec7e8',
-    '#ff7f0e',
-    '#ffbb78',
-    '#2ca02c',
-    '#98df8a',
-    '#d62728',
-    '#ff9896',
-    '#9467bd',
-    '#c5b0d5',
-    '#8c564b',
-    '#c49c94',
-    '#e377c2',
-    '#f7b6d2',
-    '#7f7f7f',
-    '#c7c7c7',
-    '#bcbd22',
-    '#dbdb8d',
-    '#17becf',
-    '#9edae5',
-  ]
+  // ref for tours
+  const UploadRef = useRef(null)
+  const SwitchRef = useRef(null)
+  const SettingsRef = useRef(null)
+  const RenameRef = useRef(null)
+  const RefineRef = useRef(null)
+  const ConfirmRef = useRef(null)
+  const DeleteRef = useRef(null)
+  const SaveRef = useRef(null)
+  const StatusRef = useRef(null)
+  const steps = [
+    {
+      title: 'Upload File',
+      description: "Click to upload your file, or drag your file here. Currently, this option accepts .h5ad file with basical attributes: .obs[\'annotation\'], and .obsm['X_umap']. These attributes can be obtained by `Scanpy` pipeline",
+      target: () => UploadRef.current,
+    },
+    {
+      title: 'Switch',
+      description: 'Switch the embeddings of Single-cell data or Spatial data to display.',
+      target: () => SwitchRef.current,
+    },
+    {
+      title: 'Settings',
+      description: 'Setting the appearance of LassoView, including opacity, spot-size, axis, clusters, and embeddings.',
+      target: () => SettingsRef.current,
+    },
+    {
+      title: 'Rename',
+      description: 'Rename the activated lasso regions. The lasso button is at the topRight of the Charts. You can lasso spots or cells in the left chart, and the results would display in the right chart.',
+      target: () => RenameRef.current,
+    },
+    {
+      title: 'Refine',
+      description: 'Select a refiner to Refine the acivated lasso regions. The refined results would display in the right chart.',
+      target: () => RefineRef.current,
+    },
+    {
+      title: 'Confirm',
+      description: 'Confirm your activated annotation after selection and refine.',
+      target: () => ConfirmRef.current,
+    },
+    {
+      title: 'Delete',
+      description: 'Delete your confirmed annotation.',
+      target: () => DeleteRef.current,
+    },
+    {
+      title: 'Save',
+      description: 'Save all your online-defined annotations as a json file.',
+      target: () => SaveRef.current,
+    },
+    {
+      title: 'Current Status',
+      description: 'The Status of Current LassoView, including current Lasso mode, clustering, embeddings, cell numbers and annoatated clusters.',
+      target: () => StatusRef.current,
+    },
+  ];
 
-  vega_20 = [...vega_20, ...vega_20]
   //var VisualColors = JSON.parse(JSON.stringify(vega_20)).reverse()
 
   const setItemGroup = (source, annoIdx, type = 'categories', doSet = true) => {
@@ -412,6 +447,7 @@ const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) =
 
   useImperativeHandle(onRef, () => ({  // explode trigger for parent components
     "Trigger": toggleAnno, // Trigger for useEffect
+    "Tour": setTourOpen, // Open the tutorial
   }))
 
   useEffect(() => {
@@ -1153,7 +1189,6 @@ const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) =
   return (
     <div>
       {contextHolder}
-
       <Flex justify="center" gap='middle'>
         <Spin spinning={loadings[0]} size="large" tip="Loading">
           <div
@@ -1180,16 +1215,18 @@ const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) =
           }}>
           <Space direction="vertical" size="small">
             <Space direction="vertical" size="small">
-              <Dragger {...upLoadProps}>
-                <p
-                  className="ant-upload-drag-icon"
-                  style={{ fontSize: 16, marginTop: 10, marginBottom: 10, alignItems: "center" }}>
-                  <InboxOutlined />
-                  <br />
-                  Upload
-                </p>
-              </Dragger>
-              <Segmented block
+              <div ref={UploadRef}>
+                <Dragger {...upLoadProps}>
+                  <p
+                    className="ant-upload-drag-icon"
+                    style={{ fontSize: 16, marginTop: 10, marginBottom: 10, alignItems: "center" }}>
+                    <InboxOutlined />
+                    <br />
+                    Upload
+                  </p>
+                </Dragger>
+              </div>
+              <Segmented block ref={SwitchRef}
                 options={[
                   { label: 'SC', value: true },
                   { label: 'SP', value: false },
@@ -1414,7 +1451,7 @@ const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) =
                   </Space>
                 }
                 trigger="click">
-                <Button type="primary" block icon={<SettingOutlined />}>
+                <Button type="primary" block icon={<SettingOutlined />} ref={SettingsRef}>
                   Settings
                 </Button>
               </Popover>
@@ -1442,6 +1479,7 @@ const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) =
                 <Button
                   block
                   type="primary"
+                  ref={RenameRef}
                   disabled={!allowConfirm}
                   icon={<FormOutlined />}>
                   Rename
@@ -1502,7 +1540,7 @@ const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) =
                   setRefineOpen(newOpen)
                 }}
                 trigger="click">
-                <Button block type="primary" icon={<SlidersOutlined />}>
+                <Button block type="primary" icon={<SlidersOutlined />} ref={RefineRef}>
                   Refine
                 </Button>
               </Popover>
@@ -1514,6 +1552,7 @@ const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) =
                 <Button
                   block
                   type="primary"
+                  ref={ConfirmRef}
                   disabled={!allowConfirm}
                   icon={<CheckOutlined />}>
                   Confirm
@@ -1570,7 +1609,7 @@ const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) =
                   setDeleteOpen(newOpen)
                 }}
                 trigger="click">
-                <Button type="primary" block icon={<DeleteOutlined />}>
+                <Button type="primary" block icon={<DeleteOutlined />} ref={DeleteRef}>
                   Delete
                 </Button>
               </Popover>
@@ -1581,12 +1620,12 @@ const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) =
                   toggleAnno('Download')
                 }}
                 cancelText="Table">
-                <Button type="primary" block icon={<CloudDownloadOutlined />}>
+                <Button type="primary" block icon={<CloudDownloadOutlined />} ref={SaveRef}>
                   Save
                 </Button>
               </Popconfirm>
             </Space>
-            <div>
+            <div ref={StatusRef}>
               <b>Current Status</b>
               <div>Mode: {brushModeState}</div>
               <div>Clustering: {clusterCur.label}</div>
@@ -1598,7 +1637,12 @@ const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) =
             <div>{JSON.stringify(_spdata[0])}</div>
           </Space>
         </ConfigProvider>
+        <Tour
+          open={tourOpen}
+          onClose={() => setTourOpen(false)}
+          steps={steps} />
       </Flex>
+
     </div>
   )
 }

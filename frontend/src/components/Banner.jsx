@@ -5,7 +5,7 @@ import pairImg from "../assets/img/pair.png"
 import lassoImg from "../assets/img/lasso.png"
 import netImg from "../assets/img/network.png"
 import heatImg from "../assets/img/heatmap.png"
-import coverImg from "../assets/img/cover-figure.svg"
+import coverImg from "../assets/img/cover-figure.png"
 import axios from 'axios'
 import { Button, ConfigProvider, Layout, Space } from 'antd'
 import { ArrowRightCircle } from 'react-bootstrap-icons'
@@ -20,7 +20,7 @@ const { Meta } = Card
 
 const { Content, Footer } = Layout
 
-const Banner = () => {
+const Help = () => {
   const [loopNum, setLoopNum] = useState(0)
   const [isDeleting, setIsDeleting] = useState(false)
   const [text, setText] = useState('')
@@ -389,4 +389,4 @@ const Banner = () => {
 }
 
 
-export default Banner
+export default Help

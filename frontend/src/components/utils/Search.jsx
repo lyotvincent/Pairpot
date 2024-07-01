@@ -58,6 +58,7 @@ const Search = ({ }) => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState([])
   const [open, setOpen] = useState(false)
+  const [status, setStatus] = useState("Success")
   return (
     <ConfigProvider theme={{
       components: {
@@ -82,38 +83,45 @@ const Search = ({ }) => {
           size="large"
           placeholder="Search for a Study to Browse."
           enterButton={loadText}
+          status={status}
           loading={loading[0]}
           onClick={() => { setOpen(!open) }}
           onSearch={(e) => {
-            setOpen(false)
-            enterLoading(0, setLoading)
-            setLoadText("Searching...")
-            axios({
-              method: 'GET',
-              url: '/api/example',
-              params: {
-                id: e
-              },
-            }).then((response) => {
-              let dataCol = response.data.attributes
-              let spitem = response.data.data[0]
-              let values = Object.fromEntries(
-                dataCol.map((k, i) => [k, spitem[i]])
-              )
-              let scitem = response.data.data[1]
-              let state = {
-                st: values
-              }
-              if (typeof scitem !== 'undefined') {
-                let scvalues = Object.fromEntries(
-                  dataCol.map((k, i) => [k, scitem[i]])
+            if(e.length > 0){
+              setOpen(false)
+              setStatus("Success")
+              enterLoading(0, setLoading)
+              setLoadText("Searching...")
+              axios({
+                method: 'GET',
+                url: '/api/example',
+                params: {
+                  id: e
+                },
+              }).then((response) => {
+                let dataCol = response.data.attributes
+                let spitem = response.data.data[0]
+                let values = Object.fromEntries(
+                  dataCol.map((k, i) => [k, spitem[i]])
                 )
-                state['sc'] = scvalues
-              }
-              quitLoading(0, setLoading)
-              setLoadText("Search")
-              navigate('/browse', { state: state })
-            })
+                let scitem = response.data.data[1]
+                let state = {
+                  st: values
+                }
+                if (typeof scitem !== 'undefined') {
+                  let scvalues = Object.fromEntries(
+                    dataCol.map((k, i) => [k, scitem[i]])
+                  )
+                  state['sc'] = scvalues
+                }
+                quitLoading(0, setLoading)
+                setLoadText("Search")
+                navigate('/browse', { state: state })
+              })
+            } else{
+              setStatus("error")
+            }
+            
           }} />
       </AutoComplete>
     </ConfigProvider>

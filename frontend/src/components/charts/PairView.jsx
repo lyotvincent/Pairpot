@@ -38,7 +38,8 @@ import {
   Row,
   Form,
   Flex,
-  Spin
+  Spin,
+  Tour
 } from 'antd'
 import {
   CheckOutlined,
@@ -119,6 +120,61 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
   const [batchName, setBatchName] = useState("batch")
   const [batchCur, setBatchCur] = useState({})
   const [batchOps, setBatchOps] = useState([])
+
+  const [tourOpen, setTourOpen] = useState(false)
+
+  // ref for tours
+  const scConfigsRef = useRef(null)
+  const spConfigsRef = useRef(null)
+  const RenameRef = useRef(null)
+  const RefineRef = useRef(null)
+  const DeconvRef = useRef(null)
+  const DeleteRef = useRef(null)
+  const SaveRef = useRef(null)
+  const StatusRef = useRef(null)
+  const steps = [
+    {
+      title: 'scConfigs',
+      description: 'Setting the appearance of LassoView.',
+      target: () => scConfigsRef.current,
+    },
+    {
+      title: 'spConfigs',
+      description: 'Setting the appearance of LassoView.',
+      target: () => spConfigsRef.current,
+    },
+    {
+      title: 'Rename',
+      description: 'Rename the activated lasso regions. The lasso button is at the topRight of the Charts. You can lasso spots or cells in the left chart, and the results would display in the right chart.',
+      target: () => RenameRef.current,
+    },
+    {
+      title: 'Refine',
+      description: 'Select a refiner to Refine the acivated lasso regions. The refined results would display in the right chart.',
+      target: () => RefineRef.current,
+    },
+    {
+      title: 'Deconv',
+      description: 'Confirm your activated annotation after selection and refine.',
+      target: () => DeconvRef.current,
+    },
+    {
+      title: 'Delete',
+      description: 'Delete your confirmed annotation.',
+      target: () => DeleteRef.current,
+    },
+    {
+      title: 'Save',
+      description: 'Save all your online-defined annotations as a json file.',
+      target: () => SaveRef.current,
+    },
+    {
+      title: 'Current Status',
+      description: 'The Status of Current LassoView, including current Lasso mode, clustering, embeddings, cell numbers and annoatated clusters.',
+      target: () => StatusRef.current,
+    },
+  ];
+
 
   const [xInv, setxInv] = useState(false)
   const [yInv, setyInv] = useState(false)
@@ -395,6 +451,7 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
 
   useImperativeHandle(onRef, () => ({  // explode trigger for parent components
     "Trigger": toggleAnno, // Trigger for useEffect
+    "Tour": setTourOpen, // Open the tutorial
   }))
 
   useEffect(() => {
@@ -1448,7 +1505,7 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
                   </Space>
                 }
                 trigger="click">
-                <Button type="primary" block icon={<SettingOutlined />}>
+                <Button type="primary" block icon={<SettingOutlined />} ref={scConfigsRef}>
                   scConfigs
                 </Button>
               </Popover>
@@ -1624,7 +1681,7 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
                   </Space>
                 }
                 trigger="click">
-                <Button type="primary" block icon={<SettingOutlined />}>
+                <Button type="primary" block icon={<SettingOutlined />} ref={spConfigsRef}>
                   spConfigs
                 </Button>
               </Popover>
@@ -1653,7 +1710,8 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
                   block
                   type="primary"
                   disabled={!allowConfirm}
-                  icon={<FormOutlined />}>
+                  icon={<FormOutlined />}
+                  ref={RenameRef}>
                   Rename
                 </Button>
               </Popconfirm>
@@ -1701,7 +1759,8 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
                         onClick={() => {
                           enterLoading(0, setLoadings)
                           toggleAnno('Refine')
-                        }}>
+                        }}
+                        >
                         {loadings[0] ? "Refining" : "Refine"}
                       </Button>
                     </Space>
@@ -1712,7 +1771,7 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
                   setRefineOpen(newOpen)
                 }}
                 trigger="click">
-                <Button block type="primary" icon={<SlidersOutlined />}>
+                <Button block type="primary" icon={<SlidersOutlined />} ref={RefineRef}>
                   Refine
                 </Button>
               </Popover>
@@ -1725,7 +1784,8 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
                   block
                   type="primary"
                   disabled={!allowConfirm}
-                  icon={<CheckOutlined />}>
+                  icon={<CheckOutlined />}
+                  ref={DeconvRef}>
                   Deconv
                 </Button>
               </Popconfirm>
@@ -1780,7 +1840,7 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
                   setDeleteOpen(newOpen)
                 }}
                 trigger="click">
-                <Button type="primary" block icon={<DeleteOutlined />}>
+                <Button type="primary" block icon={<DeleteOutlined />} ref={DeleteRef}>
                   Delete
                 </Button>
               </Popover>
@@ -1791,11 +1851,12 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
                   toggleAnno('Download')
                 }}
                 cancelText="Table">
-                <Button type="primary" block icon={<CloudDownloadOutlined />}>
+                <Button type="primary" block icon={<CloudDownloadOutlined />} ref={SaveRef}>
                   Save
                 </Button>
               </Popconfirm>
             </Space>
+            <div ref={StatusRef}>
             <div>
               <b>Current Status</b>
               <div>Mode: {brushModeState}</div>
@@ -1805,8 +1866,10 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
               <div>Annotated Clusters: {snumRef.current}</div>
               <div>Cell number: {cellNum}</div>
             </div>
+            </div>
           </Space>
         </ConfigProvider>
+        <Tour open={tourOpen} onClose={() => setTourOpen(false)} steps={steps}/>
       </Flex>
     </div>
   )

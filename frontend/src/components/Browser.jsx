@@ -27,51 +27,6 @@ import Search from './utils/Search'
 import { Cursor } from 'react-bootstrap-icons'
 const { Content, Sider, Header } = Layout
 
-const sideMenuItems = [
-  {
-    label: 'Search',
-    href: '#Search',
-    key: 'Search',
-    icon: <FileSearchOutlined />
-  },
-  {
-    label: 'MetaInfo',
-    href: '#MetaInfo',
-    key: 'MetaInfo',
-    icon: <FileDoneOutlined />
-  },
-  {
-    label: 'LassoView',
-    href: '#LassoView',
-    key: 'LassoView',
-    icon: <SelectOutlined />
-  },
-  {
-    label: 'Layer View',
-    href: '#LayerView',
-    key: 'LayerView',
-    icon: <DotChartOutlined />
-  },
-  {
-    label: 'Pair View',
-    href: '#PairView',
-    key: 'PairView',
-    icon: <OneToOneOutlined />
-  },
-  {
-    label: 'Spatial Markers',
-    href: '#SpatialMarkers',
-    key: 'SpatialMarkers',
-    icon: <SlidersOutlined />,
-  },
-  {
-    label: 'Cell Interactions',
-    href: '#CellInteractions',
-    key: 'CellInteractions',
-    icon: <HeatMapOutlined />,
-  },
-]
-
 const MetaInfo = lazy(() => (import('./utils/DatasetDetails')))
 const LassoView = lazy(() => (import('./charts/ScScatter')))
 const LayerView = lazy(() => (import('./charts/SpScatter')))
@@ -82,7 +37,6 @@ const Browser = () => {
   const location = useLocation()
   const [Init, setInit] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
-  const [selectedKey, setSelectedKey] = useState(sideMenuItems[0].key)
   const [action, setAction] = useState(0)
   const commandRef = useRef()
   const onClickSideMenu = (e) => {
@@ -114,6 +68,59 @@ const Browser = () => {
     })
   )
 
+  const SearchAnchor = React.createRef() // location of Search
+  const MetaAnchor = React.createRef() // location of MetaAnchor
+  const LassoAnchor = React.createRef() // location of LassoView
+  const LayerAnchor = React.createRef() // location of LassoView
+  const PairAnchor = React.createRef() // location of LassoView
+  const MarkerAnchor = React.createRef() // location of LassoView
+  const CPDBAnchor = React.createRef() // location of LassoView
+  const sideMenuItems = [
+    {
+      label: 'Search',
+      ref: SearchAnchor,
+      key: 'Search',
+      icon: <FileSearchOutlined />
+    },
+    {
+      label: 'MetaInfo',
+      ref: MetaAnchor,
+      key: 'MetaInfo',
+      icon: <FileDoneOutlined />
+    },
+    {
+      label: 'LassoView',
+      ref: LassoAnchor,
+      key: 'LassoView',
+      icon: <SelectOutlined />
+    },
+    {
+      label: 'Layer View',
+      ref: LayerAnchor,
+      key: 'LayerView',
+      icon: <DotChartOutlined />
+    },
+    {
+      label: 'Pair View',
+      ref: PairAnchor,
+      key: 'PairView',
+      icon: <OneToOneOutlined />
+    },
+    {
+      label: 'Spatial Markers',
+      ref: MarkerAnchor,
+      key: 'SpatialMarkers',
+      icon: <SlidersOutlined />,
+    },
+    {
+      label: 'Cell Interactions',
+      ref: CPDBAnchor,
+      key: 'CellInteractions',
+      icon: <HeatMapOutlined />,
+    },
+  ]
+  const [selectedKey, setSelectedKey] = useState(sideMenuItems[0].key)
+
   const LassoRef = React.createRef()  // get the trigger function from LassoView
   const LayerRef = React.createRef()  // get the trigger function from LayerView
   const PairRef = React.createRef()   // get the trigger function from PairView
@@ -133,7 +140,6 @@ const Browser = () => {
   }
 
   useEffect(() => {
-    console.log(location.state)
     if (Init && location.state !== null) {
       setSCFile(fetchSCData(location))
       setSPFile(fetchSPData(location))
@@ -206,20 +212,23 @@ const Browser = () => {
               position: 'fixed'
             }}
           >
-            <Anchor targetOffset={100} affix={false} >
               {sideMenuItems.map((item) => (
-                <Menu.Item key={item.key} icon={item.icon} style={{ paddingLeft: "1.5rem" }}>
-                  <Anchor.Link href={item.href} title={item.label} >
-                  </Anchor.Link>
+                <Menu.Item 
+                  key={item.key} 
+                  icon={item.icon} 
+                  onClick={(e)=>{
+                    setSelectedKey(e.key)
+                    item.ref.current.scrollIntoView({behavior:"smooth", block: 'start'})
+                  }}>
+                {item.label} 
                 </Menu.Item>
               ))}
-            </Anchor>
           </Menu>
         </Sider>
         <Layout>
           <Content style={{ padding: '20px 20px' }}>
             <Col span={6} offset={8} id='Search'>
-              <div style={{
+              <div ref={SearchAnchor} style={{
                 width: '300px',
                 height: "70px",
                 marginBottom: 30,
@@ -233,7 +242,7 @@ const Browser = () => {
 
             <Divider />
             <Suspense fallback={<h1>Loading for MetaInfo...</h1>}>
-              <Card id="MetaInfo">
+              <Card id="MetaInfo" ref={MetaAnchor}>
                 <MetaInfo
                   location={location}
                   navigate={navigate} />
@@ -242,7 +251,9 @@ const Browser = () => {
             <Divider />
             <Suspense fallback={<h1>Loading for LassoView...</h1>}>
               <Card>
-                <ToggleAccordion header={<h3 id="LassoView">Lasso View</h3>}>
+                <ToggleAccordion header={
+                  <h3 id="LassoView" ref={LassoAnchor}>{"Lasso View "}
+                  </h3>}>
                   {<div>
                     (left) These are the assignments of each spot to clusters by an
                     automated clustering algorithm in a single slice. The clustering groups together spots that
@@ -257,13 +268,21 @@ const Browser = () => {
                     under tissue are used in the clustering algorithm.
                   </div>}
                 </ToggleAccordion>
+                <Button type="primary" 
+                size='middle' 
+                onClick={() => {
+                  LassoAnchor.current.scrollIntoView({ behavior: 'smooth', block:'start'})
+                  setTimeout(()=>{LassoRef.current.Tour(true)}, 600)
+                  }}>
+                    {"Begin Tour >>>"}
+                </Button>
                 <LassoView spfile={spfile} scfile={scfile} location={location} onRef={LassoRef} />
               </Card>
             </Suspense>
             <Divider />
             <Suspense fallback={<h1>Loading for LayerView...</h1>}>
               <Card>
-                <ToggleAccordion header={<h3 id="LayerView">Layer View</h3>}>
+                <ToggleAccordion header={<h3 id="LayerView" ref={LayerAnchor}>Layer View</h3>}>
                   {<div>
                     (left) These are the assignments of each cell to clusters by an
                     automated clustering algorithm in single-cell or spatal transcriptomics data. The clustering groups together cells that
@@ -276,13 +295,24 @@ const Browser = () => {
                     After Online refine, the refined region series would also display in this plot.
                   </div>}
                 </ToggleAccordion>
+                <Button 
+                type="primary" 
+                size='middle' 
+                onClick={() => {
+                  LayerAnchor.current.scrollIntoView({behavior:"smooth", block: 'start'})
+                  setTimeout(()=>{
+                    LayerRef.current.Tour(true)
+                  }, 600)
+                  }}>
+                    {"Begin Tour >>>"}
+                </Button>
                 <LayerView id='LayerView' query={true} spfile={spfile} onRef={LayerRef} />
               </Card>
             </Suspense>
             <Divider />
             <Suspense fallback={<h1>Loading for PairView...</h1>}>
               <Card>
-                <ToggleAccordion header={<h3 id="PairView">Pair View</h3>}>
+                <ToggleAccordion header={<h3 id="PairView" ref={PairAnchor}>Pair View</h3>}>
                   {<div>
                     (left) These are the assignments of each cell to clusters by an
                     automated clustering algorithm in single-cell data. The clustering groups together cells that
@@ -296,12 +326,23 @@ const Browser = () => {
                     more similar gene expression profiles than spots that are distant from each other.
                   </div>}
                 </ToggleAccordion>
+                <Button 
+                type="primary" 
+                size='middle' 
+                onClick={() => {
+                  PairAnchor.current.scrollIntoView({behavior:"smooth", block: 'start'})
+                  setTimeout(()=>{
+                    PairRef.current.Tour(true)
+                  }, 600)
+                  }}>
+                    {"Begin Tour >>>"}
+                </Button>
                 <PairView spfile={spfile} scfile={scfile} location={location} onRef={PairRef} />
               </Card>
             </Suspense>
             <Divider />
             <Card>
-              <ToggleAccordion header={<h3 id="SpatialMarkers">Spatial Markers</h3>}>
+              <ToggleAccordion header={<h3 id="SpatialMarkers" ref={MarkerAnchor}>Spatial Markers</h3>}>
                 {<div>
                   (left) These are the assignments of each spot-barcode to clusters by an
                   <br />
@@ -311,7 +352,7 @@ const Browser = () => {
             </Card>
             <Divider />
             <Card>
-              <ToggleAccordion header={<h3 id="CellInteractions">Cell Interactions</h3>}>
+              <ToggleAccordion header={<h3 id="CellInteractions" ref={CPDBAnchor}>Cell Interactions</h3>}>
                 {<div>
                   (left) These are the assignments of each spot-barcode to clusters by an
                   <br />

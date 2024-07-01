@@ -92,15 +92,15 @@ const Nav = () => {
     //   key: 'submit',
     //   icon: <CloudUploadOutlined />,
     // },
-    // {
-    //   label: (
-    //     <NavLink to={`/contact`} style={{ textDecorationLine: 'none' }}>
-    //       Help
-    //     </NavLink>
-    //   ),
-    //   key: '/contact',
-    //   icon: <QuestionCircleOutlined />,
-    // },
+    {
+      label: (
+        <NavLink to={`/help`} style={{ textDecorationLine: 'none' }}>
+          Help
+        </NavLink>
+      ),
+      key: '/help',
+      icon: <QuestionCircleOutlined />,
+    },
   ]
 
   useEffect(() => {

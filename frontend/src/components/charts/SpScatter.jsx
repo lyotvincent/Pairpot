@@ -26,6 +26,7 @@ import {
   Spin,
   Form,
   Flex,
+  Tour
 } from 'antd'
 import {
   GraphicComponent,
@@ -80,6 +81,8 @@ const SpScatter = ({ query, spfile, onRef, height, width, margin }) => {
   const [title, setTitle] = useState('Mouse-Brain')
   const [_data, _setData] = useState([])
   const { token } = useToken()
+  const [tourOpen, setTourOpen] = useState(false)
+
   var vega_20 = [
     '#1f77b4',
     '#aec7e8',
@@ -102,6 +105,34 @@ const SpScatter = ({ query, spfile, onRef, height, width, margin }) => {
     '#17becf',
     '#9edae5',
   ]
+
+  // ref for tours
+  const UploadRef = useRef(null)
+  const SettingsRef = useRef(null)
+  const SaveRef = useRef(null)
+  const StatusRef = useRef(null)
+  const steps = [
+    {
+      title: 'Upload File',
+      description: "Click to upload your file, or drag your file here. Currently, this option accepts .h5ad file with basical attributes: .obs[\'annotation\', \'batch\'], and .obsm['X_umap', 'spatial']. These attributes can be obtained by `Scanpy` pipeline.",
+      target: () => UploadRef.current,
+    },
+    {
+      title: 'Settings',
+      description: 'Setting the appearance of LayerView.',
+      target: () => SettingsRef.current,
+    },
+    {
+      title: 'Save',
+      description: 'Save all your online-defined annotations as a json file.',
+      target: () => SaveRef.current,
+    },
+    {
+      title: 'Current Status',
+      description: 'The Status of Current LayerView, including current Layer Species, Organs, Batch, Clustering, Embedding, Attributes, Batches, Spot number and Spot Radius',
+      target: () => StatusRef.current,
+    },
+  ];
 
   vega_20 = [...vega_20, ...vega_20]
   const setAxis = (source, dims, xName0, yName0) => {
@@ -343,6 +374,7 @@ const SpScatter = ({ query, spfile, onRef, height, width, margin }) => {
 
   useImperativeHandle(onRef, () => ({  // explode trigger for parent components
     "Trigger": toggleAnno, // Trigger for useEffect
+    "Tour": setTourOpen, // Open the tutorial
   }))
 
   useEffect(() => {
@@ -835,6 +867,7 @@ const SpScatter = ({ query, spfile, onRef, height, width, margin }) => {
         }}>
         <Space direction='vertical' size='small'>
           <Space direction='vertical' size='small'>
+            <div ref={UploadRef}>
             <Dragger {...upLoadProps} style={{ marginTop: 20 }}>
               <p
                 className="ant-upload-drag-icon"
@@ -844,6 +877,7 @@ const SpScatter = ({ query, spfile, onRef, height, width, margin }) => {
                 Upload
               </p>
             </Dragger>
+            </div>
             <Popover
               title={<>Setting Figure Options:</>}
               placement="topLeft"
@@ -1019,14 +1053,15 @@ const SpScatter = ({ query, spfile, onRef, height, width, margin }) => {
                 </Space>
               }
               trigger="click">
-              <Button type="primary" block icon={<SettingOutlined />}>
+              <Button type="primary" block icon={<SettingOutlined />} ref={SettingsRef}>
                 Settings
               </Button>
             </Popover>
-            <Button type="primary" block icon={<CloudDownloadOutlined />}>
+            <Button type="primary" block icon={<CloudDownloadOutlined />} ref={SaveRef}>
               Save
             </Button>
           </Space>
+          <div ref={StatusRef}>
           <div>
             <b>Current Status</b>
             <div>Species: {"Mouse"}</div>
@@ -1039,8 +1074,10 @@ const SpScatter = ({ query, spfile, onRef, height, width, margin }) => {
             <div>Spot number: {cellNum}</div>
             <div>Spot Radius: {"55um"}</div>
           </div>
+          </div>
         </Space>
       </ConfigProvider>
+      <Tour open={tourOpen} onClose={() => setTourOpen(false)} steps={steps}/>
     </Flex>
   )
 }
