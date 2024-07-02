@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Pairpot",
+  "name": "A Database with Real-time Lasso-based Analysis Tailored for Paired Single-cell and Spatial Transcriptomics",
   "icons": [
     {
       "src": "favicon.ico",
