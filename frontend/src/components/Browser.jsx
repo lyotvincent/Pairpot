@@ -24,8 +24,11 @@ import axios from 'axios'
 import NetworkRelation from './charts/NetworkRelation'
 import RelHeat from './charts/Relation-Heatmap-test'
 import Search from './utils/Search'
-import { Cursor } from 'react-bootstrap-icons'
+import loadingTips from './charts/LoadingTip'
+import Loading from './charts/Loading'
+import { useMutation, useQuery, QueryCache } from "react-query"
 const { Content, Sider, Header } = Layout
+const {enterLoading} = Loading
 
 const MetaInfo = lazy(() => (import('./utils/DatasetDetails')))
 const LassoView = lazy(() => (import('./charts/ScScatter')))
@@ -42,10 +45,10 @@ const Browser = () => {
   const onClickSideMenu = (e) => {
 
   }
-  const fetchSPData = () => (
+  const fetchSPData = (state) => (
     axios.get('/api/query/sp', {
       params: {
-        id: location.state?.st?.dataset_id
+        id: state.st?.dataset_id
       },
       responseType: 'blob',
     }).then((response) => {
@@ -55,10 +58,10 @@ const Browser = () => {
     })
   )
 
-  const fetchSCData = (loc) => (
+  const fetchSCData = (state) => (
     axios.get('/api/query/sc', {
       params: {
-        id: loc.state?.st?.dataset_id
+        id: state.st?.dataset_id
       },
       responseType: 'blob',
     }).then((response) => {
@@ -67,6 +70,22 @@ const Browser = () => {
       return _scfile
     })
   )
+
+  const statusSP = useMutation({
+    mutationKey: ['sp'],
+    mutationFn: (state) => fetchSPData(state),
+    staleTime: Infinity, 
+    retry: false, 
+    refetchOnWindowFocus: false, 
+  })
+
+  const statusSC = useMutation({
+    mutationKey: ['sc'],
+    mutationFn: (state) => fetchSCData(state),
+    staleTime: Infinity, 
+    retry: false, 
+    refetchOnWindowFocus: false, 
+  })
 
   const SearchAnchor = React.createRef() // location of Search
   const MetaAnchor = React.createRef() // location of MetaAnchor
@@ -128,27 +147,29 @@ const Browser = () => {
   const NetRef = React.createRef()   // get the trigger function from Network Table
   const CPDBRef = React.createRef()   // get the trigger function from CPDB heatmap
 
-  const sc = fetchSCData(location)
-  const sp = fetchSPData(location)
-
-  const [scfile, setSCFile] = useState(sc)
-  const [spfile, setSPFile] = useState(sp)
-
-  const toggleAction = (command) => {
-    commandRef.current = command
-    setAction(action + 1)
-  }
+  const [componentLoad, setComponentLoad] = useState({  // whether component is called to load
+    "LassoView": false,
+    "LayerView": false,
+    "PairView": false,
+    "MarkerTable": false,
+    "NetWorkRelation": false,
+    "CPDBHeatmap": false,
+  })
 
   useEffect(() => {
     if (Init && location.state !== null) {
-      setSCFile(fetchSCData(location))
-      setSPFile(fetchSPData(location))
-      LassoRef.current.Trigger("Reload")  // call ToggleAnno to trigger reload in useEffect
-      LayerRef.current.Trigger("Reload")
-      PairRef.current.Trigger("Reload")
-      MarkerRef.current.Trigger("Reload")
-      NetRef.current.Trigger("Reload")
-      CPDBRef.current.Trigger("Reload")
+      setComponentLoad({  // reset ComponentLoad
+        "LassoView": false,
+        "LayerView": false,
+        "PairView": false,
+        "MarkerTable": false,
+        "NetWorkRelation": false,
+        "CPDBHeatmap": false,
+      })
+      LassoRef.current.Tip(loadingTips[0])
+      enterLoading(0, LassoRef.current.Loading)
+      statusSC.mutate(location.state)
+      statusSP.mutate(location.state)
     }
     else {
       if (location.state === null) {
@@ -177,10 +198,41 @@ const Browser = () => {
           navigate('/browse', { state: state })
         })
       } else {
+        statusSC.mutate(location.state)
+        statusSP.mutate(location.state)
         setInit(true)
       }
     }
   }, [location])
+
+  useEffect(() => {
+    if (statusSP.status === 'success' &&
+      typeof statusSP.data !== "undefined") {
+      if(!componentLoad['LayerView']){
+        LayerRef.current?.Trigger("Reload")  // only reload once
+      }
+      if(!componentLoad['MarkerTable']){
+        MarkerRef.current?.Trigger("Reload")
+      }  
+    }
+    if (statusSP.status === 'success' &&
+      statusSC.status === 'success' &&
+      typeof statusSC.data !== "undefined" &&
+      typeof statusSP.data !== "undefined") {
+      if(!componentLoad['LassoView']){
+        LassoRef.current?.Trigger("Reload")
+      }
+      if(!componentLoad['PairView']) {
+        PairRef.current?.Trigger("Reload")
+      }
+      if(!componentLoad['NetWorkRelation']) {
+        NetRef.current?.Trigger("Reload")
+      }
+      if(!componentLoad['CPDBHeatmap']){
+        CPDBRef.current?.Trigger("Reload")
+      } 
+    }
+  }, [statusSP.variables, statusSC.variables, PairRef])
 
   return (
     <ConfigProvider
@@ -212,21 +264,22 @@ const Browser = () => {
               position: 'fixed'
             }}
           >
-              {sideMenuItems.map((item) => (
-                <Menu.Item 
-                  key={item.key} 
-                  icon={item.icon} 
-                  onClick={(e)=>{
-                    setSelectedKey(e.key)
-                    item.ref.current.scrollIntoView({behavior:"smooth", block: 'start'})
-                  }}>
-                {item.label} 
-                </Menu.Item>
-              ))}
+            {sideMenuItems.map((item) => (
+              <Menu.Item
+                key={item.key}
+                icon={item.icon}
+                onClick={(e) => {
+                  setSelectedKey(e.key)
+                  item.ref.current.scrollIntoView({ behavior: "smooth", block: 'start' })
+                }}>
+                {item.label}
+              </Menu.Item>
+            ))}
           </Menu>
         </Sider>
         <Layout>
           <Content style={{ padding: '20px 20px' }}>
+            <div>compLoad:{JSON.stringify(componentLoad)}</div>
             <Col span={6} offset={8} id='Search'>
               <div ref={SearchAnchor} style={{
                 width: '300px',
@@ -268,15 +321,15 @@ const Browser = () => {
                     under tissue are used in the clustering algorithm.
                   </div>}
                 </ToggleAccordion>
-                <Button type="primary" 
-                size='middle' 
-                onClick={() => {
-                  LassoAnchor.current.scrollIntoView({ behavior: 'smooth', block:'start'})
-                  setTimeout(()=>{LassoRef.current.Tour(true)}, 600)
+                <Button type="primary"
+                  size='middle'
+                  onClick={() => {
+                    LassoAnchor.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                    setTimeout(() => { LassoRef.current.Tour(true) }, 600)
                   }}>
-                    {"Begin Tour >>>"}
+                  {"Begin Tour >>>"}
                 </Button>
-                <LassoView spfile={spfile} scfile={scfile} location={location} onRef={LassoRef} />
+                <LassoView spfile={statusSP.data} scfile={statusSC.data} setCompLoad={setComponentLoad} location={location} onRef={LassoRef} />
               </Card>
             </Suspense>
             <Divider />
@@ -295,18 +348,18 @@ const Browser = () => {
                     After Online refine, the refined region series would also display in this plot.
                   </div>}
                 </ToggleAccordion>
-                <Button 
-                type="primary" 
-                size='middle' 
-                onClick={() => {
-                  LayerAnchor.current.scrollIntoView({behavior:"smooth", block: 'start'})
-                  setTimeout(()=>{
-                    LayerRef.current.Tour(true)
-                  }, 600)
+                <Button
+                  type="primary"
+                  size='middle'
+                  onClick={() => {
+                    LayerAnchor.current.scrollIntoView({ behavior: "smooth", block: 'start' })
+                    setTimeout(() => {
+                      LayerRef.current.Tour(true)
+                    }, 600)
                   }}>
-                    {"Begin Tour >>>"}
+                  {"Begin Tour >>>"}
                 </Button>
-                <LayerView id='LayerView' query={true} spfile={spfile} onRef={LayerRef} />
+                <LayerView id='LayerView' query={true} spfile={statusSP.data} setCompLoad={setComponentLoad} onRef={LayerRef} />
               </Card>
             </Suspense>
             <Divider />
@@ -326,18 +379,18 @@ const Browser = () => {
                     more similar gene expression profiles than spots that are distant from each other.
                   </div>}
                 </ToggleAccordion>
-                <Button 
-                type="primary" 
-                size='middle' 
-                onClick={() => {
-                  PairAnchor.current.scrollIntoView({behavior:"smooth", block: 'start'})
-                  setTimeout(()=>{
-                    PairRef.current.Tour(true)
-                  }, 600)
+                <Button
+                  type="primary"
+                  size='middle'
+                  onClick={() => {
+                    PairAnchor.current.scrollIntoView({ behavior: "smooth", block: 'start' })
+                    setTimeout(() => {
+                      PairRef.current.Tour(true)
+                    }, 600)
                   }}>
-                    {"Begin Tour >>>"}
+                  {"Begin Tour >>>"}
                 </Button>
-                <PairView spfile={spfile} scfile={scfile} location={location} onRef={PairRef} />
+                <PairView spfile={statusSP.data} scfile={statusSC.data} setCompLoad={setComponentLoad} location={location} onRef={PairRef} />
               </Card>
             </Suspense>
             <Divider />
@@ -348,7 +401,7 @@ const Browser = () => {
                   <br />
                 </div>}
               </ToggleAccordion>
-              <MarkerTable file={spfile} onRef={MarkerRef} />
+              <MarkerTable file={statusSP.data} setCompLoad={setComponentLoad} onRef={MarkerRef} />
             </Card>
             <Divider />
             <Card>
@@ -359,8 +412,8 @@ const Browser = () => {
                   (right) Spots are colored by clustering assignment and shown in t-SNE space.
                 </div>}
               </ToggleAccordion>
-              <NetworkRelation spfile={spfile} scfile={scfile} onRef={NetRef} />
-              <RelHeat spfile={spfile} scfile={scfile} onRef={CPDBRef} />
+              <NetworkRelation spfile={statusSP.data} scfile={statusSC.data} setCompLoad={setComponentLoad} onRef={NetRef} />
+              <RelHeat spfile={statusSP.data} scfile={statusSC.data} setCompLoad={setComponentLoad} onRef={CPDBRef} />
             </Card>
             {/* <div style={{color: 'black'}}>{JSON.stringify(location.state)}</div> */}
           </Content>

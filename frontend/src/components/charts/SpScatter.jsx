@@ -5,6 +5,7 @@ import '../theme/dark'
 import '../theme/vintage'
 import { TooltipComponent, VisualMapComponent } from 'echarts/components'
 import Axis from './Axis'
+import loadingTips from './LoadingTip'
 import {
   ConfigProvider,
   Button,
@@ -54,7 +55,7 @@ const { useToken } = theme
 const { quitLoading, enterLoading } = Loading
 
 // left figure is umap2 and right figure is spatial3
-const SpScatter = ({ query, spfile, onRef, height, width, margin }) => {
+const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin }) => {
   const chartRef = useRef(null) // get current DOM container
   const commandRef = useRef('') // get the current command for useEffect
   const [action, setAction] = useState(0)
@@ -83,28 +84,8 @@ const SpScatter = ({ query, spfile, onRef, height, width, margin }) => {
   const { token } = useToken()
   const [tourOpen, setTourOpen] = useState(false)
 
-  var vega_20 = [
-    '#1f77b4',
-    '#aec7e8',
-    '#ff7f0e',
-    '#ffbb78',
-    '#2ca02c',
-    '#98df8a',
-    '#d62728',
-    '#ff9896',
-    '#9467bd',
-    '#c5b0d5',
-    '#8c564b',
-    '#c49c94',
-    '#e377c2',
-    '#f7b6d2',
-    '#7f7f7f',
-    '#c7c7c7',
-    '#bcbd22',
-    '#dbdb8d',
-    '#17becf',
-    '#9edae5',
-  ]
+  // loading tips
+  const [currTip, setCurrTip] = useState(loadingTips[0])
 
   // ref for tours
   const UploadRef = useRef(null)
@@ -132,9 +113,8 @@ const SpScatter = ({ query, spfile, onRef, height, width, margin }) => {
       description: 'The Status of Current LayerView, including current Layer Species, Organs, Batch, Clustering, Embedding, Attributes, Batches, Spot number and Spot Radius',
       target: () => StatusRef.current,
     },
-  ];
+  ]
 
-  vega_20 = [...vega_20, ...vega_20]
   const setAxis = (source, dims, xName0, yName0) => {
     // the axis of left chart
     let xIdx0 = dims.indexOf(xName0)
@@ -382,18 +362,23 @@ const SpScatter = ({ query, spfile, onRef, height, width, margin }) => {
     if (isInit) {
       var myChart = echarts.getInstanceByDom(chartRef.current)
       if (commandRef.current === "Reload") {
+        setCompLoad((compLoad) => {
+          let newCompLoad = { ...compLoad }
+          newCompLoad['LayerView'] = true
+          return newCompLoad
+        })
         enterLoading(0, setLoading)
-        spfile.then((file) => {
-          SpH5adLoader(file).then(() => {
-            console.log("All data reloaded in LayerView.")
-            toggleAnno("Upload")
-          })
+        setCurrTip(loadingTips[1])
+        SpH5adLoader(spfile).then(() => {
+          console.log("All data reloaded in LayerView.")
+          toggleAnno("Upload")
         }).catch(error => {
           console.error('Error fetching blob in LayerView:', error)
         })
       }
       if (commandRef.current === "Upload") {
         enterLoading(0, setLoading)
+        setCurrTip(loadingTips[2])
         // 1.set source
         let _dims = [...Object.keys(_data[0]), 'id']
         let source = _data.map((item, id) => {
@@ -755,16 +740,14 @@ const SpScatter = ({ query, spfile, onRef, height, width, margin }) => {
       }
     } else {
       var myChart = echarts.init(chartRef.current) //init the echart container
-      if (query) {
-        enterLoading(0, setLoading)
-        spfile.then((file) => {
-          SpH5adLoader(file).then(() => {
-            toggleAnno("Upload")
-          })
-        }).catch(error => {
-          console.error('Error fetching blob in LayerView:', error)
-        })
-      }
+      // if (query) {
+      //   enterLoading(0, setLoading)
+      //   SpH5adLoader(spfile).then(() => {
+      //     toggleAnno("Upload")
+      //   }).catch(error => {
+      //     console.error('Error fetching blob in LayerView:', error)
+      //   })
+      // }
 
       let axis = Axis.setEmptyAxis(0)
       let axis3D = Axis.setEmptyAxis3D(0)
@@ -842,7 +825,7 @@ const SpScatter = ({ query, spfile, onRef, height, width, margin }) => {
 
   return (
     <Flex justify="center" gap='middle'>
-      <Spin spinning={loading[0]} size="large" tip="Loading">
+      <Spin spinning={loading[0]} size="large" tip={currTip}>
         <div
           ref={chartRef}
           className="chart"
@@ -868,15 +851,15 @@ const SpScatter = ({ query, spfile, onRef, height, width, margin }) => {
         <Space direction='vertical' size='small'>
           <Space direction='vertical' size='small'>
             <div ref={UploadRef}>
-            <Dragger {...upLoadProps} style={{ marginTop: 20 }}>
-              <p
-                className="ant-upload-drag-icon"
-                style={{ fontSize: 16, marginTop: 10, marginBottom: 10, alignItems: "center" }}>
-                <InboxOutlined />
-                <br />
-                Upload
-              </p>
-            </Dragger>
+              <Dragger {...upLoadProps} style={{ marginTop: 20 }}>
+                <p
+                  className="ant-upload-drag-icon"
+                  style={{ fontSize: 16, marginTop: 10, marginBottom: 10, alignItems: "center" }}>
+                  <InboxOutlined />
+                  <br />
+                  Upload
+                </p>
+              </Dragger>
             </div>
             <Popover
               title={<>Setting Figure Options:</>}
@@ -1062,22 +1045,22 @@ const SpScatter = ({ query, spfile, onRef, height, width, margin }) => {
             </Button>
           </Space>
           <div ref={StatusRef}>
-          <div>
-            <b>Current Status</b>
-            <div>Species: {"Mouse"}</div>
-            <div>Organs: {"Brain"}</div>
-            <div>Batch: {batchCur.label}</div>
-            <div>Clustering: {clusterCur.label}</div>
-            <div>Embedding: {embedCur.label}</div>
-            <div>Attributes: {clusterOps.length}</div>
-            <div>Batches: {batchOps.length}</div>
-            <div>Spot number: {cellNum}</div>
-            <div>Spot Radius: {"55um"}</div>
-          </div>
+            <div>
+              <b>Current Status</b>
+              <div>Species: {"Mouse"}</div>
+              <div>Organs: {"Brain"}</div>
+              <div>Batch: {batchCur.label}</div>
+              <div>Clustering: {clusterCur.label}</div>
+              <div>Embedding: {embedCur.label}</div>
+              <div>Attributes: {clusterOps.length}</div>
+              <div>Batches: {batchOps.length}</div>
+              <div>Spot number: {cellNum}</div>
+              <div>Spot Radius: {"55um"}</div>
+            </div>
           </div>
         </Space>
       </ConfigProvider>
-      <Tour open={tourOpen} onClose={() => setTourOpen(false)} steps={steps}/>
+      <Tour open={tourOpen} onClose={() => setTourOpen(false)} steps={steps} />
     </Flex>
   )
 }
@@ -1090,8 +1073,8 @@ SpScatter.defaultProps = {
 }
 
 SpScatter.propTypes = {
-  query: PropTypes.bool,
   spfile: PropTypes.object,
+  setCompLoad: PropTypes.any,
   onRef: PropTypes.any,
   height: PropTypes.string,
   width: PropTypes.string,

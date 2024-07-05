@@ -17,6 +17,7 @@ import axios from 'axios'
 import saveAs from 'file-saver'
 import H5adLoader from '../utils/H5adLoader'
 import vega_20 from '../theme/vega_20'
+import loadingTips from './LoadingTip'
 import {
   ConfigProvider,
   Button,
@@ -50,7 +51,7 @@ import {
   UploadOutlined,
   InboxOutlined,
 } from '@ant-design/icons'
-import SeriesGallery from '../utils/SeriesGallery'
+import Loading from './Loading'
 echarts.use([
   GraphicComponent,
   TooltipComponent,
@@ -62,8 +63,9 @@ echarts.use([
 ])
 const { Dragger } = Upload
 const { useToken } = theme
+const {enterLoading, quitLoading} = Loading
 
-const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) => {
+const ScScatter = ({ scfile, spfile, setCompLoad, location, onRef, height, width, margin }) => {
   const [api, contextHolder] = notification.useNotification()
   const [isInit, setInit] = useState(false) // whether echart object is inited
   const chartRef = useRef(null) // current DOM container
@@ -116,7 +118,7 @@ const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) =
     { value: 2, label: 'LabelPropagation' },
   ])
   const { token } = useToken()
-
+  const [currTip, setCurrTip] = useState(loadingTips[0])
   // ref for tours
   const UploadRef = useRef(null)
   const SwitchRef = useRef(null)
@@ -173,7 +175,7 @@ const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) =
       description: 'The Status of Current LassoView, including current Lasso mode, clustering, embeddings, cell numbers and annoatated clusters.',
       target: () => StatusRef.current,
     },
-  ];
+  ]
 
   //var VisualColors = JSON.parse(JSON.stringify(vega_20)).reverse()
 
@@ -422,32 +424,12 @@ const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) =
     return _datasets
   }
 
-  const enterLoading = (index) => {
-    setLoadings((prevLoadings) => {
-      let newLoadings = [...prevLoadings]
-      newLoadings[index] = true
-      return newLoadings
-    })
-    setTimeout(() => {
-      setLoadings((prevLoadings) => {
-        let newLoadings = [...prevLoadings]
-        newLoadings[index] = false
-        return newLoadings
-      })
-    }, 60000)
-  }
-
-  const quitLoading = (index) => {
-    setLoadings((prevLoadings) => {
-      let newLoadings = [...prevLoadings]
-      newLoadings[index] = false
-      return newLoadings
-    })
-  }
 
   useImperativeHandle(onRef, () => ({  // explode trigger for parent components
     "Trigger": toggleAnno, // Trigger for useEffect
     "Tour": setTourOpen, // Open the tutorial
+    "Loading": setLoadings, // set Loading status
+    "Tip": setCurrTip, // set Loading Tips
   }))
 
   useEffect(() => {
@@ -456,30 +438,33 @@ const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) =
       var myChart = echarts.getInstanceByDom(chartRef.current)
       let _series = seriesArray
       if (commandRef.current === 'Reload') {
+        setCompLoad((compLoad) => {
+          let newCompLoad = { ...compLoad }
+          newCompLoad['LassoView'] = true
+          return newCompLoad
+        })
+        setCurrTip(loadingTips[1])
         enterLoading(0, setLoadings)
-        spfile.then((file) => {
-          SpH5adLoader(file).then((h5info) => {
-            //console.log("sp data loaded.")
-            setSpData(h5info)
-          })
+        SpH5adLoader(spfile).then((h5info) => {
+          setSpData(h5info)
         }).catch(error => {
           console.error('Error fetching blob in LassoView:', error)
         })
-        scfile.then((file) => {
-          SpH5adLoader(file).then((h5info) => {
-            console.log("All data loaded in LassoView.")
-            _setData(h5info.data)
-            setTitle(h5info.title)
-            setClusterOps(h5info.clusters)
-            setEmbedOps(h5info.embdOps)
-            setScData(h5info)
-            toggleAnno("Upload")
-          })
+
+        SpH5adLoader(scfile).then((h5info) => {
+          console.log("All data reloaded in LassoView.")
+          _setData(h5info.data)
+          setTitle(h5info.title)
+          setClusterOps(h5info.clusters)
+          setEmbedOps(h5info.embdOps)
+          setScData(h5info)
+          toggleAnno("Upload")
         }).catch(error => {
           console.error('Error fetching blob in LassoView:', error)
         })
       }
       if (commandRef.current === 'Upload') {
+        setCurrTip(loadingTips[2])
         let _dims = [...Object.keys(_data[0]), 'id']
         let source = _data.map((item, id) => {
           return [...Object.entries(item).map(([_, value]) => value), id]
@@ -603,7 +588,7 @@ const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) =
         brushRef.current = []
         datasetRef.current = null
         seriesRef.current = null
-        quitLoading(0)
+        quitLoading(0, setLoadings)
       }
       if (commandRef.current === 'Setting') {
         let option = myChart.getOption()
@@ -898,7 +883,7 @@ const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) =
               placement: 'topRight',
             })
           })
-        quitLoading(0)
+        quitLoading(0, setLoadings)
       }
       if (commandRef.current === 'Delete') {
         let option = myChart.getOption()
@@ -954,27 +939,28 @@ const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) =
       // init the echart container
       var myChart = echarts.init(chartRef.current)
       enterLoading(0, setLoadings)
-      spfile.then((file) => {
-        SpH5adLoader(file).then((h5info) => {
-          //console.log("sp data loaded.")
-          setSpData(h5info)
-        })
-      }).catch(error => {
-        console.error('Error fetching blob in LassoView:', error)
-      })
-      scfile.then((file) => {
-        SpH5adLoader(file).then((h5info) => {
-          console.log("All data loaded in LassoView.")
-          _setData(h5info.data)
-          setTitle(h5info.title)
-          setClusterOps(h5info.clusters)
-          setEmbedOps(h5info.embdOps)
-          setScData(h5info)
-          toggleAnno("Upload")
-        })
-      }).catch(error => {
-        console.error('Error fetching blob in LassoView:', error)
-      })
+      setCurrTip(loadingTips[0])
+      // spfile.then((file) => {
+      //   SpH5adLoader(file).then((h5info) => {
+      //     //console.log("sp data loaded.")
+      //     setSpData(h5info)
+      //   })
+      // }).catch(error => {
+      //   console.error('Error fetching blob in LassoView:', error)
+      // })
+      // scfile.then((file) => {
+      //   SpH5adLoader(file).then((h5info) => {
+      //     console.log("All data loaded in LassoView.")
+      //     _setData(h5info.data)
+      //     setTitle(h5info.title)
+      //     setClusterOps(h5info.clusters)
+      //     setEmbedOps(h5info.embdOps)
+      //     setScData(h5info)
+      //     toggleAnno("Upload")
+      //   })
+      // }).catch(error => {
+      //   console.error('Error fetching blob in LassoView:', error)
+      // })
       let axis0 = Axis.setEmptyAxis(0)
       let axis1 = Axis.setEmptyAxis(1)
       myChart.setOption({
@@ -1190,7 +1176,9 @@ const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) =
     <div>
       {contextHolder}
       <Flex justify="center" gap='middle'>
-        <Spin spinning={loadings[0]} size="large" tip="Loading">
+        <Spin spinning={loadings[0]} size="large" tip={currTip}>
+          <div>{JSON.stringify(loadings[0])}</div>
+          <div>{JSON.stringify(currTip)}</div>
           <div
             ref={chartRef}
             className="chart"
@@ -1527,7 +1515,7 @@ const ScScatter = ({ scfile, spfile, location, onRef, height, width, margin }) =
                         disabled={!allowConfirm}
                         loading={loadings[0]}
                         onClick={() => {
-                          enterLoading(0)
+                          enterLoading(0, setLoadings)
                           toggleAnno('Refine')
                         }}>
                         {loadings[0] ? "Refining" : "Refine"}
@@ -1656,6 +1644,7 @@ ScScatter.defaultProps = {
 ScScatter.propTypes = {
   scfile: PropTypes.object,
   spfile: PropTypes.object,
+  setCompLoad: PropTypes.func,
   location: PropTypes.object,
   onRef: PropTypes.any,
   height: PropTypes.string,

@@ -5,13 +5,15 @@ import Nav from './components/Nav'
 import Router from './components/Router'
 import {
   BrowserRouter,
-  RouterProvider,
-  Routes,
-  Route,
-  NavLink,
 } from "react-router-dom"
 import { ConfigProvider, theme } from 'antd'
+import {
+  QueryClient,
+  QueryClientProvider,
+} from 'react-query'
 
+// Create a client
+const queryClient = new QueryClient()
 
 function App () {
   return (
@@ -41,10 +43,12 @@ function App () {
       }
     }}>
       <div className="App">
-        <BrowserRouter>
-          <Nav />
-          <Router />
-        </BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <Nav />
+            <Router />
+          </BrowserRouter>
+        </QueryClientProvider>
       </div>
     </ConfigProvider>
   )

@@ -14,6 +14,7 @@ import { UniversalTransition } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
 import Loading from './Loading'
 import { Spin, Switch } from 'antd'
+import loadingTips from './LoadingTip'
 echarts.use([
   GraphicComponent,
   TooltipComponent,
@@ -30,7 +31,7 @@ const { enterLoading, quitLoading } = Loading
 
 
 
-const NetworkRelation = ({ spfile, scfile, onRef, title, height, width, margin }) => {
+const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, title, height, width, margin }) => {
   const chartRef = useRef(null)
   const commandRef = useRef('')
   const [action, setAction] = useState(0)
@@ -40,7 +41,7 @@ const NetworkRelation = ({ spfile, scfile, onRef, title, height, width, margin }
   const [graph, setGraph] = useState(null)
   const [scgraph, setSCGraph] = useState(null)
   const [spgraph, setSPGraph] = useState(null)
-
+  const [currTip, setCurrTip] = useState(loadingTips[0])
   const ScH5adLoader = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
@@ -94,18 +95,20 @@ const NetworkRelation = ({ spfile, scfile, onRef, title, height, width, margin }
       var myChart = echarts.getInstanceByDom(chartRef.current)
       if (commandRef.current === "Reload") {
         enterLoading(0, setLoadings)
-        scfile.then((loadedFile) => {
-          ScH5adLoader(loadedFile).then((res) => {
-            setSCGraph(res)
-          })
+        setCurrTip(loadingTips[1])
+        setCompLoad((compLoad) => {
+          let newCompLoad = { ...compLoad }
+          newCompLoad['NetWorkRelation'] = true
+          return newCompLoad
         })
-        spfile.then((loadedFile) => {
-          ScH5adLoader(loadedFile).then((res) => {
-            console.log("All data reloaded in Network.")
-            setSPGraph(res)
-            setGraph(res)
-            toggleAnno("Upload")
-          })
+        ScH5adLoader(scfile).then((res) => {
+          setSCGraph(res)
+        })
+        ScH5adLoader(spfile).then((res) => {
+          console.log("All data reloaded in Network.")
+          setSPGraph(res)
+          setGraph(res)
+          toggleAnno("Upload")
         })
       }
       if (commandRef.current === "Upload") {
@@ -169,19 +172,7 @@ const NetworkRelation = ({ spfile, scfile, onRef, title, height, width, margin }
     } else {
       var myChart = echarts.init(chartRef.current) //init the echart container
       enterLoading(0, setLoadings)
-      scfile.then((loadedFile) => {
-        ScH5adLoader(loadedFile).then((res) => {
-          setSCGraph(res)
-        })
-      })
-      spfile.then((loadedFile) => {
-        ScH5adLoader(loadedFile).then((res) => {
-          console.log("All data loaded in Network.")
-          setSPGraph(res)
-          setGraph(res)
-          toggleAnno("Upload")
-        })
-      })
+      setCurrTip(loadingTips[0])
       myChart.setOption({
         textStyle: {
           fontFamily: 'Arial',
@@ -217,7 +208,7 @@ const NetworkRelation = ({ spfile, scfile, onRef, title, height, width, margin }
 
 
   return (
-    <Spin spinning={loadings[0]} size="large" tip="Loading">
+    <Spin spinning={loadings[0]} size="large" tip={currTip}>
       <Switch checkedChildren="Spatial"
         unCheckedChildren="Single-cell"
         value={key}
@@ -250,6 +241,7 @@ NetworkRelation.defaultProps = {
 NetworkRelation.propTypes = {
   spfile: PropTypes.object,
   scfile: PropTypes.object,
+  setCompLoad: PropTypes.func,
   onRef: PropTypes.any,
   title: PropTypes.string,
   height: PropTypes.string,

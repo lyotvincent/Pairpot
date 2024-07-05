@@ -22,6 +22,7 @@ import { LineChart, LinesChart } from 'echarts/charts'
 import { UniversalTransition } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
 import Loading from './Loading'
+import loadingTips from './LoadingTip'
 echarts.use([
   GraphicComponent,
   TooltipComponent,
@@ -36,7 +37,7 @@ echarts.use([
 
 const { enterLoading, quitLoading } = Loading
 
-const MarkerTable = ({ file, onRef, title, height, width, margin }) => {
+const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin }) => {
   const commandRef = useRef('')  // current command
   const [action, setAction] = useState(0)
   const [Init, setInit] = useState(false)  // is Inited
@@ -55,7 +56,7 @@ const MarkerTable = ({ file, onRef, title, height, width, margin }) => {
   const [arrLen, setArrLen] = useState(0) // Length of 1D lfc, mn and pval
   const [cluLen, setCluLen] = useState(0) // Length of clusters, arrLen / genes
   const [showTop, setShowTop] = useState(10) // Top markers of each cluster to show
-
+  const [currTip, setCurrTip] = useState(loadingTips[0])
   // filter params
   const [searchText, setSearchText] = useState('')
   const [searchedColumn, setSearchedColumn] = useState('')
@@ -258,13 +259,17 @@ const MarkerTable = ({ file, onRef, title, height, width, margin }) => {
       var myChart = echarts.getInstanceByDom(chartRef.current)
       /*...deal with data */
       if (commandRef.current === 'Reload') {
-        file.then((file) => {
-          enterLoading(0, setLoadings)
-          enterLoading(1, setLoadings)
-          ScH5adLoader(file).then(() => {
-            console.log("All data reloaded in MarkerTable.")
-            toggleAnno("Upload")
-          })
+        enterLoading(0, setLoadings)
+        enterLoading(1, setLoadings)
+        setCurrTip(loadingTips[1])
+        setCompLoad((compLoad) => {
+          let newCompLoad = { ...compLoad }
+          newCompLoad['MarkerTable'] = true
+          return newCompLoad
+        })
+        ScH5adLoader(file).then(() => {
+          console.log("All data reloaded in MarkerTable.")
+          toggleAnno("Upload")
         }).catch(error => {
           console.error('Error fetching blob in MarkerTable:', error)
         })
@@ -272,6 +277,7 @@ const MarkerTable = ({ file, onRef, title, height, width, margin }) => {
       if (commandRef.current === "Upload") {
         enterLoading(0, setLoadings)
         enterLoading(1, setLoadings)
+        setCurrTip(loadingTips[2])
         let _data = []
         for (let i = 0; i < cluLen; i++) {
           let _arr = mn.slice(i * geneNum, i * geneNum + showTop)  // Top marker for each cluster
@@ -447,16 +453,9 @@ const MarkerTable = ({ file, onRef, title, height, width, margin }) => {
       }
     } else {
       var myChart = echarts.init(chartRef.current) //init the echart container
-      file.then((file) => {
-        enterLoading(0, setLoadings)
-        enterLoading(1, setLoadings)
-        ScH5adLoader(file).then(() => {
-          console.log("All data loaded in MarkerTable.")
-          toggleAnno("Upload")
-        })
-      }).catch(error => {
-        console.error('Error fetching blob in LayerView:', error)
-      })
+      enterLoading(0, setLoadings)
+      enterLoading(1, setLoadings)
+      setCurrTip(loadingTips[0])
       myChart.setOption({
         textStyle: {
           fontFamily: 'Arial',
@@ -654,7 +653,7 @@ const MarkerTable = ({ file, onRef, title, height, width, margin }) => {
           </div>
         </Col>
         <Col span={22} offset={1}>
-          <Spin spinning={loadings[0]} size="large" tip="Loading">
+          <Spin spinning={loadings[0]} size="large" tip={currTip}>
             <Table
               columns={dyColumns}
               dataSource={data}
@@ -674,7 +673,7 @@ const MarkerTable = ({ file, onRef, title, height, width, margin }) => {
         </Col>
       </Row>
       <Row>
-        <Spin spinning={loadings[0]} size="large" tip="Loading">
+        <Spin spinning={loadings[0]} size="large" tip={currTip}>
           <div
             ref={chartRef}
             className="chart"
@@ -695,6 +694,7 @@ MarkerTable.defaultProps = {
 
 MarkerTable.propTypes = {
   file: PropTypes.object,
+  setCompLoad: PropTypes.func,
   title: PropTypes.string,
   height: PropTypes.string,
   width: PropTypes.string,

@@ -14,6 +14,7 @@ import { UniversalTransition } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
 import H5adLoader from '../utils/H5adLoader'
 import Loading from './Loading'
+import loadingTips from './LoadingTip'
 echarts.use([
   GraphicComponent,
   TooltipComponent,
@@ -28,7 +29,7 @@ echarts.use([
 
 const { enterLoading, quitLoading } = Loading
 
-const RelHeat = ({ spfile, scfile, onRef, title, height, width, margin }) => {
+const RelHeat = ({ spfile, scfile,setCompLoad, onRef, title, height, width, margin }) => {
   const chartRef = useRef(null) // get current DOM container
   const commandRef = useRef('')
   const [action, setAction] = useState(0)
@@ -48,7 +49,7 @@ const RelHeat = ({ spfile, scfile, onRef, title, height, width, margin }) => {
   const [scHeatmap, setScHeatmap] = useState({})
   const [spHeatmap, setSpHeatmap] = useState({})
   const [key, setKey] = useState(true)
-
+  const [currTip, setCurrTip] = useState(loadingTips[0])
   const ScH5adLoader = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
@@ -92,25 +93,26 @@ const RelHeat = ({ spfile, scfile, onRef, title, height, width, margin }) => {
 
       if (commandRef.current === "Reload") {
         enterLoading(0, setLoadings)
-        scfile.then((loadedFile) => {
-          ScH5adLoader(loadedFile).then((h5info) => {
-            setScHeatmap(h5info)
-          })
+        setCompLoad((compLoad) => {
+          let newCompLoad = { ...compLoad }
+          newCompLoad['CPDBHeatmap'] = true
+          return newCompLoad
         })
-        spfile.then((file) => {
-          ScH5adLoader(file).then((h5info) => {
-            console.log("All data reloaded in CPDB.")
-            setSpHeatmap(h5info)
-            setDataArray(h5info.dataArray)
-            setCellArray(h5info.cellArray)
-            setIntArray(h5info.intArray)
-            setmyCells(h5info.cellType)
-            setDataKeys(h5info.dataKeys)
-            setCurrentData(h5info.dataArray[h5info.cellType[0]])
-            setCurrentInt(h5info.intArray[h5info.cellType[0]])
-            setCurrentCell(h5info.cellArray[h5info.cellType[0]])
-            toggleAnno("Upload")
-          })
+        ScH5adLoader(scfile).then((h5info) => {
+          setScHeatmap(h5info)
+        })
+        ScH5adLoader(spfile).then((h5info) => {
+          console.log("All data reloaded in CPDB.")
+          setSpHeatmap(h5info)
+          setDataArray(h5info.dataArray)
+          setCellArray(h5info.cellArray)
+          setIntArray(h5info.intArray)
+          setmyCells(h5info.cellType)
+          setDataKeys(h5info.dataKeys)
+          setCurrentData(h5info.dataArray[h5info.cellType[0]])
+          setCurrentInt(h5info.intArray[h5info.cellType[0]])
+          setCurrentCell(h5info.cellArray[h5info.cellType[0]])
+          toggleAnno("Upload")
         }).catch(error => {
           console.error('Error fetching blob in LayerView:', error)
         })
@@ -362,28 +364,7 @@ const RelHeat = ({ spfile, scfile, onRef, title, height, width, margin }) => {
     } else {
       var myChart = echarts.init(chartRef.current) //init the echart container
       enterLoading(0, setLoadings)
-      scfile.then((loadedFile) => {
-        ScH5adLoader(loadedFile).then((h5info) => {
-          setScHeatmap(h5info)
-        })
-      })
-      spfile.then((file) => {
-        ScH5adLoader(file).then((h5info) => {
-          console.log("All CPDB Heatmap data loaded.")
-          setSpHeatmap(h5info)
-          setDataArray(h5info.dataArray)
-          setCellArray(h5info.cellArray)
-          setIntArray(h5info.intArray)
-          setmyCells(h5info.cellType)
-          setDataKeys(h5info.dataKeys)
-          setCurrentData(h5info.dataArray[h5info.cellType[0]])
-          setCurrentInt(h5info.intArray[h5info.cellType[0]])
-          setCurrentCell(h5info.cellArray[h5info.cellType[0]])
-          toggleAnno("Upload")
-        })
-      }).catch(error => {
-        console.error('Error fetching blob in LayerView:', error)
-      })
+      setCurrTip(loadingTips[0])
       myChart.setOption({
         textStyle: {
           fontFamily: 'Arial',
@@ -521,7 +502,7 @@ const RelHeat = ({ spfile, scfile, onRef, title, height, width, margin }) => {
   //   'Neurons3', 'Platelets', 'Pyramidal cells', 'Unknown']
   return (
     <Space>
-      <Spin spinning={loadings[0]} size="large" tip="Loading">
+      <Spin spinning={loadings[0]} size="large" tip={currTip}>
         <div
           ref={chartRef}
           className="chart"
@@ -571,7 +552,9 @@ RelHeat.defaultProps = {
 }
 
 RelHeat.propTypes = {
-  file: PropTypes.object,
+  spfile: PropTypes.object,
+  scfile: PropTypes.object,
+  setCompLoad: PropTypes.func,
   title: PropTypes.string,
   onRef: PropTypes.any,
   height: PropTypes.string,

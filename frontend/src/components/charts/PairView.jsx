@@ -53,6 +53,7 @@ import {
   UploadOutlined,
   InboxOutlined,
 } from '@ant-design/icons'
+import loadingTips from './LoadingTip'
 echarts.use([
   GraphicComponent,
   TooltipComponent,
@@ -62,11 +63,11 @@ echarts.use([
   CanvasRenderer,
   UniversalTransition,
 ])
-const { Dragger } = Upload
+
 const { useToken } = theme
 const { quitLoading, enterLoading } = Loading
 
-const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) => {
+const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width, margin }) => {
   const [api, contextHolder] = notification.useNotification()
   const [isInit, setInit] = useState(false) // whether echart object is inited
   const chartRef = useRef(null) // current DOM container
@@ -122,6 +123,7 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
   const [batchOps, setBatchOps] = useState([])
 
   const [tourOpen, setTourOpen] = useState(false)
+  const [currTip, setCurrTip] = useState(loadingTips[0])
 
   // ref for tours
   const scConfigsRef = useRef(null)
@@ -173,7 +175,7 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
       description: 'The Status of Current LassoView, including current Lasso mode, clustering, embeddings, cell numbers and annoatated clusters.',
       target: () => StatusRef.current,
     },
-  ];
+  ]
 
 
   const [xInv, setxInv] = useState(false)
@@ -460,9 +462,14 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
       var myChart = echarts.getInstanceByDom(chartRef.current)
       let _series = seriesArray
       if (commandRef.current === 'Reload') {
+        setCompLoad((compLoad) => {
+          let newCompLoad = { ...compLoad }
+          newCompLoad['PairView'] = true
+          return newCompLoad
+        })
         enterLoading(1, setLoadings)
-        Promise.all([spfile.then((file) => SpH5adLoader(file)),
-        scfile.then((file) => ScH5adLoader(file))]).then(() => {
+        setCurrTip(loadingTips[1])
+        Promise.all([SpH5adLoader(spfile), ScH5adLoader(scfile)]).then(() => {
           console.log("All data reloaded in PairView.")
           toggleAnno("Upload")
         }).catch(error => {
@@ -471,6 +478,7 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
       }
       if (commandRef.current === 'Upload') {
         enterLoading(1, setLoadings)
+        setCurrTip(loadingTips[2])
         let _scdims = [...Object.keys(_scdata[0]), 'id']
         let _scsource = _scdata.map((item, id) => {  // 2d array
           return [...Object.entries(item).map(([_, value]) => value), id]
@@ -1209,15 +1217,15 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
     } else {
       // init the echart container
       var myChart = echarts.init(chartRef.current)
-      // get sc and sp data in async
       enterLoading(1, setLoadings)
-      Promise.all([spfile.then((file) => SpH5adLoader(file)),
-      scfile.then((file) => ScH5adLoader(file))]).then(() => {
-        console.log("All data loaded in PairView.")
-        toggleAnno("Upload")
-      }).catch(error => {
-        console.error('Error fetching blob in PairView:', error)
-      })
+      setCurrTip(loadingTips[0])
+      // Promise.all([spfile.then((file) => SpH5adLoader(file)),
+      // scfile.then((file) => ScH5adLoader(file))]).then(() => {
+      //   console.log("All data loaded in PairView.")
+      //   toggleAnno("Upload")
+      // }).catch(error => {
+      //   console.error('Error fetching blob in PairView:', error)
+      // })
 
       let _scaxis = setEmptyAxis(0)
       let _spaxis = setEmptyAxis(1)
@@ -1343,7 +1351,7 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
       {contextHolder}
 
       <Flex justify="center" gap='middle'>
-        <Spin spinning={loadings[1]} size="large" tip="Loading">
+        <Spin spinning={loadings[1]} size="large" tip={currTip}>
           <div
             ref={chartRef}
             className="chart"
@@ -1760,7 +1768,7 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
                           enterLoading(0, setLoadings)
                           toggleAnno('Refine')
                         }}
-                        >
+                      >
                         {loadings[0] ? "Refining" : "Refine"}
                       </Button>
                     </Space>
@@ -1857,19 +1865,19 @@ const PairView = ({ spfile, scfile, location, onRef, height, width, margin }) =>
               </Popconfirm>
             </Space>
             <div ref={StatusRef}>
-            <div>
-              <b>Current Status</b>
-              <div>Mode: {brushModeState}</div>
-              <div>Clustering: {clusterCurSc.label}</div>
-              <div>Embedding 0: {embedCurSc}</div>
-              <div>Embedding 1: {embedCurSp}</div>
-              <div>Annotated Clusters: {snumRef.current}</div>
-              <div>Cell number: {cellNum}</div>
-            </div>
+              <div>
+                <b>Current Status</b>
+                <div>Mode: {brushModeState}</div>
+                <div>Clustering: {clusterCurSc.label}</div>
+                <div>Embedding 0: {embedCurSc}</div>
+                <div>Embedding 1: {embedCurSp}</div>
+                <div>Annotated Clusters: {snumRef.current}</div>
+                <div>Cell number: {cellNum}</div>
+              </div>
             </div>
           </Space>
         </ConfigProvider>
-        <Tour open={tourOpen} onClose={() => setTourOpen(false)} steps={steps}/>
+        <Tour open={tourOpen} onClose={() => setTourOpen(false)} steps={steps} />
       </Flex>
     </div>
   )
@@ -1884,6 +1892,7 @@ PairView.defaultProps = {
 PairView.propTypes = {
   spfile: PropTypes.object,
   scfile: PropTypes.object,
+  setCompLoad: PropTypes.func,
   location: PropTypes.object,
   onRef: PropTypes.any,
   height: PropTypes.string,

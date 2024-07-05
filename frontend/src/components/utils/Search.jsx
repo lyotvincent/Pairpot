@@ -5,6 +5,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import Loading from '../charts/Loading'
 import axios from 'axios'
 import TextCollapse from './TextCollapse'
+import { useMutation } from 'react-query'
 const { enterLoading, quitLoading } = Loading
 const renderTitle = (title) => (
   <span>
@@ -59,6 +60,37 @@ const Search = ({ }) => {
   const [loading, setLoading] = useState([])
   const [open, setOpen] = useState(false)
   const [status, setStatus] = useState("Success")
+  const fetch = useMutation({
+    mutationKey:['example'],
+    mutationFn:(e) =>{
+      axios({
+        method: 'GET',
+        url: '/api/example',
+        params: {
+          id: e
+        },
+      }).then((response) => {
+        let dataCol = response.data.attributes
+        let spitem = response.data.data[0]
+        let values = Object.fromEntries(
+          dataCol.map((k, i) => [k, spitem[i]])
+        )
+        let scitem = response.data.data[1]
+        let state = {
+          st: values
+        }
+        if (typeof scitem !== 'undefined') {
+          let scvalues = Object.fromEntries(
+            dataCol.map((k, i) => [k, scitem[i]])
+          )
+          state['sc'] = scvalues
+        }
+        quitLoading(0, setLoading)
+        setLoadText("Search")
+        navigate('/browse', { state: state })
+      })
+    }
+  })
   return (
     <ConfigProvider theme={{
       components: {
@@ -92,32 +124,7 @@ const Search = ({ }) => {
               setStatus("Success")
               enterLoading(0, setLoading)
               setLoadText("Searching...")
-              axios({
-                method: 'GET',
-                url: '/api/example',
-                params: {
-                  id: e
-                },
-              }).then((response) => {
-                let dataCol = response.data.attributes
-                let spitem = response.data.data[0]
-                let values = Object.fromEntries(
-                  dataCol.map((k, i) => [k, spitem[i]])
-                )
-                let scitem = response.data.data[1]
-                let state = {
-                  st: values
-                }
-                if (typeof scitem !== 'undefined') {
-                  let scvalues = Object.fromEntries(
-                    dataCol.map((k, i) => [k, scitem[i]])
-                  )
-                  state['sc'] = scvalues
-                }
-                quitLoading(0, setLoading)
-                setLoadText("Search")
-                navigate('/browse', { state: state })
-              })
+              fetch.mutate(e)
             } else{
               setStatus("error")
             }

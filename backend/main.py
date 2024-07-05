@@ -50,7 +50,6 @@ def example():
     scid = row1[0][-1]
     cursor.execute(f"SELECT * FROM datasets WHERE dataset_id = \"{scid}\"")
     row2 = cursor.fetchall()
-    print(len(row2))
     # return query results
     response = jsonify({'attributes': attributes, 'data': [row1[0], row2[0]]})
     
