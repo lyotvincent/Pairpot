@@ -127,7 +127,7 @@ const DatasetList = ({ src, col }) => {
                 }}
               />
               <br />
-              {/* <br />
+              <br />
               <IconText
                 icon={LinkOutlined}
                 text="Paired Datasets"
@@ -144,7 +144,7 @@ const DatasetList = ({ src, col }) => {
                   )
                 }}
               />
-              <br/> */}
+              <br/>
               <br />
               <IconText
                 icon={DownloadOutlined}
@@ -195,6 +195,13 @@ const DatasetList = ({ src, col }) => {
                   {item[attr['pmid']] ? (
                     <div>
                       <b>PMID: </b> {item[attr['pmid']]}
+                    </div>
+                  ) : (
+                    ' '
+                  )}
+                  {item[attr['dataset_id']] ? (
+                    <div>
+                      <b>Dataset ID: </b> {item[attr['dataset_id']]}
                     </div>
                   ) : (
                     ' '

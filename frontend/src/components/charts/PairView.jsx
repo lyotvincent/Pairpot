@@ -454,6 +454,8 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
   useImperativeHandle(onRef, () => ({  // explode trigger for parent components
     "Trigger": toggleAnno, // Trigger for useEffect
     "Tour": setTourOpen, // Open the tutorial
+    "Loading": setLoadings, // set Loading status
+    "Tip": setCurrTip, // set Loading Tips
   }))
 
   useEffect(() => {

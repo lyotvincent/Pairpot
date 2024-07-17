@@ -355,6 +355,8 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin }) => {
   useImperativeHandle(onRef, () => ({  // explode trigger for parent components
     "Trigger": toggleAnno, // Trigger for useEffect
     "Tour": setTourOpen, // Open the tutorial
+    "Loading": setLoading, // set Loading status
+    "Tip": setCurrTip, // set Loading Tips
   }))
 
   useEffect(() => {
@@ -740,14 +742,6 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin }) => {
       }
     } else {
       var myChart = echarts.init(chartRef.current) //init the echart container
-      // if (query) {
-      //   enterLoading(0, setLoading)
-      //   SpH5adLoader(spfile).then(() => {
-      //     toggleAnno("Upload")
-      //   }).catch(error => {
-      //     console.error('Error fetching blob in LayerView:', error)
-      //   })
-      // }
 
       let axis = Axis.setEmptyAxis(0)
       let axis3D = Axis.setEmptyAxis3D(0)

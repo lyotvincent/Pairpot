@@ -88,6 +88,8 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, title, height, wi
 
   useImperativeHandle(onRef, () => ({  // explode trigger for parent components
     "Trigger": toggleAnno, // Trigger for useEffect
+    "Loading": setLoadings, // set Loading status
+    "Tip": setCurrTip, // set Loading Tips
   }))
 
   useEffect(() => {

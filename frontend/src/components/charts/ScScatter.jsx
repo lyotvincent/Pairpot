@@ -1177,8 +1177,6 @@ const ScScatter = ({ scfile, spfile, setCompLoad, location, onRef, height, width
       {contextHolder}
       <Flex justify="center" gap='middle'>
         <Spin spinning={loadings[0]} size="large" tip={currTip}>
-          <div>{JSON.stringify(loadings[0])}</div>
-          <div>{JSON.stringify(currTip)}</div>
           <div
             ref={chartRef}
             className="chart"

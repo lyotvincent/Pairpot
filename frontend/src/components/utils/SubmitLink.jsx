@@ -31,6 +31,7 @@ const initialValues = {
   citation: '',
   accessions: '',
   platforms: '',
+  PMID: '',
 }
 
 const speciesOption = [
@@ -388,6 +389,9 @@ const SubmitLink = (props) => {
             <Form.Item {...formItemLayout} name="platforms" label="Platforms">
               <Input placeholder="Please input the platforms" />
             </Form.Item>
+            <Form.Item {...formItemLayout} name="PMID" label="PMID">
+              <Input placeholder="Please input the PMID" />
+            </Form.Item>
 
             <Form.Item
               wrapperCol={{
@@ -631,6 +635,10 @@ const SubmitLink = (props) => {
               <Input placeholder="Please input the platforms" />
             </Form.Item>
 
+            <Form.Item {...formItemLayout} name="PMID" label="PMID">
+              <Input placeholder="Please input the PMID" />
+            </Form.Item>
+            
             <Form.Item
               wrapperCol={{
                 span: 12,

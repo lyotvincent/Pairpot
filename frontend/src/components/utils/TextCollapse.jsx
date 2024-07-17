@@ -7,7 +7,7 @@ const TextCollapse = ({ text, header, threshold = 100 }) => {
   return (
     <div>
       {header}
-      {detail ? text : text.substring(0, threshold)}
+      {detail ? text : text?.substring(0, threshold)}
       <Button
         onClick={() => setDetail(!detail)}
         type="link"

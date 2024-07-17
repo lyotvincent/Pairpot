@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Tabs, Button, Space } from 'antd'
+import { Tabs, Button, Space, Spin } from 'antd'
 import DatasetList from './DatasetList'
 import DatasetTable from './DatasetTable'
 import DatasetStatic from './DatasetStatic'
@@ -10,13 +10,20 @@ import {
   DownloadOutlined,
   ReloadOutlined,
 } from '@ant-design/icons'
+import loadingTips from '../charts/LoadingTip'
+import Loading from '../charts/Loading'
+import { useQuery, QueryCache } from 'react-query'
 import axios from 'axios'
+
+const {enterLoading, quitLoading} = Loading
 
 const DatasetTab = (props) => {
   const { sendData } = props // send src metadata to parent
   const [dataSrc, setDataSrc] = useState([])
   const [dataCol, setDataCol] = useState({})
-  const [fresh, setFresh] = useState(false)
+  const [fresh, setFresh] = useState(true)
+  const [loadings, setLoadings] = useState([])
+  const [currTip, setCurrTip] = useState(loadingTips[0])
   const items = [
     {
       key: '1',
@@ -50,12 +57,67 @@ const DatasetTab = (props) => {
     },
   ]
 
+  const response = useQuery({
+    queryKey: ['db'],
+    queryFn: () => axios.get('/api/datasets').then((response) => {
+      return response.data
+    }).catch((error) => {
+      console.log(error)
+    }),
+    staleTime: Infinity, 
+    retry: false, 
+    refetchOnWindowFocus: false, 
+  })
+
+
+  useEffect(() => {
+    if(response.status === 'success' && typeof response.data !== 'undefined' && fresh) {
+      setCurrTip(loadingTips[1])
+      setDataSrc(response.data.data)
+      setDataCol(response.data.attributes)
+      setFresh(false)
+      // calculate metadata and send to Database
+      let src = response.data.data
+      let attr = response.data.attributes
+      let attrIndex = {}
+      for (let i = 0; i < attr.length; i++) {
+        let colname = attr[i]
+        attrIndex[colname] = i
+      }
+      let filterName = ['species', 'tissues', 'technologies']
+      let filterItem = filterName.map((fc) => {
+        let Ori_col = Array.from(
+          new Set(src.map((item) => item[attrIndex[fc]]))
+        )
+        let Uni_col = []
+        for (let col of Ori_col) {
+          if (col !== null) {
+            Uni_col = [...Uni_col, ...col.split(';')]
+          }
+        }
+        Uni_col = Array.from(new Set(Uni_col)).sort()
+        Uni_col = Uni_col.map((item) => ({ text: item, value: item }))
+        return Uni_col
+      })
+      let filterCol = {}
+      for (let i = 0; i < filterName.length; i++) {
+        filterCol[filterName[i]] = filterItem[i]
+      }
+      sendData(filterCol)
+      quitLoading(0, setLoadings)
+      setFresh(false)
+    }
+  }, [response.data, fresh])
+
   const operations = (
     <Space>
       <Button
         onClick={() => {
-          console.log('Reload')
-          setFresh(true)
+          enterLoading(0,setLoadings)
+          setCurrTip(loadingTips[0])
+          response.refetch().then(()=>{
+            setFresh(true)
+          })
         }}
         icon={<ReloadOutlined />}>
         Reload
@@ -63,54 +125,64 @@ const DatasetTab = (props) => {
       {/* <Button icon={<DownloadOutlined />}>Download</Button> */}
     </Space>
   )
+
   useEffect(() => {
-    if (dataSrc.length === 0 || fresh) {
-      console.log('loading data')
-      axios({
-        method: 'GET',
-        url: '/api/datasets',
-      })
-        .then((response) => {
-          setDataSrc(response.data.data)
-          setDataCol(response.data.attributes)
-          setFresh(false)
-          // calculate metadata and send to Database
-          let src = response.data.data
-          let attr = response.data.attributes
-          let attrIndex = {}
-          for (let i = 0; i < attr.length; i++) {
-            let colname = attr[i]
-            attrIndex[colname] = i
-          }
-          let filterName = ['species', 'tissues', 'technologies']
-          let filterItem = filterName.map((fc) => {
-            let Ori_col = Array.from(
-              new Set(src.map((item) => item[attrIndex[fc]]))
-            )
-            let Uni_col = []
-            for (let col of Ori_col) {
-              if (col !== null) {
-                Uni_col = [...Uni_col, ...col.split(';')]
-              }
-            }
-            Uni_col = Array.from(new Set(Uni_col)).sort()
-            Uni_col = Uni_col.map((item) => ({ text: item, value: item }))
-            return Uni_col
-          })
-          let filterCol = {}
-          for (let i = 0; i < filterName.length; i++) {
-            filterCol[filterName[i]] = filterItem[i]
-          }
-          sendData(filterCol)
-          //console.log(filterCol['technologies'].map((item) => item.text))
-        })
-        .catch((error) => {
-          console.log(error)
-        })
-    }
-  }, [fresh])
-  return (
+    setCurrTip(loadingTips[0])
+  }, [])
+
+  // useEffect(() => {
+  //   enterLoading(0, setLoadings)
+  //   setCurrTip(loadingTips[0])
+  //   if (dataSrc.length === 0 || fresh) {
+  //     axios({
+  //       method: 'GET',
+  //       url: '/api/datasets',
+  //     })
+  //       .then((response) => {
+  //         setCurrTip(loadingTips[2])
+  //         setDataSrc(response.data.data)
+  //         setDataCol(response.data.attributes)
+  //         setFresh(false)
+  //         // calculate metadata and send to Database
+  //         let src = response.data.data
+  //         let attr = response.data.attributes
+  //         let attrIndex = {}
+  //         for (let i = 0; i < attr.length; i++) {
+  //           let colname = attr[i]
+  //           attrIndex[colname] = i
+  //         }
+  //         let filterName = ['species', 'tissues', 'technologies']
+  //         let filterItem = filterName.map((fc) => {
+  //           let Ori_col = Array.from(
+  //             new Set(src.map((item) => item[attrIndex[fc]]))
+  //           )
+  //           let Uni_col = []
+  //           for (let col of Ori_col) {
+  //             if (col !== null) {
+  //               Uni_col = [...Uni_col, ...col.split(';')]
+  //             }
+  //           }
+  //           Uni_col = Array.from(new Set(Uni_col)).sort()
+  //           Uni_col = Uni_col.map((item) => ({ text: item, value: item }))
+  //           return Uni_col
+  //         })
+  //         let filterCol = {}
+  //         for (let i = 0; i < filterName.length; i++) {
+  //           filterCol[filterName[i]] = filterItem[i]
+  //         }
+  //         sendData(filterCol)
+  //         quitLoading(0, setLoadings)
+  //         //console.log(filterCol['technologies'].map((item) => item.text))
+  //       })
+  //       .catch((error) => {
+  //         console.log(error)
+  //       })
+  //   }
+  // }, [fresh])
+
+  return (<Spin spinning={loadings[0]} size="large" tip={currTip}>
     <Tabs defaultActiveKey="1" items={items} tabBarExtraContent={operations} />
+    </Spin>
   )
 }
 export default DatasetTab

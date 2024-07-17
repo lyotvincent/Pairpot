@@ -85,6 +85,8 @@ const RelHeat = ({ spfile, scfile,setCompLoad, onRef, title, height, width, marg
 
   useImperativeHandle(onRef, () => ({  // explode trigger for parent components
     "Trigger": toggleAnno, // Trigger for useEffect
+    "Loading": setLoadings, // set Loading status
+    "Tip": setCurrTip, // set Loading Tips
   }))
 
   useEffect(() => {

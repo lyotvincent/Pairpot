@@ -1,5 +1,5 @@
 import { DotChartOutlined, FileDoneOutlined, FileSearchOutlined, FileTextOutlined, HeatMapOutlined, LinkOutlined, OneToOneOutlined, SelectOutlined, SlidersOutlined, UnorderedListOutlined } from '@ant-design/icons'
-import React, { useState, useEffect, lazy, Suspense, useRef } from 'react'
+import React, { useState, useEffect, lazy, Suspense, useRef,memo } from 'react'
 import logoFig from "../assets/img/mylogo.png"
 import {
   Menu,
@@ -30,7 +30,7 @@ import { useMutation, useQuery, QueryCache } from "react-query"
 const { Content, Sider, Header } = Layout
 const {enterLoading} = Loading
 
-const MetaInfo = lazy(() => (import('./utils/DatasetDetails')))
+const MetaInfo = memo(lazy(() => (import('./utils/DatasetDetails'))))
 const LassoView = lazy(() => (import('./charts/ScScatter')))
 const LayerView = lazy(() => (import('./charts/SpScatter')))
 const PairView = lazy(() => (import('./charts/PairView')))
@@ -40,6 +40,7 @@ const Browser = () => {
   const location = useLocation()
   const [Init, setInit] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
+  const [locState, setLocState] = useState(false)
   const [action, setAction] = useState(0)
   const commandRef = useRef()
   const onClickSideMenu = (e) => {
@@ -82,6 +83,36 @@ const Browser = () => {
   const statusSC = useMutation({
     mutationKey: ['sc'],
     mutationFn: (state) => fetchSCData(state),
+    staleTime: Infinity, 
+    retry: false, 
+    refetchOnWindowFocus: false, 
+  })
+
+  const example = useQuery({
+    queryKey: ['example'],
+    queryFn: ()=> axios.get('/api/example',{
+        params: {
+          id: "STDS0000235"
+        },
+      }).then((response) => {
+        let dataCol = response.data.attributes
+        let spitem = response.data.data[0]
+        let values = Object.fromEntries(
+          dataCol.map((k, i) => [k, spitem[i]])
+        )
+        let scitem = response.data.data[1]
+        let state = {
+          st: values
+        }
+        if (typeof scitem !== 'undefined') {
+          let scvalues = Object.fromEntries(
+            dataCol.map((k, i) => [k, scitem[i]])
+          )
+          state['sc'] = scvalues
+        }
+        return state
+      })
+    ,
     staleTime: Infinity, 
     retry: false, 
     refetchOnWindowFocus: false, 
@@ -139,7 +170,7 @@ const Browser = () => {
     },
   ]
   const [selectedKey, setSelectedKey] = useState(sideMenuItems[0].key)
-
+  const MetaRef = React.createRef()   // get the trigger function from MetaInfo
   const LassoRef = React.createRef()  // get the trigger function from LassoView
   const LayerRef = React.createRef()  // get the trigger function from LayerView
   const PairRef = React.createRef()   // get the trigger function from PairView
@@ -156,6 +187,20 @@ const Browser = () => {
     "CPDBHeatmap": false,
   })
 
+  useEffect(()=>{
+    if(example.status === 'success' && typeof example.data !== 'undefined'){
+      MetaRef.current?.Trigger(example.data)
+      setLocState(example.data)
+    }
+  }, [example.data, MetaRef])
+
+  useEffect(() => {
+    if(typeof locState !== 'undefined'){
+      statusSC.mutate(locState)
+      statusSP.mutate(locState)
+    }
+  }, [locState])
+
   useEffect(() => {
     if (Init && location.state !== null) {
       setComponentLoad({  // reset ComponentLoad
@@ -166,42 +211,28 @@ const Browser = () => {
         "NetWorkRelation": false,
         "CPDBHeatmap": false,
       })
-      LassoRef.current.Tip(loadingTips[0])
+
+      // set loading status for each components
+      LassoRef.current.Tip(loadingTips[3])
       enterLoading(0, LassoRef.current.Loading)
+      LayerRef.current.Tip(loadingTips[3])
+      enterLoading(0, LayerRef.current.Loading)
+      PairRef.current.Tip(loadingTips[3])
+      enterLoading(1, PairRef.current.Loading)
+      MarkerRef.current.Tip(loadingTips[3])
+      enterLoading(0, MarkerRef.current.Loading)
+      enterLoading(1, MarkerRef.current.Loading)
+      CPDBRef.current.Tip(loadingTips[3])
+      enterLoading(0, CPDBRef.current.Loading)
+      NetRef.current.Tip(loadingTips[3])
+      enterLoading(0, NetRef.current.Loading)
+
+      // mutation of datasets
       statusSC.mutate(location.state)
       statusSP.mutate(location.state)
     }
     else {
-      if (location.state === null) {
-        axios({
-          method: 'GET',
-          url: '/api/example',
-          params: {
-            id: "STDS0000235"
-          },
-        }).then((response) => {
-          let dataCol = response.data.attributes
-          let spitem = response.data.data[0]
-          let values = Object.fromEntries(
-            dataCol.map((k, i) => [k, spitem[i]])
-          )
-          let scitem = response.data.data[1]
-          let state = {
-            st: values
-          }
-          if (typeof scitem !== 'undefined') {
-            let scvalues = Object.fromEntries(
-              dataCol.map((k, i) => [k, scitem[i]])
-            )
-            state['sc'] = scvalues
-          }
-          navigate('/browse', { state: state })
-        })
-      } else {
-        statusSC.mutate(location.state)
-        statusSP.mutate(location.state)
         setInit(true)
-      }
     }
   }, [location])
 
@@ -296,9 +327,7 @@ const Browser = () => {
             <Divider />
             <Suspense fallback={<h1>Loading for MetaInfo...</h1>}>
               <Card id="MetaInfo" ref={MetaAnchor}>
-                <MetaInfo
-                  location={location}
-                  navigate={navigate} />
+                <MetaInfo onRef={MetaRef} />
               </Card>
             </Suspense>
             <Divider />

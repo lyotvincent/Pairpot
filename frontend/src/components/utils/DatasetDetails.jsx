@@ -5,7 +5,7 @@ import {
   LinkOutlined,
   SearchOutlined,
 } from '@ant-design/icons'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useImperativeHandle } from 'react'
 import { Statistic, ConfigProvider, theme, Row, Col, Table } from 'antd'
 import TextCollapse from './TextCollapse'
 import './bg.scss'
@@ -94,12 +94,10 @@ const Data = [
     sc: 'SC Accessions',
   },
 ]
-const State = {
-}
-const DatasetDetails = (props) => {
-  const { navigate, location } = props
+
+const DatasetDetails = ({onRef}) => {
   const [title, setTitle] = useState()
-  const [state, setState] = useState(State)
+  const [state, setState] = useState()
   const [dataSource, setDataSource] = useState(Data)
   const { token } = theme.useToken()
   const formItemLayout = {
@@ -111,33 +109,37 @@ const DatasetDetails = (props) => {
     },
   }
 
+  useImperativeHandle(onRef, () => ({  // explode trigger for parent components
+    "Trigger": setState, // Trigger for useEffect
+  }))
+
   var dataIndex = ["dataset_id", "title", "contributors", "summary", "species", "tissues", "technologies", "contacts", "citation", "accessions"]
   useEffect(() => {
-    if (location.state !== null) {
-      let stateKeys = Object.keys(location.state)
+    if (typeof state !== 'undefined') {
+      let stateKeys = Object.keys(state)
       let set_sc = stateKeys.includes('sc')
       if (stateKeys.includes('st')) {
-        let st_state = location.state.st
+        let st_state = state.st
         let _dataSource = dataIndex.map((item, index) => {
           let _data = Data[index]
           _data.st = item === 'summary' ? <TextCollapse text={st_state[item]} /> : st_state[item]
           if (set_sc) {
-            let sc_state = location.state.sc
+            let sc_state = state.sc
             _data.sc = item === 'summary' ? <TextCollapse text={sc_state[item]} /> : sc_state[item]
           }
           return _data
         })
         setDataSource(_dataSource)
         setTitle(st_state['title'])
-        setState({
-          Spots: st_state['spots'],
-          Samples: st_state['n_samples'],
-          Cells: st_state['cells'],
-          Genes: st_state['genes'],
-        })
+        // setState({
+        //   Spots: st_state['spots'],
+        //   Samples: st_state['n_samples'],
+        //   Cells: st_state['cells'],
+        //   Genes: st_state['genes'],
+        // })
       }
     }
-  }, [location.state])
+  }, [state])
 
   return (
     <>
