@@ -131,32 +131,33 @@ const Help = () => {
                           onClick={() => {
                             enterLoading(0, setLoading)
                             setLoadText("Loading Example...")
-                            axios({
-                              method: 'GET',
-                              url: '/api/example',
-                              params: {
-                                id: "STDS0000235"
-                              },
-                            }).then((response) => {
-                              let dataCol = response.data.attributes
-                              let spitem = response.data.data[0]
-                              let values = Object.fromEntries(
-                                dataCol.map((k, i) => [k, spitem[i]])
-                              )
-                              let scitem = response.data.data[1]
-                              let state = {
-                                st: values
-                              }
-                              if (typeof scitem !== 'undefined') {
-                                let scvalues = Object.fromEntries(
-                                  dataCol.map((k, i) => [k, scitem[i]])
-                                )
-                                state['sc'] = scvalues
-                              }
-                              quitLoading(0, setLoading)
-                              setLoadText("Example Prepared.")
-                              navigate('/browse', { state: state })
-                            })
+                            // axios({
+                            //   method: 'GET',
+                            //   url: '/api/example',
+                            //   params: {
+                            //     id: "STDS0000235"
+                            //   },
+                            // }).then((response) => {
+                            //   let dataCol = response.data.attributes
+                            //   let spitem = response.data.data[0]
+                            //   let values = Object.fromEntries(
+                            //     dataCol.map((k, i) => [k, spitem[i]])
+                            //   )
+                            //   let scitem = response.data.data[1]
+                            //   let state = {
+                            //     st: values
+                            //   }
+                            //   if (typeof scitem !== 'undefined') {
+                            //     let scvalues = Object.fromEntries(
+                            //       dataCol.map((k, i) => [k, scitem[i]])
+                            //     )
+                            //     state['sc'] = scvalues
+                            //   }
+                          
+                            // })
+                            quitLoading(0, setLoading)
+                            setLoadText("Example Prepared.")
+                            navigate('/browse')
                           }
                           }
                         >{loadText}</Button>

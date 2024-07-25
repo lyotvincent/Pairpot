@@ -9,11 +9,14 @@ import {
   TableOutlined,
   DownloadOutlined,
   ReloadOutlined,
+  DotNetOutlined,
+  ApartmentOutlined,
 } from '@ant-design/icons'
 import loadingTips from '../charts/LoadingTip'
 import Loading from '../charts/Loading'
 import { useQuery, QueryCache } from 'react-query'
 import axios from 'axios'
+import DatasetGraph from './DatasetGraph'
 
 const {enterLoading, quitLoading} = Loading
 
@@ -47,6 +50,39 @@ const DatasetTab = (props) => {
     },
     {
       key: '3',
+      label: (
+        <span>
+          <ApartmentOutlined />
+          Graph
+        </span>
+      ),
+      children: <DatasetGraph config={{
+        containerId: "viz",
+        neo4j: {
+            serverUrl: "neo4j://localhost:7687",
+            serverUser: "neo4j",
+            serverPassword: "biorzh123456",
+        },
+        labels: {
+          ST: {
+              caption: 'id',  
+          },
+          SC: {
+              caption: 'id',   
+          },
+        },
+        relationships: {
+          PAIR:{
+              thickness: 1,  //String：线段粗细，用作边缘厚度的属性名。默认为1。
+              caption: true,  //Boolean：如果设置为true，则关系类型将显示为边缘标题。或String：用作边缘标题的属性名。
+              font: { size: 12, color: '#606266' }  // 关系节点文字大小颜色
+          },
+        },
+        initialCypher: "MATCH (n)-[r:INTERACTS]->(m) RETURN *"
+      }} />,
+    },
+    {
+      key: '4',
       label: (
         <span>
           <BarChartOutlined />
