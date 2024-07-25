@@ -4,6 +4,7 @@
 
 from normalize import *
 import os
+import re
 from glob import glob
 
 file0=open("Error.txt","w")
@@ -88,11 +89,14 @@ def proc_h5(filename, filepath):
     sampleNames=filename
     adata = concat_adata(samples, sampleNames, inputFunc=input_adata_10Xh5)
     adata = pp(adata)
-    adata = clu(adata)
     if adata.shape[0]>100000:
-        print("File ",directory[-3:]," is too large with {}".format(adata.shape[0]),file=file0)
-        print("File ",directory[-3:]," is too large with {}".format(adata.shape[0]))
-        return
+        sampleIdx = np.random.choice(len(adata), 50000)
+        adata = adata[sampleIdx,:].copy()
+    adata = clu(adata)
+    # if adata.shape[0]>100000:
+    #     print("File ",directory[-3:]," is too large with {}".format(adata.shape[0]),file=file0)
+    #     print("File ",directory[-3:]," is too large with {}".format(adata.shape[0]))
+    #     return
     try:
         adata = rank(adata, organs)
     except:
@@ -162,6 +166,37 @@ def process_files(path):
                     # proc_h5(file, filepath)
                 # except:
                 #     print("Error in "+filepath)
+
+def txtToH5ad(path):
+    df_test = pd.read_csv(path, sep='\t')
+    # GENE
+    var = df_test.columns.to_list()
+    var.pop(0)
+    # CELL
+    obs = df_test.iloc[:,0].to_list()
+    # MATRIX
+    X = df_test.iloc[:,1:].to_numpy()
+    # X = df_test
+
+    adata = ad.AnnData(X=X, var=var, obs=obs)
+    adata.var_names = [s.upper() for s in var]  # 基因名务必⼤写！！
+    adata.obs_names = [s.upper() for s in obs]  # 细胞名务必⼤写！！
+
+    adata.var_names_make_unique()  # 基因名务必去重！！
+    adata.obs_names_make_unique()  # 细胞名务必去重！！
+
+    # 将obs的索引和列名转换为字符串
+    adata.obs.index = adata.obs.index.astype(str)
+    adata.obs.columns = adata.obs.columns.astype(str)
+    # 将var的索引和列名转换为字符串
+    adata.var.index = adata.var.index.astype(str)
+    adata.var.columns = adata.var.columns.astype(str)
+
+    new_path = path[:-4] + ".h5ad"
+    adata.write_h5ad(new_path)
+    print(new_path," done!")
+    
+
 print(1)
 # process_files('/data/rzh/RawUrls')
 # sample = {
@@ -175,45 +210,66 @@ print(1)
 #     'name':['P1', 'P2', 'P3', 'P4', 'P5', 'P6']
 # }
 import json
+# sample = {
+#   "dict":"/data/rzh/RawUrls/212/SCDS0000002",
+#   "path":["GSM4653855_AD1.h5ad",
+#           "GSM4653856_AD2.h5ad",
+#           "GSM4653857_AD3.h5ad",
+#           "GSM4653858_AD4.h5ad",
+#           "GSM4653859_AD5.h5ad",
+#           "GSM4653860_AD6.h5ad",
+#           "GSM4653861_AD7.h5ad",
+#           'GSM4653862_AD8.h5ad',
+#           'GSM4653863_HC1.h5ad',
+#           'GSM4653864_HC2.h5ad',
+#           'GSM4653865_HC3.h5ad',
+#           'GSM4653866_HC4.h5ad',
+#           'GSM4653867_HC5.h5ad',
+#           'GSM4653868_HC6.h5ad',
+#           'GSM4653869_HC7.h5ad',],
+#   "name":["AD1",
+#           "AD2",
+#           "AD3",
+#           "AD4",
+#           "AD5",
+#           "AD6",
+#           "AD7",
+#           'AD8',
+#           'HC1',
+#           'HC2',
+#           'HC3',
+#           'HC4',
+#           'HC5',
+#           'HC6',
+#           'HC7',]
+# }
+
 sample = {
-  "dict":"/data/rzh/RawUrls/212/SCDS0000002",
-  "path":["GSM4653855_AD1.h5ad",
-          "GSM4653856_AD2.h5ad",
-          "GSM4653857_AD3.h5ad",
-          "GSM4653858_AD4.h5ad",
-          "GSM4653859_AD5.h5ad",
-          "GSM4653860_AD6.h5ad",
-          "GSM4653861_AD7.h5ad",
-          'GSM4653862_AD8.h5ad',
-          'GSM4653863_HC1.h5ad',
-          'GSM4653864_HC2.h5ad',
-          'GSM4653865_HC3.h5ad',
-          'GSM4653866_HC4.h5ad',
-          'GSM4653867_HC5.h5ad',
-          'GSM4653868_HC6.h5ad',
-          'GSM4653869_HC7.h5ad',],
-  "name":["AD1",
-          "AD2",
-          "AD3",
-          "AD4",
-          "AD5",
-          "AD6",
-          "AD7",
-          'AD8',
-          'HC1',
-          'HC2',
-          'HC3',
-          'HC4',
-          'HC5',
-          'HC6',
-          'HC7',]
+  "dict":"/data/rzh/RawUrls/114/SCDS0000114",
+  "path":["GSM5764246_filtered_feature_bc_matrix_ABU18.h5",
+          "GSM5764252_filtered_feature_bc_matrix_ABU7.h5",
+          "GSM5764265_filtered_feature_bc_matrix_CS52.h5",
+          "GSM5764269_filtered_feature_bc_matrix_CS89.h5",
+          "GSM5764354_filtered_feature_bc_matrix_CS33.h5",
+          "GSM5764384_filtered_feature_bc_matrix_CS85.h5",
+          "GSM5764389_filtered_feature_bc_matrix_CS110.h5",
+          "GSM5764397_filtered_feature_bc_matrix_CS166.h5",
+          "GSM5764406_filtered_feature_bc_matrix_CS172.h5",
+          "",
+          "",
+          "",
+         ],
+  "name":["46Q",
+          "47Q",
+          "73R",]
 }
 json_data = json.dumps(sample)
  
 # 将JSON数据保存到文件
 with open(f"{sample['dict']}/sample.json", 'w') as f:
     json.dump(sample, f)
-proc_h5ad(filepath=[f"{sample['dict']}/{s}" for s in sample["path"]], filename=sample['name'])
+# proc_h5ad(filepath=[f"{sample['dict']}/{s}" for s in sample["path"]], filename=sample['name'])
+proc_h5(filepath=[f"{sample['dict']}/{s}" for s in sample["path"]], filename=sample['name'])
 file0.close()
 print("End")
 f=open("End","w")

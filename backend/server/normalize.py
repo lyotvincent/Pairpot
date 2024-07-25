@@ -79,7 +79,6 @@ def concat_adata(samples, sampleNames, inputFunc=input_adata_10Xh5):
             adatas[i] = adatas[i][:, common_vars]
     # 进行数据合并
     adata_concat = adatas[0].concatenate(adatas[1:], batch_categories=sampleNames)
-    adata_concat
     return adata_concat
 
 

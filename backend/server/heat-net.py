@@ -195,8 +195,7 @@ def run_cpdb(adata_inFile, adata_outPath, type='sc'):
     threads=16,
     )
     print("calculating cpdb network...")
-    ax = kpy.plot_cpdb_heatmap(pvals=cpdb_res['pvalues'],
-                        cell_types=adata_in.obs[groupby], return_tables=True)
+    ax = kpy.plot_cpdb_heatmap(pvals=cpdb_res['pvalues'],return_tables=True)
     network_data = get_network(ax)
     cpdb_res['network'] = network_data
     print("calculating cpdb heatmap...")
@@ -278,9 +277,9 @@ def run_deconv(adata_scFile, adata_spFile, adata_outPath):
     print(f"Write dcv results to {adata_outPath}/sp_deconv.h5ad")
 
 if __name__ == '__main__':
-    adata_spFile = "/data/rzh/RawUrls/212/STDS0000212/New_212.h5ad"
-    adata_scFile = "/data/rzh/RawUrls/212/SCDS0000002/New_002.h5ad"
-    adata_outPath = "/data/rzh/RawUrls/212"
-    run_deconv(adata_scFile, adata_spFile, adata_outPath)
+    adata_spFile = "/data/rzh/RawUrls/152/STDS0000152/New_152.h5ad"
+    adata_scFile = "/data/rzh/RawUrls/152/SCDS0000152/New_152.h5ad"
+    adata_outPath = "/data/rzh/RawUrls/152"
+    # run_deconv(adata_scFile, adata_spFile, adata_outPath)
     run_cpdb(adata_scFile, adata_outPath, type="sc")
-    run_cpdb(f"{adata_outPath}/sp_deconv.h5ad", adata_outPath, type="sp")
+    # run_cpdb(f"{adata_outPath}/sp_deconv.h5ad", adata_outPath, type="sp")
