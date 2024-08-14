@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useImperativeHandle } from 'react'
 import { Tabs, Button, Space, Spin } from 'antd'
 import DatasetList from './DatasetList'
 import DatasetTable from './DatasetTable'
@@ -10,6 +10,7 @@ import {
   DownloadOutlined,
   ReloadOutlined,
   DotNetOutlined,
+  ProductOutlined,
   ApartmentOutlined,
 } from '@ant-design/icons'
 import loadingTips from '../charts/LoadingTip'
@@ -21,12 +22,15 @@ import DatasetGraph from './DatasetGraph'
 const {enterLoading, quitLoading} = Loading
 
 const DatasetTab = (props) => {
-  const { sendData } = props // send src metadata to parent
+  const { sendData, response, onRef } = props // send src metadata to parent
   const [dataSrc, setDataSrc] = useState([])
   const [dataCol, setDataCol] = useState({})
   const [fresh, setFresh] = useState(true)
   const [loadings, setLoadings] = useState([])
+  const [showAll, setShowAll] = useState(false)
   const [currTip, setCurrTip] = useState(loadingTips[0])
+  const [graphCfg, setGraphCfg] = useState(null)
+
   const items = [
     {
       key: '1',
@@ -56,30 +60,7 @@ const DatasetTab = (props) => {
           Graph
         </span>
       ),
-      children: <DatasetGraph config={{
-        containerId: "viz",
-        neo4j: {
-            serverUrl: "neo4j://localhost:7687",
-            serverUser: "neo4j",
-            serverPassword: "biorzh123456",
-        },
-        labels: {
-          ST: {
-              caption: 'id',  
-          },
-          SC: {
-              caption: 'id',   
-          },
-        },
-        relationships: {
-          PAIR:{
-              thickness: 1,  //String：线段粗细，用作边缘厚度的属性名。默认为1。
-              caption: true,  //Boolean：如果设置为true，则关系类型将显示为边缘标题。或String：用作边缘标题的属性名。
-              font: { size: 12, color: '#606266' }  // 关系节点文字大小颜色
-          },
-        },
-        initialCypher: "MATCH (n)-[r:INTERACTS]->(m) RETURN *"
-      }} />,
+      children: <DatasetGraph config={graphCfg} />,
     },
     {
       key: '4',
@@ -93,22 +74,29 @@ const DatasetTab = (props) => {
     },
   ]
 
-  const response = useQuery({
+  const OriginResponse = useQuery({
     queryKey: ['db'],
     queryFn: () => axios.get('/api/datasets').then((response) => {
       return response.data
     }).catch((error) => {
       console.log(error)
     }),
-    staleTime: Infinity, 
-    retry: false, 
-    refetchOnWindowFocus: false, 
+    staleTime: Infinity,
+    retry: false,
+    refetchOnWindowFocus: false,
   })
 
+  useImperativeHandle(onRef, () => ({  // explode trigger for parent components
+    "Fresh": setFresh, // Trigger for useEffect
+    "Loading": setLoadings, // set Loading status
+    "Tip": setCurrTip, // set Loading Tips
+    "GraphConfig": setGraphCfg, // set GraphConfigs
+  }))
 
   useEffect(() => {
     if(response.status === 'success' && typeof response.data !== 'undefined' && fresh) {
       setCurrTip(loadingTips[1])
+      enterLoading(0, setLoadings)
       setDataSrc(response.data.data)
       setDataCol(response.data.attributes)
       setFresh(false)
@@ -141,12 +129,30 @@ const DatasetTab = (props) => {
       }
       sendData(filterCol)
       quitLoading(0, setLoadings)
-      setFresh(false)
     }
   }, [response.data, fresh])
 
+  useEffect(() => {
+    if(showAll && OriginResponse.status === 'success' && typeof OriginResponse.data !== 'undefined'){
+      setCurrTip(loadingTips[1])
+      setDataSrc(OriginResponse.data.data)
+      setDataCol(OriginResponse.data.attributes)
+      quitLoading(0, setLoadings)
+      setShowAll(false)
+    }
+  }, [showAll, OriginResponse.data])
+
   const operations = (
     <Space>
+      <Button 
+      onClick={() => {
+        enterLoading(0,setLoadings)
+        setCurrTip(loadingTips[0])
+        setShowAll(true)
+      }}
+      icon={<ProductOutlined />}>
+        Display All
+      </Button>
       <Button
         onClick={() => {
           enterLoading(0,setLoadings)
@@ -156,7 +162,7 @@ const DatasetTab = (props) => {
           })
         }}
         icon={<ReloadOutlined />}>
-        Reload
+        ReFresh
       </Button>
       {/* <Button icon={<DownloadOutlined />}>Download</Button> */}
     </Space>

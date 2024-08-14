@@ -451,7 +451,7 @@ const ScScatter = ({ scfile, spfile, setCompLoad, location, onRef, height, width
           console.error('Error fetching blob in LassoView:', error)
         })
 
-        SpH5adLoader(scfile).then((h5info) => {
+        ScH5adLoader(scfile).then((h5info) => {
           console.log("All data reloaded in LassoView.")
           _setData(h5info.data)
           setTitle(h5info.title)
@@ -985,7 +985,7 @@ const ScScatter = ({ scfile, spfile, setCompLoad, location, onRef, height, width
             mark: { show: true },
             dataView: { show: true, readOnly: true },
             restore: { show: true },
-            saveAsImage: { show: true, pixelRatio: 3, },
+            saveAsImage: { show: true, pixelRatio: 5, },
             dataZoom: {},
           },
           iconStyle: {
@@ -1075,22 +1075,6 @@ const ScScatter = ({ scfile, spfile, setCompLoad, location, onRef, height, width
   }
 
   const ScH5adLoader = (file) => {
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      let h5info = H5adLoader(file, event)
-      _setData(h5info.data)
-      setTitle(h5info.title)
-      setClusterOps(h5info.clusters)
-      setEmbedOps(h5info.embdOps)
-    }
-    reader.onloadend = () => {
-      toggleAnno('Upload')
-      setUploading(false)
-    }
-    reader.readAsArrayBuffer(file)
-  }
-
-  const SpH5adLoader = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
       reader.onload = (event) => {
@@ -1121,6 +1105,58 @@ const ScScatter = ({ scfile, spfile, setCompLoad, location, onRef, height, width
       reader.readAsArrayBuffer(file)
     })
   }
+
+  const SpH5adLoader = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        try {
+          let h5info = H5adLoader(file, event, ['meta'])
+          _setData(h5info.data)
+          setTitle(h5info.title)
+          setClusterOps(h5info.clusters)
+          if (h5info.clusters.map((item) => item.label).includes('batch'))
+            setBatchName('batch')
+            let batches = [
+              ...new Set(
+                h5info.data.map((item) => {
+                  return item['batch']
+                })
+              ),
+            ]
+            let batchIdx = Object.fromEntries(batches.map((item, idx)=>([item, idx])))
+            let batch_row = Math.ceil(Math.sqrt(batches.length))
+            let _row = h5info.data.map(item=>item['array_row'])
+            let _col = h5info.data.map(item=>item['array_col'])
+            let array_row_dist = Math.max.apply(null, _row) - Math.min.apply(null, _row)
+            let array_col_dist = Math.max.apply(null, _col) - Math.min.apply(null, _col)
+            h5info.data.forEach(obj=>{
+              obj['array_0'] = obj['array_row']+ array_row_dist * (Math.floor(batchIdx[obj['batch']] / batch_row))
+              obj['array_1'] = obj['array_col']+ array_col_dist * (batchIdx[obj['batch']] % batch_row)
+            })
+            h5info.embdOps = [...h5info.embdOps, { value: h5info.embdOps.length, label: "array" }]
+            
+          setEmbedOps(h5info.embdOps)
+          resolve({
+            data: h5info.data,
+            title: h5info.title,
+            clusters: h5info.clusters,
+            embdOps: h5info.embdOps
+          })
+        } catch (error) {
+          reject(error)
+        }
+      }
+      reader.onloadend = () => {
+        //console.log("Load sp data finished.")
+      }
+      reader.onerror = (error) => {
+        reject(error)
+      }
+      reader.readAsArrayBuffer(file)
+    })
+  }
+
 
   const JsonLoader = (file) => {
     let newTitle = file.name.replace(/\.json$/, '')

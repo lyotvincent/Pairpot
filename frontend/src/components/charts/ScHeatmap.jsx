@@ -236,7 +236,6 @@ const ScHeatmap = ({ title, height, width, margin }) => {
           itemWidth: 20,
           itemHeight: 120,
           inRange: {
-            // 设置映射的颜色范围为蓝色到红色之间
             symbolSize: [3, 18],
             color: ["#104e8b", "#ffdab9", "#8b0a50"],
           },

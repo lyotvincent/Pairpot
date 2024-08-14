@@ -54,6 +54,7 @@
     "jest-watch-typeahead": "^1.0.0",
     "jquery": "^3.7.1",
     "jQuery": "^1.7.4",
+    "js2wordcloud": "^1.1.12",
     "jsfive": "^0.3.14",
     "location": "0.0.1",
     "mini-css-extract-plugin": "^2.4.5",

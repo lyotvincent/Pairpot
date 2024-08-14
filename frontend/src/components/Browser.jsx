@@ -310,7 +310,6 @@ const Browser = () => {
         </Sider>
         <Layout>
           <Content style={{ padding: '20px 20px' }}>
-            <div>compLoad:{JSON.stringify(componentLoad)}</div>
             <Col span={6} offset={8} id='Search'>
               <div ref={SearchAnchor} style={{
                 width: '300px',
@@ -323,8 +322,8 @@ const Browser = () => {
               }} />
             </Col>
             <Col span={18} offset={3}> <Search /> </Col>
-
             <Divider />
+            {/* <div>compLoad:{JSON.stringify(componentLoad)}</div> */}
             <Suspense fallback={<h1>Loading for MetaInfo...</h1>}>
               <Card id="MetaInfo" ref={MetaAnchor}>
                 <MetaInfo onRef={MetaRef} />
