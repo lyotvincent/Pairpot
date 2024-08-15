@@ -1,7 +1,6 @@
 import {
-  DownloadOutlined,
   EyeOutlined,
-  FileTextOutlined,
+  CloudDownloadOutlined,
   LinkOutlined,
   SearchOutlined,
 } from '@ant-design/icons'
@@ -17,7 +16,7 @@ const IconTip = ({ icon, attr, onClick, placement = 'bottom' }) => (
   </Tooltip>
 )
 
-const DatasetTable = ({ src, col }) => {
+const DatasetTable = ({ src, col, oriSrc }) => {
   const navigate = useNavigate()
   const [data, setData] = useState([])
   const [descOpen, setDescOpen] = useState(false)
@@ -139,7 +138,7 @@ const DatasetTable = ({ src, col }) => {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
-      width: '14%',
+      width: '10%',
       sorter: (a, b) => a.key - b.key,
       sortDirections: ['descend', 'ascend'],
       fixed: 'left',
@@ -192,32 +191,20 @@ const DatasetTable = ({ src, col }) => {
   useEffect(() => {
     setDataCol(col)
     var attrStack = {}
-    for (var i = 0; i < col.length; i++) {
-      var colname = col[i]
+    for (let i = 0; i < col.length; i++) {
+      let colname = col[i]
       attrStack[colname] = i
     }
-    var dataStack = []
-    for (let i = 0; i < src.length; i++) {
-      dataStack.push({
-        key: src[i][0],
-        id: src[i][1],
-        title: src[i][2],
-        species: src[i][attrStack.species],
-        tissues: src[i][attrStack.tissues],
-        technologies: src[i][attrStack.technologies],
-        pmid: src[i][attrStack.pmid],
-      })
-    }
+    var dataStack = src.map((srcitem) => (Object.fromEntries(col.map((item,index)=>([item,srcitem[index]])))))
     setData(dataStack)
-
     //filter columns
     let filterName = ['species', 'tissues', 'technologies']
     let filterItem = filterName.map((fc) => {
       let Ori_col = Array.from(new Set(dataStack.map((val) => val[fc])))
       let Uni_col = []
       for (let col of Ori_col) {
-        if (col !== null) {
-          Uni_col = [...Uni_col, ...col.split(';')]
+        if (col !== null && typeof col == 'string') {
+          Uni_col = [...Uni_col, ...col?.split(';')]
         }
       }
       Uni_col = Array.from(new Set(Uni_col)).sort()
@@ -236,7 +223,7 @@ const DatasetTable = ({ src, col }) => {
         title: 'ID',
         dataIndex: 'id',
         key: 'id',
-        width: '12%',
+        width: '4%',
         sorter: (a, b) => a.key - b.key,
         sortDirections: ['descend', 'ascend'],
         fixed: 'left',
@@ -246,7 +233,7 @@ const DatasetTable = ({ src, col }) => {
         dataIndex: 'title',
         ellipsis: true,
         key: 'title',
-        width: '30%',
+        width: '35%',
         ...getColumnSearchProps('title'),
       },
       {
@@ -299,32 +286,50 @@ const DatasetTable = ({ src, col }) => {
         title: 'Action',
         key: 'operation',
         fixed: 'right',
-        width: '8%',
-        render: (_, record) => (
+        width: '10%',
+        render: (index, record) => (
           <>
+          {/* <div>{JSON.stringify(record.id)}</div> */}
             <Space>
               <DatasetDescription
                 descCol={col}
-                descInfo={src[record.key]}
+                descInfo={Object.values(record)}
                 placement={'top'}
               />
-              <EyeOutlined />
+              <IconTip
+                icon={EyeOutlined}
+                text="Visualization"
+                key="list-vertical-visualization-o"
+                attr="Visualize this Dataset"
+                placement="top"
+                onClick={() => {
+                  let scid = record['has_paired']
+                  let scitem = oriSrc.find((item) => item[1] === scid)
+                  let state = {
+                    st: record
+                  }
+                  if (typeof scitem !== 'undefined') {
+                    let scvalues = Object.fromEntries(
+                      dataCol.map((k, i) => [k, scitem[i]])
+                    )
+                    state['sc'] = scvalues
+                  }
+                  console.log(state)
+                  navigate('/browse', { state: state })
+                }}
+              />
               <IconTip
                 icon={LinkOutlined}
                 key="list-vertical-Paired-Datasets-o"
                 attr="Link paired datasets"
                 placement="top"
                 onClick={() => {
-                  let item = src[record.key]
-                  let values = Object.fromEntries(
-                    col.map((k, i) => [k, item[i]])
-                  )
-                  navigate('/submit', { state: values })
+                  navigate('/submit', { state: record })
                 }}
               />
               <IconTip
-                icon={DownloadOutlined}
-                attr={'Download from:' + src[record.key][attrStack.accessions]}
+                icon={CloudDownloadOutlined}
+                attr={'Download from:' + record.accessions}
                 placement="top"
               />
             </Space>

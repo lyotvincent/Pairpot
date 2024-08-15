@@ -1,18 +1,21 @@
 import React, { useState, useEffect, View } from 'react'
-import TrackVisibility from 'react-on-screen'
+// import TrackVisibility from 'react-on-screen'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { ReactComponent as Female } from '../assets/img/female.svg'
-import { ReactComponent as FemaleOrgans } from '../assets/img/female-organs.svg'
-import SideMenu from './utils/SideMenu'
+// import { ReactComponent as Female } from '../assets/img/female.svg'
+// import { ReactComponent as FemaleOrgans } from '../assets/img/female-organs.svg'
+//import SideMenu from './utils/SideMenu'
+import Species from './metas/Species'
+import Technologies from './metas/Technologies'
+import Tissues from './metas/Tissues'
+import Topics from './metas/Topics'
 import axios from 'axios'
 import { useQuery } from 'react-query'
-import { Card, Layout, Menu, theme, Space, Button, Tag, Col, Divider, Flex } from 'antd'
+import { Card, Layout, theme, Tag, Col, Divider, ConfigProvider } from 'antd'
 import logoFig from "../assets/img/mylogo.png"
-import loadingTips from './charts/LoadingTip'
+import TagCollapse from './utils/TagCollapse'
+// import loadingTips from './charts/LoadingTip'
 import Loading from './charts/Loading'
 import {
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
   DatabaseOutlined,
   ProfileOutlined,
   OneToOneOutlined,
@@ -20,18 +23,27 @@ import {
 import DatasetTab from './utils/DatasetTab'
 import Search from './utils/Search'
 import SampleTab from './utils/SampleTab'
-const { Header, Content, Footer, Sider } = Layout
+const { Content, Footer } = Layout
 const { enterLoading } = Loading
 
 export const Database = () => {
-  const [collapsed, setCollapsed] = useState(false)
+  //const [collapsed, setCollapsed] = useState(false)
   const [srcMeta, setSrcMeta] = useState({}) // get the meta data from childrens
-  const [src, setSrc] = useState({})
-  const [selectedKey, setSelectedKey] = useState('datasets')
-  const [visible, setVisible] = useState(true)
-  const onClickTopMenu = (e) => {
-    setSelectedKey(e.key)
-  }
+  const [src, setSrc] = useState([1, 2, 3])
+  const [selectedTags, setSelectedTags] = React.useState([]);
+
+  const handleChange = (tag, checked) => {
+    const nextSelectedTags = checked
+      ? [...selectedTags, tag]
+      : selectedTags.filter((t) => t !== tag);
+    console.log('You are interested in: ', nextSelectedTags);
+    setSelectedTags(nextSelectedTags);
+  };
+  //const [selectedKey, setSelectedKey] = useState('datasets')
+  //const [visible, setVisible] = useState(true)
+  // const onClickTopMenu = (e) => {
+  //   setSelectedKey(e.key)
+  // }
 
   const response = useQuery({
     queryKey: ['db'],
@@ -49,8 +61,8 @@ export const Database = () => {
     return (response.data.data.filter((item) => item[3]?.split(";").includes(species)))
   }
 
-  const filterTissues = (species) => {
-    return (response.data.data.filter((item) => item[4]?.split(";").includes(species)))
+  const filterTissues = (tissues) => {
+    return (response.data.data.filter((item) => item[4]?.split(";").includes(tissues)))
   }
 
   const filterTechs = (species) => {
@@ -90,19 +102,21 @@ export const Database = () => {
 
   const Rerender = (label, item) => {
     let newSrcData
-    if(label==="tissues"){
+    if (label === "tissues") {
       newSrcData = filterTissues(item)
       TabRef.current?.GraphConfig(`{tissues: \"${item}\"}`)
     }
-    else if(label==="species"){
+    else if (label === "species") {
       newSrcData = filterSpecies(item)
+      TabRef.current?.GraphConfig(`{species: \"${item}\"}`)
     }
-    else if(label==="technologies"){
+    else if (label === "technologies") {
       newSrcData = filterTechs(item)
+      TabRef.current?.GraphConfig(`{technologies: \"${item}\"}`)
     }
-    else if(label==="diseases"){
+    else if (label === "diseases") {
       newSrcData = filterDiseases(item)
-    } else{
+    } else {
       newSrcData = src.data.data
     }
     setSrc(prevSrc => ({
@@ -114,6 +128,8 @@ export const Database = () => {
     TabRef.current?.Fresh(true)
     enterLoading(0, TabRef.current?.Loading)
   }
+
+  const species = []
 
   return (
     <Layout
@@ -145,11 +161,18 @@ export const Database = () => {
             }} />
           </Col>
           <Col span={16} offset={4}> <Search /> </Col>
-          <Col span={16} offset={4}> 
-          <Divider orientation="center">Preset Keywords</Divider> 
+          <Col span={16} offset={4}>
+          <Divider style={{marginTop:16, marginBottom: 14}}/>
           </Col>
-          <Col span={16} offset={4}> 
-          <Flex gap={6} wrap justify='left'>
+          <Col span={18} offset={3}>
+            <TagCollapse
+              tags={Species.map((item) => (<Tag style={{ margin: 4, cursor:"pointer" }} color="magenta" onClick={() => {
+                Rerender("species", item)
+              }}>{item}</Tag>))}
+              threshold={5}
+              prefix={<b style={{ margin: 3 }}>Species:</b>}
+            />
+            {/* <Flex gap={6} wrap justify='left'>
             Species:
             <Tag color="magenta"
               onClick={() => {
@@ -183,11 +206,17 @@ export const Database = () => {
             }}>
               Gallus gallus
             </Tag>
-          </Flex>
+          </Flex> */}
           </Col>
-          <br />
-          <Col span={16} offset={4}> 
-          <Flex gap={6} wrap justify='left'>
+          <Col span={18} offset={3}>
+            <TagCollapse
+              tags={Tissues.map((item) => (<Tag style={{ margin: 4, cursor:"pointer" }} color="volcano" onClick={() => {
+                Rerender("tissues", item)
+              }}>{item}</Tag>))}
+              threshold={10}
+              prefix={<b style={{ margin: 3 }}>Tissues:</b>}
+            />
+            {/* <Flex gap={6} wrap justify='left'>
             Tissues:
             <Tag color="magenta"
               onClick={() => {
@@ -255,99 +284,115 @@ export const Database = () => {
               }}>
               Spinal Cord
             </Tag>
-          </Flex>
+          </Flex> */}
           </Col>
-          <br />
-          <Col span={16} offset={4}> 
-          <Flex gap={6} wrap justify='left'>
-            Technologies:
-            <Tag color="magenta"
-              onClick={() => {
-                Rerender('technologies',"10x Visium")
-              }}>
-              10x Visium
-            </Tag>
-            <Tag color="red"
-              onClick={() => {
-                Rerender('technologies',"scRNA")
-              }}>
-              scRNA-seq
-            </Tag>
-            <Tag color="volcano"
-              onClick={() => {
-                let newSrcData = filterTechs("snRNA")
-                setSrc(prevSrc => ({
-                  ...prevSrc, data: {
-                    attributes: prevSrc.data.attributes,
-                    data: newSrcData
-                  }
-                }))
-                TabRef.current?.Fresh(true)
-                enterLoading(0, TabRef.current?.Loading)
-              }}>
-              snRNA-seq
-            </Tag>
-            <Tag color="orange"
-              onClick={() => {
-                Rerender('technologies',"Stereo-Seq")
-              }}>
-              Stereo-Seq
-            </Tag>
-            <Tag color="gold"
-              onClick={() => {
-                Rerender('technologies',"MERFISH")
-              }}>
-              MERFISH
-            </Tag>
-            <Tag color="lime"
-              onClick={() => {
-                Rerender('technologies',"Spatial Transcriptomics")
-              }}>
-              Spatial Transcriptomics
-            </Tag>
-          </Flex>
+          <Col span={18} offset={3}>
+            <TagCollapse
+              tags={Technologies.map((item) => (<Tag style={{ margin: 4, cursor:"pointer" }} color="gold" onClick={() => {
+                Rerender("technologies", item)
+              }}>{item}</Tag>))}
+              threshold={8}
+              prefix={<b style={{ margin: 3 }}>Platforms:</b>}
+            />
+            {/* <Flex gap={6} wrap justify='left'>
+              Platforms:
+              <Tag color="magenta"
+                onClick={() => {
+                  Rerender('technologies', "10x Visium")
+                }}>
+                10x Visium
+              </Tag>
+              <Tag color="red"
+                onClick={() => {
+                  Rerender('technologies', "scRNA")
+                }}>
+                scRNA-seq
+              </Tag>
+              <Tag color="volcano"
+                onClick={() => {
+                  let newSrcData = filterTechs("snRNA")
+                  setSrc(prevSrc => ({
+                    ...prevSrc, data: {
+                      attributes: prevSrc.data.attributes,
+                      data: newSrcData
+                    }
+                  }))
+                  TabRef.current?.Fresh(true)
+                  enterLoading(0, TabRef.current?.Loading)
+                }}>
+                snRNA-seq
+              </Tag>
+              <Tag color="orange"
+                onClick={() => {
+                  Rerender('technologies', "Stereo-Seq")
+                }}>
+                Stereo-Seq
+              </Tag>
+              <Tag color="gold"
+                onClick={() => {
+                  Rerender('technologies', "MERFISH")
+                }}>
+                MERFISH
+              </Tag>
+              <Tag color="lime"
+                onClick={() => {
+                  Rerender('technologies', "Spatial Transcriptomics")
+                }}>
+                Spatial Transcriptomics
+              </Tag>
+            </Flex> */}
           </Col>
-          <br/>
-          <Col span={16} offset={4}> 
-          <Flex gap={6} wrap justify='left'>
-            Diseases:
-            <Tag color="magenta"
-              onClick={() => {
-                Rerender("diseases","cancer")
-              }}>
-              Cancer
-            </Tag>
-            <Tag color="red"
-              onClick={() => {
-                Rerender("diseases","injury")
-              }}>
-              Injury
-            </Tag>
-            <Tag color="volcano"
-              onClick={() => {
-                Rerender("diseases","Alzheimer")
-              }}>
-              Alzheimer
-            </Tag>
-            <Tag color="orange"
-              onClick={() => {
-                Rerender("diseases","melanoma")
-              }}>
-              Melanoma
-            </Tag>
-            <Tag color="gold"
-              onClick={() => {
-                Rerender("diseases","carcinoma")
-              }}>
-              Carcinoma
-            </Tag>
-          </Flex>
+          <Col span={18} offset={3}>
+          <TagCollapse
+              tags={Topics.map((tag) => (<Tag
+                style={{ margin: 4, cursor:"pointer" }} 
+                color="green"
+                onClick={() => {
+                  Rerender("diseases", tag)
+                }}>{tag}</Tag>))}
+              threshold={6}
+              prefix={<b style={{ margin: 3 }}>Topics:</b>}
+            />
+
+            {/* <Flex gap={6} wrap justify='left'>
+              Topics:
+              <Tag color="magenta"
+                onClick={() => {
+                  Rerender("diseases", "cancer")
+                }}>
+                Cancer
+              </Tag>
+              <Tag color="red"
+                onClick={() => {
+                  Rerender("diseases", "injury")
+                }}>
+                Injury
+              </Tag>
+              <Tag color="volcano"
+                onClick={() => {
+                  Rerender("diseases", "Alzheimer")
+                }}>
+                Alzheimer
+              </Tag>
+              <Tag color="orange"
+                onClick={() => {
+                  Rerender("diseases", "melanoma")
+                }}>
+                Melanoma
+              </Tag>
+              <Tag color="gold"
+                onClick={() => {
+                  Rerender("diseases", "carcinoma")
+                }}>
+                Carcinoma
+              </Tag>
+            </Flex> */}
           </Col>
-          <Divider />
+          <Divider style={{marginTop:14, marginBottom: 18}}/>
           <Card>
             <DatasetTab sendData={setSrcMeta} response={src} onRef={TabRef} />
           </Card>
-          {/* <div>{JSON.stringify(src)}</div> */}
+          {/* <div>{JSON.stringify(Array.from(new Set(src.data?.data.map((item) => item[4]))))}</div> */}
         </Content>
         <Footer
           style={{

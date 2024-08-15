@@ -30,7 +30,17 @@ const DatasetTab = (props) => {
   const [showAll, setShowAll] = useState(false)
   const [currTip, setCurrTip] = useState(loadingTips[0])
   const [graphCfg, setGraphCfg] = useState(null)
-
+  const OriginResponse = useQuery({
+    queryKey: ['db'],
+    queryFn: () => axios.get('/api/datasets').then((response) => {
+      return response.data
+    }).catch((error) => {
+      console.log(error)
+    }),
+    staleTime: Infinity,
+    retry: false,
+    refetchOnWindowFocus: false,
+  })
   const items = [
     {
       key: '1',
@@ -50,7 +60,7 @@ const DatasetTab = (props) => {
           Table
         </span>
       ),
-      children: <DatasetTable src={dataSrc} col={dataCol} />,
+      children: <DatasetTable src={dataSrc} col={dataCol} oriSrc={OriginResponse.data?.data} />,
     },
     {
       key: '3',
@@ -74,17 +84,6 @@ const DatasetTab = (props) => {
     },
   ]
 
-  const OriginResponse = useQuery({
-    queryKey: ['db'],
-    queryFn: () => axios.get('/api/datasets').then((response) => {
-      return response.data
-    }).catch((error) => {
-      console.log(error)
-    }),
-    staleTime: Infinity,
-    retry: false,
-    refetchOnWindowFocus: false,
-  })
 
   useImperativeHandle(onRef, () => ({  // explode trigger for parent components
     "Fresh": setFresh, // Trigger for useEffect

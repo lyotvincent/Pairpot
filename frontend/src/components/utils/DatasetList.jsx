@@ -1,23 +1,20 @@
 import {
-  DatabaseOutlined,
   ExperimentOutlined,
   SwitcherOutlined,
   YuqueOutlined,
   EyeOutlined,
   LinkOutlined,
-  FileTextOutlined,
-  DownloadOutlined,
+  CloudDownloadOutlined,
+  StarFilled,
 } from '@ant-design/icons'
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
-  Avatar,
   List,
   Space,
-  Checkbox,
-  Card,
   Tooltip,
   Button,
   Rate,
+  Tag,
 } from 'antd'
 import DatasetDescription from './DatasetDescription'
 import TextCollapse from './TextCollapse'
@@ -34,6 +31,15 @@ const IconText = ({ icon, text, attr, onClick, placement = 'bottom' }) => (
   </Tooltip>
 )
 
+const PairedScoreTips = {
+  0:"No available paired data",
+  1:"Bad pair",
+  2:"Paired with atlas",
+  3:"Paired with some similar conditions",
+  4:"Paired with almost same conditions",
+  5:"Paired data from same study"
+}
+
 const AddCommas = (num) => {
   return num.toLocaleString().replace(/^0+/, '')
 }
@@ -43,8 +49,8 @@ const DatasetList = ({ src, col }) => {
   const [dataSrc, setDataSrc] = useState([])
   const [attr, setAttr] = useState([])
   const [dataCol, setDataCol] = useState({})
-  const [descOpen, setDescOpen] = useState(false)
-  const [descInfo, setDescInfo] = useState([])
+  // const [descOpen, setDescOpen] = useState(false)
+  // const [descInfo, setDescInfo] = useState([])
   useEffect(() => {
     setDataSrc(src)
     setDataCol(col)
@@ -90,7 +96,12 @@ const DatasetList = ({ src, col }) => {
               key="list-vertical-message"
               onClick={() => { }}
             />,
-            <Rate defaultValue={2} />,
+            <Tooltip title={`${PairedScoreTips[item[attr.paired_score]]}`}>
+            <Space size='middle'>
+            Paired Score:
+            <Rate disabled value={item[attr.paired_score]} character={<StarFilled style={{fontSize:16, marginTop:1}}/>} />
+            </Space>
+            </Tooltip>,
           ]}
           extra={
             <div>
@@ -147,7 +158,7 @@ const DatasetList = ({ src, col }) => {
               <br/>
               <br />
               <IconText
-                icon={DownloadOutlined}
+                icon={CloudDownloadOutlined}
                 text="Download Datasets"
                 key="list-vertical-Download-Datasets-o"
                 attr="Download datasets"
@@ -181,7 +192,7 @@ const DatasetList = ({ src, col }) => {
           <List.Item.Meta
             title={
               <div>
-                {item[0]}. <DatabaseOutlined /> {item[attr['title']]}
+                {item[0]}. {item[attr['title']]}
               </div>
             }
             description={
@@ -209,9 +220,9 @@ const DatasetList = ({ src, col }) => {
                   {
                     (item[attr.spots] ? (
                       <div>
-                        <Button type="primary" size="small" shape="round">
+                        <Tag color="green" size="middle">
                           {AddCommas(item[attr.spots])} spots
-                        </Button>
+                        </Tag>
                       </div>
                     ) : (
                       ' '

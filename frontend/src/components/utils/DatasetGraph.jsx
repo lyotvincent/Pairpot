@@ -3,6 +3,7 @@ import { NeoVis } from 'neovis.js';
 import { Spin, Card, Col, Button, Row, Space } from 'antd';
 import loadingTips from '../charts/LoadingTip';
 import Loading from '../charts/Loading';
+import ToggleAccordion from './ToggleAccordion';
 const { enterLoading, quitLoading } = Loading
 
 
@@ -10,7 +11,7 @@ const DatasetGraph = ({ config }) => {
   const container = useRef(null);
   const [loadings, setLoadings] = useState([false]) // loadings for [network]
   const [currTip, setCurrTip] = useState(loadingTips[0])
-  const [rerender, setRerender] = useState(false)
+  // const [rerender, setRerender] = useState(false)
   const visRef = useRef(null)
   let newConfig = {
     containerId: 'viz',
@@ -67,13 +68,27 @@ const DatasetGraph = ({ config }) => {
 
   useEffect(() => {
     if (config) {
-      
+
       visRef.current?.renderWithCypher(`MATCH p=(n:ST ${config})-[r:PAIR]->() RETURN p LIMIT 100`)
     }
   }, [config])
 
 
   return (<Spin spinning={loadings[0]} size="large" tip={currTip}>
+    <ToggleAccordion header={
+      <h3 id="Association Networks">{"Association Networks"}
+      </h3>}>
+      {<div>
+        Pairpot provides association networks to establish connections among different single-cell and SRT studies。
+        In the association networks, each node denotes a dataset and its color denotes the dataset's species.
+        Nodes with self-loops in the network represent datasets that contain SC-SP pairs.
+        Paired single-cell and SRT datasets are linked by undirected edges.
+        <br/>
+        Users can click the nodes to explore detailed information and access the analysis modules.
+        By default, only 25 pairs would be displayed initially for the system fluency, if users would like to browse all the pairs, please click the button `Display All`.
+      </div>}
+    </ToggleAccordion>
+    <br />
     <Row>
       <Col span={16} offset={1}>
         <Card>
@@ -93,13 +108,13 @@ const DatasetGraph = ({ config }) => {
           </Button>
           <Button type='primary' onClick={() => {
             visRef.current?.renderWithCypher("MATCH p=(n:ST)-[r:PAIR]->(m:ST) RETURN p LIMIT 100")
-          }}> 
-          Display SRT Rings 
+          }}>
+            Display SRT Rings
           </Button>
           <Button type='primary' onClick={() => {
             visRef.current?.stabilize()
-          }}> 
-          Stabilize
+          }}>
+            Stabilize
           </Button>
         </Space>
       </Col>
