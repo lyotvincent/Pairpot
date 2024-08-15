@@ -21,8 +21,8 @@ df_sc = df[[True if df['dataset_id'][i].startswith("SC") else False for i in df.
 df_st = df[[True if df['dataset_id'][i].startswith("ST") else False for i in df.index]]
 
 # create nodes
-nodes_st = [Node("ST", id=df_st['dataset_id'][i], title=df_st['title'][i], tissues=df_st['tissues'][i]) for i in df_st.index]
-nodes_sc = [Node("SC", id=df_sc['dataset_id'][i], title=df_sc['title'][i], tissues=df_sc['tissues'][i]) for i in df_sc.index]
+nodes_st = [Node("ST", id=df_st['dataset_id'][i], title=df_st['title'][i], tissues=df_st['tissues'][i], species=df_st['species'][i], technologies=df_st['technologies'][i]) for i in df_st.index]
+nodes_sc = [Node("SC", id=df_sc['dataset_id'][i], title=df_sc['title'][i], tissues=df_sc['tissues'][i], species=df_sc['species'][i], technologies=df_sc['technologies'][i]) for i in df_sc.index]
 for node in nodes_st:
   graph.create(node)
 for node in nodes_sc:

@@ -15,7 +15,7 @@ const DatasetGraph = ({ config }) => {
   let newConfig = {
     containerId: 'viz',
     neo4j: {
-      serverUrl: "bolt://localhost:7687",
+      serverUrl: "bolt://123.207.205.5:17687",
       serverUser: "neo4j",
       serverPassword: "biorzh123456",
     },
