@@ -30,14 +30,16 @@ export const Database = () => {
   //const [collapsed, setCollapsed] = useState(false)
   const [srcMeta, setSrcMeta] = useState({}) // get the meta data from childrens
   const [src, setSrc] = useState([1, 2, 3])
-  const [selectedTags, setSelectedTags] = React.useState([]);
+  const [selectedTags, setSelectedTags] = React.useState(null);
 
-  const handleChange = (tag, checked) => {
-    const nextSelectedTags = checked
-      ? [...selectedTags, tag]
-      : selectedTags.filter((t) => t !== tag);
-    console.log('You are interested in: ', nextSelectedTags);
-    setSelectedTags(nextSelectedTags);
+  const handleChange = (tag, checked, label) => {
+    if(checked){
+      setSelectedTags(tag)
+      Rerender(label, tag)
+    } else{
+      setSelectedTags(null)
+      Rerender('all', tag)
+    }
   };
   //const [selectedKey, setSelectedKey] = useState('datasets')
   //const [visible, setVisible] = useState(true)
@@ -116,7 +118,9 @@ export const Database = () => {
     }
     else if (label === "diseases") {
       newSrcData = filterDiseases(item)
-    } else {
+    } else if (label === 'all') {
+      newSrcData = response.data.data
+    } else{
       newSrcData = src.data.data
     }
     setSrc(prevSrc => ({
@@ -166,9 +170,12 @@ export const Database = () => {
           </Col>
           <Col span={18} offset={3}>
             <TagCollapse
-              tags={Species.map((item) => (<Tag style={{ margin: 4, cursor:"pointer" }} color="magenta" onClick={() => {
-                Rerender("species", item)
-              }}>{item}</Tag>))}
+              tags={Species.map((tag) => (<Tag.CheckableTag style={{ margin: 3, fontSize: 16 }}
+                key={tag}
+                checked={selectedTags === tag}
+                onChange={(checked) => {
+                  handleChange(tag, checked, 'species')
+                }}>{tag}</Tag.CheckableTag>))}
               threshold={5}
               prefix={<b style={{ margin: 3 }}>Species:</b>}
             />
@@ -210,9 +217,12 @@ export const Database = () => {
           </Col>
           <Col span={18} offset={3}>
             <TagCollapse
-              tags={Tissues.map((item) => (<Tag style={{ margin: 4, cursor:"pointer" }} color="volcano" onClick={() => {
-                Rerender("tissues", item)
-              }}>{item}</Tag>))}
+              tags={Tissues.map((tag) => (<Tag.CheckableTag style={{ margin: 3, fontSize: 16 }}
+                key={tag}
+                checked={selectedTags === tag}
+                onChange={(checked) => {
+                  handleChange(tag, checked, 'tissues')
+                }}>{tag}</Tag.CheckableTag>))}
               threshold={10}
               prefix={<b style={{ margin: 3 }}>Tissues:</b>}
             />
@@ -288,10 +298,13 @@ export const Database = () => {
           </Col>
           <Col span={18} offset={3}>
             <TagCollapse
-              tags={Technologies.map((item) => (<Tag style={{ margin: 4, cursor:"pointer" }} color="gold" onClick={() => {
-                Rerender("technologies", item)
-              }}>{item}</Tag>))}
-              threshold={8}
+              tags={Technologies.map((tag) => (<Tag.CheckableTag style={{ margin: 3, fontSize: 16 }}
+                key={tag}
+                checked={selectedTags === tag}
+                onChange={(checked) => {
+                  handleChange(tag, checked, 'technologies')
+                }}>{tag}</Tag.CheckableTag>))}
+              threshold={6}
               prefix={<b style={{ margin: 3 }}>Platforms:</b>}
             />
             {/* <Flex gap={6} wrap justify='left'>
@@ -344,12 +357,12 @@ export const Database = () => {
           </Col>
           <Col span={18} offset={3}>
           <TagCollapse
-              tags={Topics.map((tag) => (<Tag
-                style={{ margin: 4, cursor:"pointer" }} 
-                color="green"
-                onClick={() => {
-                  Rerender("diseases", tag)
-                }}>{tag}</Tag>))}
+              tags={Topics.map((tag) => (<Tag.CheckableTag style={{ margin: 3, fontSize: 16 }}
+                key={tag}
+                checked={selectedTags === tag}
+                onChange={(checked) => {
+                  handleChange(tag, checked, 'diseases')
+                }}>{tag}</Tag.CheckableTag >))}
               threshold={6}
               prefix={<b style={{ margin: 3 }}>Topics:</b>}
             />

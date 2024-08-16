@@ -114,14 +114,14 @@ const Help = () => {
                           {`A Database with Real-time Lasso-Based Analysis Tailored for Paired Single-cell and Spatial Transcriptomics`}
                         </h3>
                         <p>
-                          Spatial Transcriptomics analysis requires paired single-cell references for cell-type annotation, cell-proportion inference, and cell co-localization detection.
-                          However, lacking of paired single-cell and spatial transcriptomics data hinders the in-depth deciphering of tissue architectures and functions.
-                          Existing databases mainly provide preliminary pre-defined annotations, instead of sufficiently precise annotations for cell sub-types or cell states of user’s interests, which may not conform to user expectations for integrative analysis.
-                         </p>
-                         <p>
-                          Pairpot curated currently available paired single-cell and spatially resolved transcriptomics data including nearly 830,000 spots from 80 paired studies, with precise annotations for cell sub-types or cell states.
-                          Pairpot performed in-depth analysis including batch effects correction, spatial clustering, markers detection, cell-proportion inference, and cell-cell interaction for the paired data.
-                          Moreover, Pairpot proposed three online lasso-based analysis modules and integrated them with pre-analysis results into an easy-to-use webpage. In particular, Pairpot designed a LassoView module to refine the customized domains lassoed by users in millisecond-level response time, a PairView module to infer cell proportions of spots using the user-selected cells from single-cell data in real-time, and a LayerView module to display slices in a 3D hierarchical layout.
+                           Paired single-cell and spatial resolved transcriptomics (SRT) data supplement and complement each other, yielding in-depth insights into biological processes and disease mechanisms. 
+                        Pairpot is a database tailored for paired single-cell and SRT data with real-time heuristic analysis. 
+                        Pairpot curates 99 high-quality pairs including 1,425,656 spots from 299 datasets, and creates the association networks. 
+                        Pairpot constructs the curated pairs by integrating multiple slices and establishing potential associations between single-cell and SRT data. 
+                        <br/>
+                        <br/>
+                        On this basis, Pairpot adopts semi-supervised learning that enables real-time heuristic analysis for SC-SP pairs where Lasso-View refines the user-selected SRT domains within milliseconds, Pair-View infers cell proportions of spots based on user-selected cell types in real-time, and Layer-View displays SRT slices using a 3D hierarchical layout. 
+                        In summary, Pairpot provides valuable database resources and powerful heuristic analysis that empower researchers to streamline single-cell and SRT integrative analysis in real-time.
                         </p>
                         <Button style={{ margin: 0, fontWeight: 500 }}
                           size='large'
