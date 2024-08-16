@@ -1,14 +1,20 @@
 const Topics = [
   'Normal atlas', 
   'Development', 
+  "Cancer",
+  'Injury',
+  "Plants",
+  "Heart failure",
   'Melanoma', 
+  'Repair',
   'Carcinoma', 
+  "Breast cancer",
+  "Pancreatic cancer",
+  "Pan cancer",
   'Embryonic brain',
+  "Brain cortex",
   "Olfactory bulb",
-   "Pan cancer", 
-   "Plants",
-   "Atopic dermatitis",
-   'Injury',
-   'Regeneration',
-   'Repair']
+  "Atopic dermatitis",
+  'Regeneration',
+  ]
 export default Topics
