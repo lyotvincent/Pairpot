@@ -20,6 +20,7 @@ import DatasetDescription from './DatasetDescription'
 import TextCollapse from './TextCollapse'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import Topics from '../metas/Topics'
 //import { response } from 'express'
 
 const IconText = ({ icon, text, attr, onClick, placement = 'bottom' }) => (
@@ -222,6 +223,17 @@ const DatasetList = ({ src, col }) => {
                       <div>
                         <Tag color="green" size="middle">
                           {AddCommas(item[attr.spots])} spots
+                        </Tag>
+                      </div>
+                    ) : (
+                      ' '
+                    ))
+                  }
+                  {
+                    (item[15] ? (
+                      <div>
+                        <Tag color="gold" size="middle">
+                          {item[15]}
                         </Tag>
                       </div>
                     ) : (

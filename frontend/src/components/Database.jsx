@@ -72,10 +72,11 @@ export const Database = () => {
   }
 
   const filterDiseases = (diseases) => {
-    return (response.data.data.filter((item) => item[16]?.split(" ").includes(diseases)))
+    return (response.data.data.filter((item) => item[15]?.toLowerCase().includes(diseases.toLowerCase())))
   }
 
   useEffect(() => {
+    console.log("AB CD".includes("B C"))
     console.log("toggled")
     if (response.status === 'success' && typeof response.data !== 'undefined') {
       setSrc(response)
