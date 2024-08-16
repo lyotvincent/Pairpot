@@ -2,7 +2,7 @@ import { SearchOutlined } from '@ant-design/icons'
 import * as echarts from 'echarts'
 import React, { useEffect, useRef, useState } from 'react'
 import Highlighter from 'react-highlight-words'
-import { Button, Input, Space, Table, Pagination } from 'antd'
+import { Row, Col } from 'antd'
 import PropTypes from 'prop-types'
 import { TooltipComponent, ToolboxComponent } from 'echarts/components'
 import {
@@ -15,6 +15,7 @@ import { UniversalTransition, LabelLayout } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
 import axios from 'axios'
 import Js2WordCloud from 'js2wordcloud'
+import ToggleAccordion from './ToggleAccordion';
 echarts.use([
   ToolboxComponent,
   GraphicComponent,
@@ -163,10 +164,19 @@ const DatasetStatic = ({ src, col, height, width, margin }) => {
 
     wc.setOption({
         tooltip: {
-            show: true
+            show: true,
+            backgroundColor: 'rgba(0, 0, 0, 0.701961)',
+            formatter: function(item) {
+                if (item[1] > 12) {
+                    document.querySelector('.__wc_tooltip__').style.backgroundColor = 'rgba(0, 0, 0, 0.701961)';
+                    return item[0] + ':' + item[2];
+                } else {
+                    document.querySelector('.__wc_tooltip__').style.backgroundColor = 'transparent';
+                    return '';
+              }
+            }
         },
         list:dataList,
-        // list: [['谈笑风生', 80], ['谈笑风生', 80], ['谈笑风生', 70], ['谈笑风生', 70], ['谈笑风生', 60], ['谈笑风生', 60]],
         // color: '#15a4fa',
         color: function () {
           const colors = ['#FF5733', '#4CAF50', '#5733FF', '#F1C40F', '#E67E22'];
@@ -174,7 +184,7 @@ const DatasetStatic = ({ src, col, height, width, margin }) => {
         },
         fontSizeFactor: 1,                                    // 当词云值相差太大，可设置此值进字体行大小微调，默认0.1
         maxFontSize: 80,                                        // 最大fontSize，用来控制weightFactor，默认60
-        minFontSize: 0,                                        // 最小fontSize，用来控制weightFactor，默认12
+        minFontSize: 5,                                        // 最小fontSize，用来控制weightFactor，默认12
         tooltip: {
             show: true,                                         // 默认：false
             backgroundColor: 'rgba(0, 0, 0, 0.701961)',         // 默认：'rgba(0, 0, 0, 0.701961)'
@@ -193,11 +203,6 @@ const DatasetStatic = ({ src, col, height, width, margin }) => {
 
     // first plot the proportion of technologies
     myChart.setOption({
-      title: {
-        text: 'Proportion of Datasets',
-        top: 'top',
-        left: 'center',
-      },
       tooltip: {
         trigger: 'item',
         formatter: '<b>{a}</b> <br/> {b}:  {c}({d}%)',
@@ -318,26 +323,41 @@ const DatasetStatic = ({ src, col, height, width, margin }) => {
   }, [src, col, techSrc, techCol, dataSrc])
 
   return (
-    <div>
+    <>
+    <ToggleAccordion header={
+      <h3 id="Statistics">{"Statistics"}
+      </h3>}>
+      {<div>
+        After filtering by keywords, users can take an overview of statistics and word-clouds about the filtered results.
+        The left chart is the proportion of sequencing technologies. The middle chart is the proportion of species.
+        <br/>
+        For the construction of the wordclouds (the right chart), we used the term frequency–inverse document frequency strategy (TF-IDF) to evaluate the word weight in dataset summary and overall design based on TfidfVectorizer.
+      </div>}
+    </ToggleAccordion>
+    <Row>
+      <Col>
       <div
         ref={chartRef}
         className="chart"
         //the target DOM container needs height and width
-        style={{ height: height, width: width, margin: margin }}></div>
+        style={{ height: height, width:width, margin: margin }}></div>
+      </Col>
+      <Col span={8}>
       <div
         ref={wordCloudRef}
         className='wordCloud'
-        style={{height:'20rem',width:'30rem',margin:margin}}
+        style={{height:'22rem',width:'25rem',margin:'2rem'}}
         >
-        
       </div>
-    </div>
+      </Col>
+    </Row>
+    </>
   )
 }
 
 DatasetStatic.defaultProps = {
-  height: '35rem',
-  width: '70rem',
+  height: '30rem',
+  width: '55rem',
   margin: '0rem',
 }
 
