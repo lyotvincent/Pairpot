@@ -14,6 +14,7 @@ import { PieChart } from 'echarts/charts'
 import { UniversalTransition, LabelLayout } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
 import axios from 'axios'
+import Js2WordCloud from 'js2wordcloud'
 echarts.use([
   ToolboxComponent,
   GraphicComponent,
@@ -26,10 +27,13 @@ echarts.use([
   UniversalTransition,
 ])
 
+var flag = 1
 const DatasetStatic = ({ src, col, height, width, margin }) => {
   const [techSrc, setTechSrc] = useState([])
   const [techCol, setTechCol] = useState([])
+  const [dataSrc, setDataSrc] = useState([])
   const chartRef = useRef(null) // get current DOM container
+  const wordCloudRef = useRef(null)
 
   useEffect(() => {
     if (techSrc.length === 0) {
@@ -42,6 +46,20 @@ const DatasetStatic = ({ src, col, height, width, margin }) => {
         console.log(techCol)
       })
     }
+
+    if(flag==1){
+      axios({
+        method: 'GET',
+        url: '/api/global_words',
+      }).then((response) => {
+        console.log(response)
+        setDataSrc(response.data)
+        // console.log(dataSrc)
+        // console.log(dataSrc[0])
+      })
+      flag=0
+    }
+
     var myChart = echarts.init(chartRef.current) //init the echart container
 
     var straDict = {} // record the strategy of each technology
@@ -133,6 +151,44 @@ const DatasetStatic = ({ src, col, height, width, margin }) => {
     }
     tisSource.sort((a, b) => {
       return b.value - a.value
+    })
+
+    // wordcloud data
+    // an example
+    var dataList = Object.entries(dataSrc)
+    console.log(dataList)
+    var wc = new Js2WordCloud(wordCloudRef.current);
+    // const wc = new Js2WordCloud();
+    // static global:
+
+    wc.setOption({
+        tooltip: {
+            show: true
+        },
+        list:dataList,
+        // list: [['谈笑风生', 80], ['谈笑风生', 80], ['谈笑风生', 70], ['谈笑风生', 70], ['谈笑风生', 60], ['谈笑风生', 60]],
+        // color: '#15a4fa',
+        color: function () {
+          const colors = ['#FF5733', '#4CAF50', '#5733FF', '#F1C40F', '#E67E22'];
+          return colors[Math.floor(Math.random() * colors.length)];
+        },
+        fontSizeFactor: 1,                                    // 当词云值相差太大，可设置此值进字体行大小微调，默认0.1
+        maxFontSize: 80,                                        // 最大fontSize，用来控制weightFactor，默认60
+        minFontSize: 0,                                        // 最小fontSize，用来控制weightFactor，默认12
+        tooltip: {
+            show: true,                                         // 默认：false
+            backgroundColor: 'rgba(0, 0, 0, 0.701961)',         // 默认：'rgba(0, 0, 0, 0.701961)'
+            formatter: function(item) {                         // 数据格式化函数，item为list的一项
+            }
+        },
+        noDataLoadingOption: {                                  // 无数据提示。
+            backgroundColor: '#eee',
+            text: 'data loading',
+            textStyle: {
+                color: '#888',
+                fontSize: 14
+            }
+        }
     })
 
     // first plot the proportion of technologies
@@ -256,9 +312,10 @@ const DatasetStatic = ({ src, col, height, width, margin }) => {
           },
           data: tisSource,
         },
-      ],
+        
+      ],// series end
     })
-  }, [src, col, techSrc, techCol])
+  }, [src, col, techSrc, techCol, dataSrc])
 
   return (
     <div>
@@ -267,6 +324,13 @@ const DatasetStatic = ({ src, col, height, width, margin }) => {
         className="chart"
         //the target DOM container needs height and width
         style={{ height: height, width: width, margin: margin }}></div>
+      <div
+        ref={wordCloudRef}
+        className='wordCloud'
+        style={{height:'20rem',width:'30rem',margin:margin}}
+        >
+        
+      </div>
     </div>
   )
 }
