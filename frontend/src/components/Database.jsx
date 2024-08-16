@@ -76,8 +76,6 @@ export const Database = () => {
   }
 
   useEffect(() => {
-    console.log("AB CD".includes("B C"))
-    console.log("toggled")
     if (response.status === 'success' && typeof response.data !== 'undefined') {
       setSrc(response)
     }
