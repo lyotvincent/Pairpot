@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify, send_file
 import sqlite3
 import time
+import re
 from server.refine import *
 from server.deconvolution import *
 from id import builtID
+from sklearn.feature_extraction.text import TfidfVectorizer
 app = Flask(__name__)
 app.debug = True
 
@@ -47,7 +49,7 @@ def example():
     cursor.execute(f"SELECT * FROM datasets WHERE dataset_id = \"{id}\"")
     row1 = cursor.fetchall()
 
-    scid = row1[0][-1]
+    scid = row1[0][-2]
     cursor.execute(f"SELECT * FROM datasets WHERE dataset_id = \"{scid}\"")
     row2 = cursor.fetchall()
     # return query results
@@ -111,6 +113,62 @@ def get_strategies():
     conn.close()
 
     return response
+
+@app.route('/global_words', methods=['GET'])
+def get_global_wordcloud():
+    # connect to database
+    conn = sqlite3.connect('resources/STpair.db')
+    cursor = conn.cursor()
+
+    # query content
+    query_pair = {
+        'datasets': ["title", "species",	"tissues", "organ_parts", "cell_types", "summary", "overall_design"],
+        'pair_qualities': ["quality", "description"],
+        'sc_datasets': ["title", "species",	"tissues", "organ_parts", "cell_types", "summary", "overall_design"],
+        'species_table': ["species_name", "simple_name"],
+        'technology_table': ["point_address", "spot_configuration", "strategy"],
+        'tissue_table': ["tissue_name"]
+    }
+
+    res = []
+    for table_name, table_attr in query_pair.items():
+        for i in range(len(table_attr)):
+            temp_query = f"SELECT {table_attr[i]} FROM {table_name}"
+            cursor.execute(temp_query)
+            res.append(cursor.fetchall())
+
+    text = []
+    for i in range(len(res)):
+        for j in range(len(res[i])):
+            item_str = str(res[i][j][0])
+            item_str = re.sub(r'[^\w\s]', ' ', item_str)
+            words = item_str.split(" ")
+            text.append(words)
+    
+    corpus = [' '.join(sentence) for sentence in text]
+    # print(corpus)
+
+    custom_stop_words = [
+        'none','we',
+        'nan','homo','sapiens','mus','musculus',
+        'and', 'if', 'or', 'the', 'to', 'in', 'of', 'a', 'an', 'is', 'was', 'for', 'on', 'with', 'at', 'by', 'from', 'as', 'that', 'which', 'it', 'are', 'has', 'have', 'had', 'be', 'will', 'would', 'can', 'could', 'may', 'might', 'should'
+    ]
+
+    # init TfidfVectorizer
+    vectorizer = TfidfVectorizer(stop_words=custom_stop_words)
+    # TF-IDF Matrix
+    X = vectorizer.fit_transform(corpus)
+    # TF-IDF weghts
+    feature_names = vectorizer.get_feature_names_out()
+    dense = X.todense()
+    denselist = dense.tolist()
+    df = pd.DataFrame(denselist, columns=feature_names)
+    word_tfidf = df.sum(axis=0)
+    #  to dict
+    word_dict = word_tfidf.to_dict()
+
+    return word_dict
+
 
 
 @app.route('/refine', methods=['POST'])
@@ -283,3 +341,4 @@ def query_sc():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5522)
+    # get_global_wordcloud()
