@@ -149,7 +149,7 @@ def get_global_wordcloud():
     # print(corpus)
 
     custom_stop_words = [
-        'none','we',
+        'none','we','were',
         'nan','homo','sapiens','mus','musculus',
         'and', 'if', 'or', 'the', 'to', 'in', 'of', 'a', 'an', 'is', 'was', 'for', 'on', 'with', 'at', 'by', 'from', 'as', 'that', 'which', 'it', 'are', 'has', 'have', 'had', 'be', 'will', 'would', 'can', 'could', 'may', 'might', 'should'
     ]

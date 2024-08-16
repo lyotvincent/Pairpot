@@ -27,14 +27,13 @@ echarts.use([
   UniversalTransition,
 ])
 
+var flag = 1
 const DatasetStatic = ({ src, col, height, width, margin }) => {
   const [techSrc, setTechSrc] = useState([])
   const [techCol, setTechCol] = useState([])
   const [dataSrc, setDataSrc] = useState([])
   const chartRef = useRef(null) // get current DOM container
   const wordCloudRef = useRef(null)
-  var flag = 1
-
 
   useEffect(() => {
     if (techSrc.length === 0) {
@@ -168,7 +167,11 @@ const DatasetStatic = ({ src, col, height, width, margin }) => {
         },
         list:dataList,
         // list: [['谈笑风生', 80], ['谈笑风生', 80], ['谈笑风生', 70], ['谈笑风生', 70], ['谈笑风生', 60], ['谈笑风生', 60]],
-        color: '#15a4fa',
+        // color: '#15a4fa',
+        color: function () {
+          const colors = ['#FF5733', '#4CAF50', '#5733FF', '#F1C40F', '#E67E22'];
+          return colors[Math.floor(Math.random() * colors.length)];
+        },
         fontSizeFactor: 1,                                    // 当词云值相差太大，可设置此值进字体行大小微调，默认0.1
         maxFontSize: 80,                                        // 最大fontSize，用来控制weightFactor，默认60
         minFontSize: 0,                                        // 最小fontSize，用来控制weightFactor，默认12
@@ -312,7 +315,7 @@ const DatasetStatic = ({ src, col, height, width, margin }) => {
         
       ],// series end
     })
-  }, [src, col, techSrc, techCol])
+  }, [src, col, techSrc, techCol, dataSrc])
 
   return (
     <div>
