@@ -192,7 +192,7 @@ def get_filted_wordcloud():
     else: 
         # "SELECT * FROM table1 WHERE species = 'x'"
         # 'datasets': ["title", "species",	"tissues", "organ_parts", "cell_types", "summary", "overall_design"],
-        query_content = f"SELECT title, summary, overall_design, species,organ_parts, cell_types FROM datasets where {label} = '{item}'"
+        query_content = f"SELECT title, summary, overall_design, species,organ_parts, cell_types FROM datasets where {label} like '%{item}%'"
     cursor.execute(query_content)
     res = cursor.fetchall()
     # res.append(cursor.fetchall())

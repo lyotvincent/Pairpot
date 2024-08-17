@@ -71,8 +71,8 @@ export const Database = () => {
     return (response.data.data.filter((item) => item[12]?.split(";").includes(species)))
   }
 
-  const filterDiseases = (diseases) => {
-    return (response.data.data.filter((item) => item[15]?.toLowerCase().includes(diseases.toLowerCase())))
+  const filterDiseases = (disease) => {
+    return (response.data.data.filter((item) => item[15]?.toLowerCase().includes(disease.toLowerCase())))
   }
 
   useEffect(() => {
@@ -118,7 +118,7 @@ export const Database = () => {
       newSrcData = filterTechs(item)
       TabRef.current?.GraphConfig(`{technologies: \"${item}\"}`)
     }
-    else if (label === "diseases") {
+    else if (label === "disease") {
       newSrcData = filterDiseases(item)
     } else if (label === 'all') {
       newSrcData = response.data.data
@@ -366,7 +366,7 @@ export const Database = () => {
                 key={tag}
                 checked={selectedTags === tag}
                 onChange={(checked) => {
-                  handleChange(tag, checked, 'diseases')
+                  handleChange(tag, checked, 'disease')
                 }}>{tag}</Tag.CheckableTag >))}
               threshold={6}
               prefix={<b style={{ margin: 3 }}>Topics:</b>}
@@ -376,31 +376,31 @@ export const Database = () => {
               Topics:
               <Tag color="magenta"
                 onClick={() => {
-                  Rerender("diseases", "cancer")
+                  Rerender("disease", "cancer")
                 }}>
                 Cancer
               </Tag>
               <Tag color="red"
                 onClick={() => {
-                  Rerender("diseases", "injury")
+                  Rerender("disease", "injury")
                 }}>
                 Injury
               </Tag>
               <Tag color="volcano"
                 onClick={() => {
-                  Rerender("diseases", "Alzheimer")
+                  Rerender("disease", "Alzheimer")
                 }}>
                 Alzheimer
               </Tag>
               <Tag color="orange"
                 onClick={() => {
-                  Rerender("diseases", "melanoma")
+                  Rerender("disease", "melanoma")
                 }}>
                 Melanoma
               </Tag>
               <Tag color="gold"
                 onClick={() => {
-                  Rerender("diseases", "carcinoma")
+                  Rerender("disease", "carcinoma")
                 }}>
                 Carcinoma
               </Tag>

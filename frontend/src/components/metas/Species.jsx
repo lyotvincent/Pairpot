@@ -80,7 +80,6 @@ const Species = [
   "Mus musculus",
   "Maize",
   "Canis lupus familiaris",
-  "Rattus norvegicus",
   "Phalaenopsis aphrodite",
   "Oryctolagus cuniculus",
   "Macaca fascicularis",
