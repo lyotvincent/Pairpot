@@ -144,7 +144,7 @@ const DatasetTab = (props) => {
       setDataSrc(OriginResponse.data.data)
       setDataCol(OriginResponse.data.attributes)
       setdataLabel(OriginResponse.data.label)
-      setdataItem(OriginResponse.daata.item)
+      setdataItem(OriginResponse.data.item)
       quitLoading(0, setLoadings)
       setShowAll(false)
     }
