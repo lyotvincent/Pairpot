@@ -124,13 +124,13 @@ const Help = () => {
               <Col span={22} offset={1}>
               <Row>
               <Card hoverable
-                style={{ width: '42%', margin: '2%',marginLeft: '2%', marginRight: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                style={{ width: '46%', margin: '2%',marginLeft: '2%', marginRight: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
                 title={<h3 style={{ marginTop: "1rem" }}> Usage1</h3>}
                 cover={<img src={browser1Img} alt="Browse-step1"/>}>
                 <Card.Meta classNames='header' description={"Users can search for datasets through any words of interest, or apply filters through preset keywords in species, tissues, technologies, and topics."}></Card.Meta>
               </Card>
               <Card hoverable
-                style={{ width: '52%', margin: '2%',marginLeft: '1%', marginRight: '2%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                style={{ width: '48%', margin: '2%',marginLeft: '1%', marginRight: '2%', paddingLeft: '1rem', paddingRight: '1rem' }}
                 title={<h3 style={{ marginTop: "1rem" }}> Usage2</h3>}
                 cover={<img src={browser2Img} alt="Browse-step2"/>}>
                 <Card.Meta classNames='header' description={"In the extensive list, each item contains a title, summary, pair scores, and action buttons. By clicking ’Visualization’, users can access the analysis results, and perform lasso-based real-time analysis. By clicking ’Descriptions’, users can access detailed meta-information."}></Card.Meta>
