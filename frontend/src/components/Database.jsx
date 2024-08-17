@@ -102,6 +102,9 @@ export const Database = () => {
   const TabRef = React.createRef()
 
   const Rerender = (label, item) => {
+    // console.log(label)
+    // console.log(item)
+    // console.log(src)
     let newSrcData
     if (label === "tissues") {
       newSrcData = filterTissues(item)
@@ -125,7 +128,10 @@ export const Database = () => {
     setSrc(prevSrc => ({
       ...prevSrc, data: {
         attributes: prevSrc.data.attributes,
-        data: newSrcData
+        data: newSrcData,
+        // add lable and item
+        label: label,
+        item: item,
       }
     }))
     TabRef.current?.Fresh(true)

@@ -1,5 +1,5 @@
 import { DotChartOutlined, FileDoneOutlined, FileSearchOutlined, FileTextOutlined, HeatMapOutlined, LinkOutlined, OneToOneOutlined, SelectOutlined, SlidersOutlined, UnorderedListOutlined } from '@ant-design/icons'
-import React, { useState, useEffect, lazy, Suspense, useRef,memo } from 'react'
+import React, { useState, useEffect, lazy, Suspense, useRef, memo } from 'react'
 import logoFig from "../assets/img/mylogo.png"
 import {
   Menu,
@@ -28,7 +28,7 @@ import loadingTips from './charts/LoadingTip'
 import Loading from './charts/Loading'
 import { useMutation, useQuery, QueryCache } from "react-query"
 const { Content, Sider, Header } = Layout
-const {enterLoading} = Loading
+const { enterLoading } = Loading
 
 const MetaInfo = memo(lazy(() => (import('./utils/DatasetDetails'))))
 const LassoView = lazy(() => (import('./charts/ScScatter')))
@@ -75,47 +75,47 @@ const Browser = () => {
   const statusSP = useMutation({
     mutationKey: ['sp'],
     mutationFn: (state) => fetchSPData(state),
-    staleTime: Infinity, 
-    retry: false, 
-    refetchOnWindowFocus: false, 
+    staleTime: Infinity,
+    retry: false,
+    refetchOnWindowFocus: false,
   })
 
   const statusSC = useMutation({
     mutationKey: ['sc'],
     mutationFn: (state) => fetchSCData(state),
-    staleTime: Infinity, 
-    retry: false, 
-    refetchOnWindowFocus: false, 
+    staleTime: Infinity,
+    retry: false,
+    refetchOnWindowFocus: false,
   })
 
   const example = useQuery({
     queryKey: ['example'],
-    queryFn: ()=> axios.get('/api/example',{
-        params: {
-          id: "STDS0000235"
-        },
-      }).then((response) => {
-        let dataCol = response.data.attributes
-        let spitem = response.data.data[0]
-        let values = Object.fromEntries(
-          dataCol.map((k, i) => [k, spitem[i]])
+    queryFn: () => axios.get('/api/example', {
+      params: {
+        id: "STDS0000235"
+      },
+    }).then((response) => {
+      let dataCol = response.data.attributes
+      let spitem = response.data.data[0]
+      let values = Object.fromEntries(
+        dataCol.map((k, i) => [k, spitem[i]])
+      )
+      let scitem = response.data.data[1]
+      let state = {
+        st: values
+      }
+      if (typeof scitem !== 'undefined') {
+        let scvalues = Object.fromEntries(
+          dataCol.map((k, i) => [k, scitem[i]])
         )
-        let scitem = response.data.data[1]
-        let state = {
-          st: values
-        }
-        if (typeof scitem !== 'undefined') {
-          let scvalues = Object.fromEntries(
-            dataCol.map((k, i) => [k, scitem[i]])
-          )
-          state['sc'] = scvalues
-        }
-        return state
-      })
+        state['sc'] = scvalues
+      }
+      return state
+    })
     ,
-    staleTime: Infinity, 
-    retry: false, 
-    refetchOnWindowFocus: false, 
+    staleTime: Infinity,
+    retry: false,
+    refetchOnWindowFocus: false,
   })
 
   const SearchAnchor = React.createRef() // location of Search
@@ -187,15 +187,15 @@ const Browser = () => {
     "CPDBHeatmap": false,
   })
 
-  useEffect(()=>{
-    if(example.status === 'success' && typeof example.data !== 'undefined'){
+  useEffect(() => {
+    if (example.status === 'success' && typeof example.data !== 'undefined') {
       MetaRef.current?.Trigger(example.data)
       setLocState(example.data)
     }
   }, [example.data, MetaRef])
 
   useEffect(() => {
-    if(typeof locState !== 'undefined'){
+    if (typeof locState !== 'undefined') {
       statusSC.mutate(locState)
       statusSP.mutate(locState)
     }
@@ -232,36 +232,36 @@ const Browser = () => {
       statusSP.mutate(location.state)
     }
     else {
-        setInit(true)
+      setInit(true)
     }
   }, [location])
 
   useEffect(() => {
     if (statusSP.status === 'success' &&
       typeof statusSP.data !== "undefined") {
-      if(!componentLoad['LayerView']){
+      if (!componentLoad['LayerView']) {
         LayerRef.current?.Trigger("Reload")  // only reload once
       }
-      if(!componentLoad['MarkerTable']){
+      if (!componentLoad['MarkerTable']) {
         MarkerRef.current?.Trigger("Reload")
-      }  
+      }
     }
     if (statusSP.status === 'success' &&
       statusSC.status === 'success' &&
       typeof statusSC.data !== "undefined" &&
       typeof statusSP.data !== "undefined") {
-      if(!componentLoad['LassoView']){
+      if (!componentLoad['LassoView']) {
         LassoRef.current?.Trigger("Reload")
       }
-      if(!componentLoad['PairView']) {
+      if (!componentLoad['PairView']) {
         PairRef.current?.Trigger("Reload")
       }
-      if(!componentLoad['NetWorkRelation']) {
+      if (!componentLoad['NetWorkRelation']) {
         NetRef.current?.Trigger("Reload")
       }
-      if(!componentLoad['CPDBHeatmap']){
+      if (!componentLoad['CPDBHeatmap']) {
         CPDBRef.current?.Trigger("Reload")
-      } 
+      }
     }
   }, [statusSP.variables, statusSC.variables, PairRef])
 

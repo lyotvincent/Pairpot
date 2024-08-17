@@ -170,6 +170,66 @@ def get_global_wordcloud():
     return word_dict
 
 
+@app.route('/filted_words', methods=['GET'])
+def get_filted_wordcloud():
+    # changed param
+    label = request.args.get("label")
+    item = request.args.get("item")
+    print(label, item)
+    # None: return error message
+    if label is None or item is None:
+        # return jsonify({"error": "Missing required parameters"}), 400
+        return jsonify({"data":{}})
+    
+    # deal with data
+    # step1: connect
+    conn = sqlite3.connect('resources/STpair.db')
+    cursor = conn.cursor()
+
+    # step2: query
+    if label == "all":
+        query_content = f"SELECT title, summary, overall_design, species,organ_parts, cell_types FROM datasets"
+    else: 
+        # "SELECT * FROM table1 WHERE species = 'x'"
+        # 'datasets': ["title", "species",	"tissues", "organ_parts", "cell_types", "summary", "overall_design"],
+        query_content = f"SELECT title, summary, overall_design, species,organ_parts, cell_types FROM datasets where {label} = '{item}'"
+    cursor.execute(query_content)
+    res = cursor.fetchall()
+    # res.append(cursor.fetchall())
+    text = []
+    # print(len(res))
+    for i in range(len(res)):
+        item_str = str(res[i])
+        item_str = re.sub(r'[^\w\s]', ' ', item_str)
+        words = item_str.split(" ")
+        text.append(words)
+        # print(i)
+    # print(text)
+
+    # step3: calculate TF-IDF
+    corpus = [' '.join(sentence) for sentence in text]
+    # print(corpus)
+    custom_stop_words = [
+        'none','we','were',
+        'nan','homo','sapiens','mus','musculus',
+        'and', 'if', 'or', 'the', 'to', 'in', 'of', 'a', 'an', 'is', 'was', 'for', 'on', 'with', 'at', 'by', 'from', 'as', 'that', 'which', 'it', 'are', 'has', 'have', 'had', 'be', 'will', 'would', 'can', 'could', 'may', 'might', 'should'
+    ]
+    # init TfidfVectorizer
+    vectorizer = TfidfVectorizer(stop_words=custom_stop_words)
+    # TF-IDF Matrix
+    X = vectorizer.fit_transform(corpus)
+    # TF-IDF weghts
+    feature_names = vectorizer.get_feature_names_out()
+    dense = X.todense()
+    denselist = dense.tolist()
+    df = pd.DataFrame(denselist, columns=feature_names)
+    word_tfidf = df.sum(axis=0)
+    #  to dict
+    word_dict = word_tfidf.to_dict()
+    # print(word_dict)
+
+    return jsonify({"data": word_dict})
+
 
 @app.route('/refine', methods=['POST'])
 def refine():

@@ -14,7 +14,7 @@ import { PieChart } from 'echarts/charts'
 import { UniversalTransition, LabelLayout } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
 import axios from 'axios'
-import { useQuery } from 'react-query'
+import { useQuery, useMutation } from 'react-query'
 import Js2WordCloud from 'js2wordcloud'
 import ToggleAccordion from './ToggleAccordion';
 echarts.use([
@@ -28,8 +28,7 @@ echarts.use([
   CanvasRenderer,
   UniversalTransition,
 ])
-var flag = 1
-const DatasetStatic = ({ src, col, height, width, margin }) => {
+const DatasetStatic = ({ src, col, height, width, margin, _label, _item }) => {
   const [techSrc, setTechSrc] = useState([])
   const [techCol, setTechCol] = useState([])
   const [Init, setInit] = useState(false)
@@ -37,8 +36,9 @@ const DatasetStatic = ({ src, col, height, width, margin }) => {
   const chartRef = useRef(null) // get current DOM container
   const wordCloudRef = useRef(null)
 
-  const wordCloudResponse = useQuery({  // change axios to reactQuery
-    queryKey: ['wordcloud'],
+  /***** save the global query api *****/
+  const globalWordCloudResponse = useQuery({  // change axios to reactQuery
+    queryKey: ['wordcloud0'],
     queryFn: () => axios.get('/api/global_words').then((response) => {
       return response.data
     }).catch((error) => {
@@ -50,50 +50,146 @@ const DatasetStatic = ({ src, col, height, width, margin }) => {
   })
 
 
-  useEffect(() => {
-    if (wordCloudResponse.status === 'success' && typeof wordCloudResponse.data !== 'undefined') {
-      var dataList = Object.entries(wordCloudResponse.data)
-      var wc = new Js2WordCloud(wordCloudRef.current);
-      wc.setOption({
-        tooltip: {
-          show: true,
-          backgroundColor: 'rgba(0, 0, 0, 0.701961)',
-          formatter: function (item) {
-            if (item[1] > 12) {
-              document.querySelector('.__wc_tooltip__').style.backgroundColor = 'rgba(0, 0, 0, 0.701961)';
-              return item[0] + ':' + item[2];
-            } else {
-              document.querySelector('.__wc_tooltip__').style.backgroundColor = 'transparent';
-              return '';
-            }
-          }
-        },
-        list: dataList,
-        color: function () {
-          const colors = ['#FF5733', '#4CAF50', '#5733FF', '#F1C40F', '#E67E22'];
-          return colors[Math.floor(Math.random() * colors.length)];
-        },
-        fontSizeFactor: 1,                                    // 当词云值相差太大，可设置此值进字体行大小微调，默认0.1
-        maxFontSize: 80,                                        // 最大fontSize，用来控制weightFactor，默认60
-        minFontSize: 7,                                        // 最小fontSize，用来控制weightFactor，默认12
-        tooltip: {
-          show: true,                                         // 默认：false
-          backgroundColor: 'rgba(0, 0, 0, 0.701961)',         // 默认：'rgba(0, 0, 0, 0.701961)'
-          formatter: function (item) {                         // 数据格式化函数，item为list的一项
-          }
-        },
-        noDataLoadingOption: {                                  // 无数据提示。
-          backgroundColor: '#eee',
-          text: 'data loading',
-          textStyle: {
-            color: '#888',
-            fontSize: 14
-          }
-        }
+  // useEffect(() => {
+  //   if (wordCloudResponse.status === 'success' && typeof wordCloudResponse.data !== 'undefined') {
+  //     var dataList = Object.entries(wordCloudResponse.data)
+  //     var wc = new Js2WordCloud(wordCloudRef.current);
+  //     wc.setOption({
+  //       tooltip: {
+  //         show: true,
+  //         backgroundColor: 'rgba(0, 0, 0, 0.701961)',
+  //         formatter: function (item) {
+  //           if (item[1] > 12) {
+  //             document.querySelector('.__wc_tooltip__').style.backgroundColor = 'rgba(0, 0, 0, 0.701961)';
+  //             return item[0] + ':' + item[2];
+  //           } else {
+  //             document.querySelector('.__wc_tooltip__').style.backgroundColor = 'transparent';
+  //             return '';
+  //           }
+  //         }
+  //       },
+  //       list: dataList,
+  //       color: function () {
+  //         const colors = ['#FF5733', '#4CAF50', '#5733FF', '#F1C40F', '#E67E22'];
+  //         return colors[Math.floor(Math.random() * colors.length)];
+  //       },
+  //       fontSizeFactor: 1,                                    // 当词云值相差太大，可设置此值进字体行大小微调，默认0.1
+  //       maxFontSize: 80,                                        // 最大fontSize，用来控制weightFactor，默认60
+  //       minFontSize: 7,                                        // 最小fontSize，用来控制weightFactor，默认12
+  //       tooltip: {
+  //         show: true,                                         // 默认：false
+  //         backgroundColor: 'rgba(0, 0, 0, 0.701961)',         // 默认：'rgba(0, 0, 0, 0.701961)'
+  //         formatter: function (item) {                         // 数据格式化函数，item为list的一项
+  //         }
+  //       },
+  //       noDataLoadingOption: {                                  // 无数据提示。
+  //         backgroundColor: '#eee',
+  //         text: 'data loading',
+  //         textStyle: {
+  //           color: '#888',
+  //           fontSize: 14
+  //         }
+  //       }
+  //     })
+  //   }
+  // }, [wordCloudResponse])
+
+  /***** filted wordcloud *****/
+  // useMutation
+
+
+  const getFiltedWord = (label,item) => (
+    axios.get('/api/filted_words', {
+      params: {
+        // param_name: value
+        label: label,
+        item: item
+      },
+      responseType: 'json',
+    }).then((response) => {
+        // deal with response
+        // console.log(response.data.data)
+        return response.data.data
+    }).catch((error) => {
+      console.error('Error fetching word cloud:', error);
+      throw error; // 抛出错误
+    })
+  )
+
+  const wordCloudResponse = useMutation({
+    mutationKey:['wordcloud'],
+    mutationFn: (state) => getFiltedWord(state.label, state.item),
+    staleTime: Infinity, 
+    retry: false, 
+    refetchOnWindowFocus: false, 
+  })
+
+  useEffect(()=>{
+    if(typeof src != 'undefined'){
+      wordCloudResponse.mutate({
+        label: _label,
+        item: _item
       })
     }
+  },[src])
+
+
+
+  useEffect(() => {
+    var dataList = [];
+    if (globalWordCloudResponse.status === 'success' && typeof globalWordCloudResponse.data !== 'undefined'){
+      if (wordCloudResponse.status === 'success' && typeof wordCloudResponse.data !== 'undefined') {
+        dataList = Object.entries(wordCloudResponse.data)
+      }      
+      else{
+          dataList = Object.entries(globalWordCloudResponse.data)
+      }
+      console.log(dataList.length)
+      if(dataList!=null && dataList.length>0){
+        var wc = new Js2WordCloud(wordCloudRef.current);
+        wc.setOption({
+          tooltip: {
+            show: true,
+            backgroundColor: 'rgba(0, 0, 0, 0.701961)',
+            formatter: function (item) {
+              if (item[1] > 12) {
+                document.querySelector('.__wc_tooltip__').style.backgroundColor = 'rgba(0, 0, 0, 0.701961)';
+                return item[0] + ':' + item[2];
+              } else {
+                document.querySelector('.__wc_tooltip__').style.backgroundColor = 'transparent';
+                return '';
+              }
+            }
+          },
+          list: dataList,
+          color: function () {
+            const colors = ['#FF5733', '#4CAF50', '#5733FF', '#F1C40F', '#E67E22'];
+            return colors[Math.floor(Math.random() * colors.length)];
+          },
+          fontSizeFactor: 1,                                    // 当词云值相差太大，可设置此值进字体行大小微调，默认0.1
+          maxFontSize: 80,                                        // 最大fontSize，用来控制weightFactor，默认60
+          minFontSize: 7,                                        // 最小fontSize，用来控制weightFactor，默认12
+          tooltip: {
+            show: true,                                         // 默认：false
+            backgroundColor: 'rgba(0, 0, 0, 0.701961)',         // 默认：'rgba(0, 0, 0, 0.701961)'
+            formatter: function (item) {                         // 数据格式化函数，item为list的一项
+            }
+          },
+          noDataLoadingOption: {                                  // 无数据提示。
+            backgroundColor: '#eee',
+            text: 'data loading',
+            textStyle: {
+              color: '#888',
+              fontSize: 14
+            }
+          }
+        })
+    }
+  }
   }, [wordCloudResponse])
 
+
+  /***** proportion graph *****/
   const strategyResponse = useQuery({
     queryKey: ['strategy'],
     queryFn: () => axios.get('/api/strategies').then((response) => {
@@ -114,6 +210,9 @@ const DatasetStatic = ({ src, col, height, width, margin }) => {
   }, [strategyResponse])
 
   useEffect(() => {
+    // console.log(src)
+    console.log(_label)
+    console.log(_item)
     if(Init){
       var myChart = echarts.getInstanceByDom(chartRef.current)
       if(techCol.length > 0){

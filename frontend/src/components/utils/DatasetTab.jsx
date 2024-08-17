@@ -25,6 +25,8 @@ const DatasetTab = (props) => {
   const { sendData, response, onRef } = props // send src metadata to parent
   const [dataSrc, setDataSrc] = useState([])
   const [dataCol, setDataCol] = useState({})
+  const [dataLabel, setdataLabel] = useState({})
+  const [dataItem, setdataItem] = useState({})
   const [fresh, setFresh] = useState(true)
   const [loadings, setLoadings] = useState([])
   const [showAll, setShowAll] = useState(false)
@@ -80,7 +82,7 @@ const DatasetTab = (props) => {
           Static
         </span>
       ),
-      children: <DatasetStatic src={dataSrc} col={dataCol} />,
+      children: <DatasetStatic src={dataSrc} col={dataCol} _label={dataLabel} _item={dataItem} />,
     },
   ]
 
@@ -93,11 +95,16 @@ const DatasetTab = (props) => {
   }))
 
   useEffect(() => {
+    // console.log(response.data)
+    // console.log(dataLabel)
+    // console.log(dataItem)
     if(response.status === 'success' && typeof response.data !== 'undefined' && fresh) {
       setCurrTip(loadingTips[1])
       enterLoading(0, setLoadings)
       setDataSrc(response.data.data)
       setDataCol(response.data.attributes)
+      setdataLabel(response.data.label) // add selected label
+      setdataItem(response.data.item) // add selected item
       setFresh(false)
       // calculate metadata and send to Database
       let src = response.data.data
@@ -136,6 +143,8 @@ const DatasetTab = (props) => {
       setCurrTip(loadingTips[1])
       setDataSrc(OriginResponse.data.data)
       setDataCol(OriginResponse.data.attributes)
+      setdataLabel(OriginResponse.data.label)
+      setdataItem(OriginResponse.daata.item)
       quitLoading(0, setLoadings)
       setShowAll(false)
     }
