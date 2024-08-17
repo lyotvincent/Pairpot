@@ -470,7 +470,7 @@ const DatasetStatic = ({ src, col, height, width, margin, _label, _item }) => {
           </div>
         </Col>
       </Row>
-      <div>{JSON.stringify(Init)}</div>
+      {/* <div>{JSON.stringify(Init)}</div> */}
     </>
   )
 }
