@@ -73,12 +73,12 @@ const Search = ({ onSearchComplete }) => {
         },
       }).then((response) => {
         let datas = response.data.data
-        onSearchComplete(datas)  // 将数据传递给父组件
+        onSearchComplete(datas)  // to parent
         quitLoading(0,setLoading)
-        setLoadText("Search")  // 重置按钮文本
+        setLoadText("Search") 
         return datas
       }).catch(() => {
-        setLoading(0,setLoading)  // 搜索失败时也恢复状态
+        setLoading(0,setLoading) 
         setLoadText("Search")
       })
     }
@@ -112,22 +112,22 @@ const Search = ({ onSearchComplete }) => {
           onClick={() => { setOpen(!open) }}
           onSearch={(e) => {
             if(e.length > 0){
-                // 必要的状态设置
+                // status settings
                 setOpen(false)
                 setStatus("Success")
                 enterLoading(0, setLoading)
                 setLoadText("Searching...")
 
-                // 需要在这判断一下搜索的类型
+                // query type
                 var res;
-                // case1: id搜索
+                // case1: id
                 if(e.startsWith("STDS") || e.startsWith("SCDS")){
                     res={
                         type: 'id',
                         content: e
                     }
                 }
-                else{ // case2: keyword搜索
+                else{ // case2: keyword
                     res={
                         type: 'key',
                         content: e

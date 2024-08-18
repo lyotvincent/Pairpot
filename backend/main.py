@@ -99,7 +99,7 @@ def find_dataset(key):
                 id_list.append(item[1]) # record the id
     # There is no result 
     if len(id_list) == 0:
-        return None # TODO:改进——模糊查询
+        return [] # TODO:Fuzzy queries
     # count the frequency
     count_dict = {}
     for item in id_list:
