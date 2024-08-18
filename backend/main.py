@@ -62,6 +62,61 @@ def example():
     return response
 
 
+@app.route('/search_key', methods=['GET'])
+def search_dataset():
+    type = request.args.get('type')
+    content = request.args.get('content')
+    if(type == 'key'):
+        id_list = find_dataset(content)
+    if(type == 'id'):
+        id_list = [content] # only one
+    # query db
+    conn = sqlite3.connect('resources/STpair.db')
+    cursor = conn.cursor()
+    res_list = []
+    for id in id_list:
+        query_content = f"SELECT * FROM datasets WHERE dataset_id = '{id}'"
+        cursor.execute(query_content)
+        temp = cursor.fetchall()
+        res_list.append(temp[0])
+    response = jsonify({'data':res_list})
+    return response
+
+
+def find_dataset(key):
+    # keys = key.split(" ")
+    # title > summary > overall_design > species/Tissues/Platforms/disease
+    conn = sqlite3.connect('resources/STpair.db')
+    cursor = conn.cursor()
+    query_list = ['title','summary','overall_design','species','Tissues','disease','Platforms']
+    id_list = []
+    for query_label in query_list:
+        query_content = f"SELECT * FROM datasets WHERE {query_label} Like '%{key}%'"
+        cursor.execute(query_content)
+        res = cursor.fetchall()
+        if res != None:
+            for item in res:
+                id_list.append(item[1]) # record the id
+    # There is no result 
+    if len(id_list) == 0:
+        return None # TODO:改进——模糊查询
+    # count the frequency
+    count_dict = {}
+    for item in id_list:
+        if item in count_dict:
+            count_dict[item] += 1
+        else:
+            count_dict[item] = 1
+    # find the max value
+    max_count = max(count_dict.values())
+    # find items with the max value
+    res_list = []
+    unique_list = list(set(id_list))
+    for item in unique_list:
+        if count_dict[item] == max_count:
+            res_list.append(item)
+    return res_list  
+
 
 @app.route('/datasets', methods=['GET'])
 def init_dataset():

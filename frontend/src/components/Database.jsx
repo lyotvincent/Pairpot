@@ -21,7 +21,7 @@ import {
   OneToOneOutlined,
 } from '@ant-design/icons'
 import DatasetTab from './utils/DatasetTab'
-import Search from './utils/Search'
+import Search from './utils/SearchEngine'
 import SampleTab from './utils/SampleTab'
 const { Content, Footer } = Layout
 const { enterLoading } = Loading
@@ -31,6 +31,23 @@ export const Database = () => {
   const [srcMeta, setSrcMeta] = useState({}) // get the meta data from childrens
   const [src, setSrc] = useState([1, 2, 3])
   const [selectedTags, setSelectedTags] = React.useState(null);
+
+  // 有搜索的时候
+  const handleSearchComplete = (datas) => {
+    console.log(datas)
+    // data直接改掉src
+    setSrc(prevSrc => ({
+      ...prevSrc, data: {
+        attributes: prevSrc.data.attributes,
+        data: datas,
+        // add lable and item
+        label: 'all',
+        item: 'None',
+      }
+    }))
+    TabRef.current?.Fresh(true)
+    enterLoading(0, TabRef.current?.Loading)
+  }
 
   const handleChange = (tag, checked, label) => {
     if(checked){
@@ -125,6 +142,7 @@ export const Database = () => {
     } else{
       newSrcData = src.data.data
     }
+    // console.log(newSrcData)
     setSrc(prevSrc => ({
       ...prevSrc, data: {
         attributes: prevSrc.data.attributes,
@@ -169,7 +187,7 @@ export const Database = () => {
               alignItems: "center"
             }} />
           </Col>
-          <Col span={16} offset={4}> <Search /> </Col>
+          <Col span={16} offset={4}> <Search onSearchComplete={handleSearchComplete} /> </Col>
           <Col span={16} offset={4}>
           <Divider style={{marginTop:16, marginBottom: 14}}/>
           </Col>
