@@ -7,9 +7,9 @@ import {
   UnorderedListOutlined,
   BarChartOutlined,
   TableOutlined,
-  DownloadOutlined,
+  // DownloadOutlined,
   ReloadOutlined,
-  DotNetOutlined,
+  // DotNetOutlined,
   ProductOutlined,
   ApartmentOutlined,
 } from '@ant-design/icons'
@@ -143,7 +143,7 @@ const DatasetTab = (props) => {
       setCurrTip(loadingTips[1])
       setDataSrc(OriginResponse.data.data)
       setDataCol(OriginResponse.data.attributes)
-      setdataLabel(OriginResponse.data.label)
+      setdataLabel("all")
       setdataItem(OriginResponse.data.item)
       quitLoading(0, setLoadings)
       setShowAll(false)

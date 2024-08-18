@@ -5,11 +5,12 @@
 from normalize import *
 import os
 import re
+import json
 from glob import glob
 
 file0=open("Error.txt","w")
 
-def proc_h5ad(filename, filepath):
+def proc_h5ad(filename, filepath, type='sc'):
     directory = os.path.dirname(filepath[0])
     meta_file_path = os.path.join(directory, 'meta.txt')
     organs=[]
@@ -22,10 +23,12 @@ def proc_h5ad(filename, filepath):
     # sampleNames=filename
     adata=concat_adata(filepath, filename, inputFunc=input_adata_h5ad)
     adata = pp(adata)
-    if adata.shape[0]>100000:
+    if adata.shape[0]>100000 and type=='sc':
         sampleIdx = np.random.choice(len(adata), 50000)
         adata = adata[sampleIdx,:].copy()
     adata = clu(adata)
+    if type=='sp':
+        adata = mender(adata)
     
     try:
         adata = rank(adata, organs)
@@ -76,7 +79,7 @@ def proc_txtgz(filename, filepath, type='sc'):
     adata = marker(adata, groupby="leiden-1", method='wilcoxon')
     adata.write_h5ad(f"{directory}/{type}{directory[-3:]}_raw.h5ad")
 
-def proc_h5(filename, filepath):
+def proc_h5(filename, filepath, type='sc'):
     directory = os.path.dirname(filepath[0])
     meta_file_path = os.path.join(directory, 'meta.txt')
     organs=[]
@@ -89,10 +92,12 @@ def proc_h5(filename, filepath):
     sampleNames=filename
     adata = concat_adata(samples, sampleNames, inputFunc=input_adata_10Xh5)
     adata = pp(adata)
-    if adata.shape[0]>100000:
+    if adata.shape[0]>100000 and type=='sc':
         sampleIdx = np.random.choice(len(adata), 50000)
         adata = adata[sampleIdx,:].copy()
     adata = clu(adata)
+    if type=='sp':
+        adata = mender(adata)
     # if adata.shape[0]>100000:
     #     print("File ",directory[-3:]," is too large with {}".format(adata.shape[0]),file=file0)
     #     print("File ",directory[-3:]," is too large with {}".format(adata.shape[0]))
@@ -196,8 +201,6 @@ def txtToH5ad(path):
     adata.write_h5ad(new_path)
     print(new_path," done!")
     
-
-print(1)
 # process_files('/data/rzh/RawUrls')
 # sample = {
 #    'dictionary':'/data/rzh/RawUrls/227/SCDS0000005',
@@ -209,7 +212,6 @@ print(1)
 #           "GSM4711415_P6_gene_cell_exprs_table.h5ad"],
 #     'name':['P1', 'P2', 'P3', 'P4', 'P5', 'P6']
 # }
-import json
 # sample = {
 #   "dict":"/data/rzh/RawUrls/212/SCDS0000002",
 #   "path":["GSM4653855_AD1.h5ad",

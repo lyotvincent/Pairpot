@@ -20,6 +20,7 @@ import pandas as pd
 import numpy as np
 import anndata as ad
 from AUCell import *
+import MENDER
 from db import panglaoDB
 import cell2location
 from cellphonedb.src.core.methods import cpdb_statistical_analysis_method
@@ -129,6 +130,40 @@ def clu(adata, key_added="leiden-1", n_neighbors=50, n_pcs=30, rep='X_pca_harmon
     sc.pl.umap(adata, color=key_added, legend_fontoutline=True, palette=sc.pl.palettes.default_20, legend_loc="on data")
     return adata
 
+def mender(adata:ad.AnnData, key_added="mender"):
+    # input parameters of MENDER
+    scale = 6
+    radius = 15
+    # main body of MENDER
+    msm = MENDER.MENDER(
+        adata,
+        # determine which cell state to use
+        # we use the cell state got by Leiden
+        batch_obs='batch',
+        ct_obs='leiden-1'
+    )
+    msm.prepare()
+    # set the MENDER parameters
+
+    msm.set_MENDER_para(
+    # default of n_scales is 6
+    n_scales=scale,
+
+    # for single cell data, nn_mode is set to 'radius'
+    nn_mode='radius',
+
+    # default of n_scales is 15 um (see the manuscript for the analysis).
+    # MENDER also provide a function 'estimate_radius' for estimating the radius
+    nn_para=radius,
+    )
+
+    # construct the context representation
+    msm.run_representation_mp()
+
+    msm.run_clustering_normal(-0.5)
+    adata.obs[key_added] = np.array(msm.adata_MENDER.obs['MENDER'])
+    adata.obs['annotation'] = np.array(msm.adata_MENDER.obs['MENDER'])
+    return adata
 
 def rank(adata, organs, 
          method="AUCell", 
