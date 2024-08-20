@@ -66,19 +66,30 @@ def example():
 def search_dataset():
     type = request.args.get('type')
     content = request.args.get('content')
+    # connect
+    conn = sqlite3.connect('resources/STpair.db')
+    cursor = conn.cursor()
+
+    # Categorical discussions
+    if(type == 'all'):
+        query_content = f"SELECT * FROM datasets"
+        cursor.execute(query_content)
+        res_list = cursor.fetchall()
+        response = jsonify({'data':res_list})
+        return response
+
     if(type == 'key'):
         id_list = find_dataset(content)
     if(type == 'id'):
         id_list = [content] # only one
     # query db
-    conn = sqlite3.connect('resources/STpair.db')
-    cursor = conn.cursor()
     res_list = []
     for id in id_list:
         query_content = f"SELECT * FROM datasets WHERE dataset_id = '{id}'"
         cursor.execute(query_content)
         temp = cursor.fetchall()
-        res_list.append(temp[0])
+        if len(temp) > 0: # must exist
+            res_list.append(temp[0])
     response = jsonify({'data':res_list})
     return response
 

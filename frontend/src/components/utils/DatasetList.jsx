@@ -97,12 +97,12 @@ const DatasetList = ({ src, col }) => {
               key="list-vertical-message"
               onClick={() => { }}
             />,
-            <Tooltip title={`${PairedScoreTips[item[attr.paired_score]]}`}>
-            <Space size='middle'>
-            Paired Score:
-            <Rate disabled value={item[attr.paired_score]} character={<StarFilled style={{fontSize:16, marginTop:1}}/>} />
-            </Space>
-            </Tooltip>,
+            // <Tooltip title={`${PairedScoreTips[item[attr.paired_score]]}`}>
+            // <Space size='middle'>
+            // Paired Score:
+            // <Rate disabled value={item[attr.paired_score]} character={<StarFilled style={{fontSize:16, marginTop:1}}/>} />
+            // </Space>
+            // </Tooltip>,
           ]}
           extra={
             <div>

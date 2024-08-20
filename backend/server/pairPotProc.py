@@ -10,7 +10,7 @@ from glob import glob
 
 file0=open("Error.txt","w")
 
-def proc_h5ad(filename, filepath, type='sc'):
+def proc_h5ad(filename, filepath, type='sp'):
     directory = os.path.dirname(filepath[0])
     meta_file_path = os.path.join(directory, 'meta.txt')
     organs=[]
@@ -28,6 +28,7 @@ def proc_h5ad(filename, filepath, type='sc'):
         adata = adata[sampleIdx,:].copy()
     adata = clu(adata)
     if type=='sp':
+        print("doing MENDER.")
         adata = mender(adata)
     
     try:
@@ -247,31 +248,38 @@ def txtToH5ad(path):
 # }
 
 sample = {
-  "dict":"/data/rzh/RawUrls/114/SCDS0000114",
-  "path":["GSM5764246_filtered_feature_bc_matrix_ABU18.h5",
-          "GSM5764252_filtered_feature_bc_matrix_ABU7.h5",
-          "GSM5764265_filtered_feature_bc_matrix_CS52.h5",
-          "GSM5764269_filtered_feature_bc_matrix_CS89.h5",
-          "GSM5764354_filtered_feature_bc_matrix_CS33.h5",
-          "GSM5764384_filtered_feature_bc_matrix_CS85.h5",
-          "GSM5764389_filtered_feature_bc_matrix_CS110.h5",
-          "GSM5764397_filtered_feature_bc_matrix_CS166.h5",
-          "GSM5764406_filtered_feature_bc_matrix_CS172.h5",
-          "",
-          "",
-          "",
+  "dict":"/data/rzh/RawUrls/153/STDS0000153",
+  "path":[
+          "GSM6177623_10xVisium_processed.h5ad",
+          "GSM6177618_10xVisium_processed.h5ad",
+          "GSM6177617_10xVisium_processed.h5ad",
+          "GSM6177614_10xVisium_processed.h5ad",
+          "GSM6177612_10xVisium_processed.h5ad",
+          "GSM6177609_10xVisium_processed.h5ad",
+          "GSM6177607_10xVisium_processed.h5ad",
+          "GSM6177603_10xVisium_processed.h5ad",
+          "GSM6177601_10xVisium_processed.h5ad",
+          "GSM6177599_10xVisium_processed.h5ad",
          ],
-  "name":["46Q",
-          "47Q",
-          "73R",]
+  "name":[
+          "NYU_UCEC3",
+            "NYU_PDAC1",
+            "NYU_OVCA3",
+            "NYU_OVCA1",
+            "NYU_LIHC1",
+            "NYU_GIST2",
+            "NYU_GIST1",
+            "NYU_BRCA2",
+            "NYU_BRCA1",
+            "NYU_BRCA0",]
 }
 json_data = json.dumps(sample)
  
 # 将JSON数据保存到文件
 with open(f"{sample['dict']}/sample.json", 'w') as f:
     json.dump(sample, f)
-# proc_h5ad(filepath=[f"{sample['dict']}/{s}" for s in sample["path"]], filename=sample['name'])
-proc_h5(filepath=[f"{sample['dict']}/{s}" for s in sample["path"]], filename=sample['name'])
+proc_h5ad(filepath=[f"{sample['dict']}/{s}" for s in sample["path"]], filename=sample['name'], type='sp')
+# proc_h5(filepath=[f"{sample['dict']}/{s}" for s in sample["path"]], filename=sample['name'])
 file0.close()
 print("End")
 f=open("End","w")

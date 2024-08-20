@@ -112,7 +112,7 @@ def clu(adata, key_added="leiden-1", n_neighbors=50, n_pcs=30, rep='X_pca_harmon
     if do_scrublet:
         n0 = adata.shape[0]
         print("{0} Cell number: {1}".format(key_added, n0))
-        sc.pp.scrublet(adata, random_state=112)
+        sc.external.pp.scrublet(adata, random_state=112)
         adata = adata[adata.obs['predicted_doublet']==False,:].copy()
         print("{0} Cells retained after scrublet, {1} cells reomved.".format(adata.shape[0], n0-adata.shape[0]))
     else:

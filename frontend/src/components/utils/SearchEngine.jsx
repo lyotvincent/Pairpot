@@ -1,7 +1,7 @@
 // our SearchEngine
 import React, { useState } from 'react'
 import { UserOutlined } from '@ant-design/icons'
-import { AutoComplete, Input, Col, Row, Popover, ConfigProvider } from 'antd'
+import { AutoComplete, Input, Col, Row, Popover, ConfigProvider, Button } from 'antd'
 import { useNavigate, Link } from 'react-router-dom'
 import Loading from '../charts/Loading'
 import axios from 'axios'
@@ -44,12 +44,12 @@ const options = [
     label: renderTitle('Spatial Transcriptomics Studies'),
     options: [renderItem('Spatial transcriptomics map of the embryonic mouse brain – a tool to explore neurogenesis', 'STDS0000235'),
     renderItem('Spatial transcriptomics combined with single-cell RNA-sequencing unravels the complex inflammatory cell network in atopic dermatitis [ST]', 'STDS0000212'),
-    // renderItem("Spatial transcriptomics of de novo NEPC and ARPC", 'STDS0000227'),
-    // renderItem("Spatial resolution of cellular senescence dynamics in colorectal liver metastasis", 'STDS0000219'),
-    // renderItem("Spatial transcriptomics of adenoid cystic carcinoma of the lacrimal gland", 'STDS0000221'),
-    // renderItem("Spatial transcriptomics (Visium, 10x Genomics) data of Duchenne mouse models", 'STDS0000204'),
-    // renderItem("Discovering Haematoma-Stimulated Circuits for Secondary Brain Injury after Intraventricular Haemorrhage by Spatial Transcriptome Analysis", 'STDS0000201'),
-    // renderItem("Moxibustion Improves Hypothalamus Aqp4 Polarization in APP/PS1 Mice: Evidence from Spatial Transcriptomics", 'STDS0000189')
+    renderItem("Spatial transcriptomics of de novo NEPC and ARPC", 'STDS0000227'),
+    renderItem("Spatial resolution of cellular senescence dynamics in colorectal liver metastasis", 'STDS0000219'),
+    renderItem("Spatial transcriptomics of adenoid cystic carcinoma of the lacrimal gland", 'STDS0000221'),
+    renderItem("Spatial transcriptomics (Visium, 10x Genomics) data of Duchenne mouse models", 'STDS0000204'),
+    renderItem("Discovering Haematoma-Stimulated Circuits for Secondary Brain Injury after Intraventricular Haemorrhage by Spatial Transcriptome Analysis", 'STDS0000201'),
+    renderItem("Moxibustion Improves Hypothalamus Aqp4 Polarization in APP/PS1 Mice: Evidence from Spatial Transcriptomics", 'STDS0000189')
     ],
   },
 ]
@@ -91,6 +91,8 @@ const Search = ({ onSearchComplete }) => {
         }
       }
     }}>
+            <Row gutter={8}>
+            <Col flex="auto">
       <AutoComplete
         popupClassName="certain-category-search-dropdown"
         popupMatchSelectWidth="80%"
@@ -103,6 +105,7 @@ const Search = ({ onSearchComplete }) => {
         onSelect={() => { setOpen(false) }}
         size="large"
       >
+
         <Input.Search
           size="large"
           placeholder="Search for a Study to Browse."
@@ -142,7 +145,28 @@ const Search = ({ onSearchComplete }) => {
             }
             
           }} />
+
       </AutoComplete>
+      </Col>
+
+      <Col>
+          <Button
+            size="large"
+            type="primary"
+            onClick={()=>{
+              var res={
+                type: 'all',
+                content: 'all'
+              }
+              fetch.mutate(res)
+            }}
+            loading={loading[0]}
+          >
+            Display All
+          </Button>
+        </Col>
+        </Row>  
+
     </ConfigProvider>
   )
 }

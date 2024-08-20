@@ -277,9 +277,9 @@ def run_deconv(adata_scFile, adata_spFile, adata_outPath):
     print(f"Write dcv results to {adata_outPath}/sp_deconv.h5ad")
 
 if __name__ == '__main__':
-    adata_spFile = "/data/rzh/RawUrls/152/STDS0000152/New_152.h5ad"
-    adata_scFile = "/data/rzh/RawUrls/152/SCDS0000152/New_152.h5ad"
-    adata_outPath = "/data/rzh/RawUrls/152"
-    # run_deconv(adata_scFile, adata_spFile, adata_outPath)
+    adata_spFile = "/data/rzh/RawUrls/153/STDS0000153/New_153.h5ad"
+    adata_scFile = "/data/rzh/RawUrls/153/SCDS0000153/New_153.h5ad"
+    adata_outPath = "/data/rzh/RawUrls/153"
+    run_deconv(adata_scFile, adata_spFile, adata_outPath)
     run_cpdb(adata_scFile, adata_outPath, type="sc")
-    # run_cpdb(f"{adata_outPath}/sp_deconv.h5ad", adata_outPath, type="sp")
+    run_cpdb(f"{adata_outPath}/sp_deconv.h5ad", adata_outPath, type="sp")
