@@ -171,7 +171,7 @@ def save_delete(adata, loc, column):
 
 def run_cpdb(adata_inFile, adata_outPath, type='sc'):
     if type == 'sp':
-        groupby = 'leiden-1'  # adata.obs['leiden-1'] for sp data
+        groupby = 'annotation'  # adata.obs['mender'] for sp data
     else:
         groupby = 'annotation'  # adata.obs['annotation'] for sc data
     adata_in = sc.read_h5ad(adata_inFile) 
@@ -277,9 +277,11 @@ def run_deconv(adata_scFile, adata_spFile, adata_outPath):
     print(f"Write dcv results to {adata_outPath}/sp_deconv.h5ad")
 
 if __name__ == '__main__':
-    adata_spFile = "/data/rzh/RawUrls/153/STDS0000153/New_153.h5ad"
-    adata_scFile = "/data/rzh/RawUrls/153/SCDS0000153/New_153.h5ad"
-    adata_outPath = "/data/rzh/RawUrls/153"
+    dataset_id = '153'
+    scdata_id = '153'
+    adata_spFile = f"/data/rzh/RawUrls/{dataset_id}/STDS0000{dataset_id}/New_{dataset_id}.h5ad"
+    adata_scFile = f"/data/rzh/RawUrls/{dataset_id}/SCDS0000{scdata_id}/New_{scdata_id}.h5ad"
+    adata_outPath = f"/data/rzh/RawUrls/{dataset_id}"
     run_deconv(adata_scFile, adata_spFile, adata_outPath)
     run_cpdb(adata_scFile, adata_outPath, type="sc")
     run_cpdb(f"{adata_outPath}/sp_deconv.h5ad", adata_outPath, type="sp")

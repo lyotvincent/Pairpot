@@ -193,7 +193,8 @@ const DatasetList = ({ src, col }) => {
           <List.Item.Meta
             title={
               <div>
-                {item[0]}. {item[attr['title']]}
+                {/* {item[0]}. {item[attr['title']]} */}
+                {item[attr['title']]}
               </div>
             }
             description={

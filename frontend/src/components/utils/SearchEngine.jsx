@@ -39,7 +39,7 @@ const renderItem = (title, key) => ({
     </div>
   ),
 })
-const options = [
+const initialOptions = [
   {
     label: renderTitle('Spatial Transcriptomics Studies'),
     options: [renderItem('Spatial transcriptomics map of the embryonic mouse brain – a tool to explore neurogenesis', 'STDS0000235'),
@@ -61,9 +61,11 @@ const Search = ({ onSearchComplete }) => {
   const [loading, setLoading] = useState([])
   const [open, setOpen] = useState(false)
   const [status, setStatus] = useState("Success")
+  const [options, setOptions] = useState(initialOptions)
+
   const fetch = useMutation({
-    mutationKey:['search_key'],
-    mutationFn:(e) =>{
+    mutationKey: ['search_key'],
+    mutationFn: (e) => {
       axios({
         method: 'GET',
         url: '/api/search_key',
@@ -74,15 +76,30 @@ const Search = ({ onSearchComplete }) => {
       }).then((response) => {
         let datas = response.data.data
         onSearchComplete(datas)  // to parent
-        quitLoading(0,setLoading)
-        setLoadText("Search") 
+        quitLoading(0, setLoading)
+        setLoadText("Search")
         return datas
       }).catch(() => {
-        setLoading(0,setLoading) 
+        setLoading(0, setLoading)
         setLoadText("Search")
       })
     }
   })
+
+  // 下拉框根据输入来动态更新
+  const handleSearch = (value) => {
+    if (value.length > 0) {
+      const filteredOptions = initialOptions.map(optionGroup => ({
+        ...optionGroup,
+        options: optionGroup.options.filter(item => item.label.props.children[0].props.children.toLowerCase().includes(value.toLowerCase()))
+      }))
+      setOptions(filteredOptions)
+    } else {
+      setOptions(initialOptions)  // 如果没有输入内容，则重置为初始的选项
+    }
+  }
+
+
   return (
     <ConfigProvider theme={{
       components: {
@@ -91,70 +108,71 @@ const Search = ({ onSearchComplete }) => {
         }
       }
     }}>
-            <Row gutter={8}>
-            <Col flex="auto">
-      <AutoComplete
-        popupClassName="certain-category-search-dropdown"
-        popupMatchSelectWidth="80%"
-        style={{
-          width: "100%"
-        }}
-        options={options}
-        open={open}
-        onBlur={() => { setOpen(false) }}
-        onSelect={() => { setOpen(false) }}
-        size="large"
-      >
+      <Row gutter={8}>
+        <Col flex="auto">
+          <AutoComplete
+            popupClassName="certain-category-search-dropdown"
+            popupMatchSelectWidth="80%"
+            style={{
+              width: "100%"
+            }}
+            options={options}
+            open={open}
+            onBlur={() => { setOpen(false) }}
+            onSelect={() => { setOpen(false) }}
+            onSearch={handleSearch}  // 输入变化
+            size="large"
+          >
 
-        <Input.Search
-          size="large"
-          placeholder="Search for a Study to Browse."
-          enterButton={loadText}
-          status={status}
-          loading={loading[0]}
-          onClick={() => { setOpen(!open) }}
-          onSearch={(e) => {
-            if(e.length > 0){
-                // status settings
-                setOpen(false)
-                setStatus("Success")
-                enterLoading(0, setLoading)
-                setLoadText("Searching...")
+            <Input.Search
+              size="large"
+              placeholder="Search for a Study to Browse."
+              enterButton={loadText}
+              status={status}
+              loading={loading[0]}
+              onClick={() => { setOpen(!open) }}
+              onSearch={(e) => {
+                if (e.length > 0) {
+                  // status settings
+                  setOpen(false)
+                  setStatus("Success")
+                  enterLoading(0, setLoading)
+                  setLoadText("Searching...")
 
-                // query type
-                var res;
-                // case1: id
-                if(e.startsWith("STDS") || e.startsWith("SCDS")){
-                    res={
-                        type: 'id',
-                        content: e
+                  // query type
+                  var res
+                  // case1: id
+                  if (e.startsWith("STDS") || e.startsWith("SCDS")) {
+                    res = {
+                      type: 'id',
+                      content: e
                     }
-                }
-                else{ // case2: keyword
-                    res={
-                        type: 'key',
-                        content: e
+                  }
+                  else { // case2: keyword
+                    res = {
+                      type: 'key',
+                      content: e
                     }
+                  }
+
+
+                  fetch.mutate(res)
+                }
+                else {
+                  setStatus("error")
                 }
 
+              }} />
 
-                fetch.mutate(res)
-            } 
-            else{
-                setStatus("error")
-            }
-            
-          }} />
+          </AutoComplete>
+        </Col>
 
-      </AutoComplete>
-      </Col>
-
-      <Col>
+        <Col>
           <Button
             size="large"
             type="primary"
-            onClick={()=>{
-              var res={
+            onClick={() => {
+              var res = {
                 type: 'all',
                 content: 'all'
               }
@@ -165,7 +183,7 @@ const Search = ({ onSearchComplete }) => {
             Display All
           </Button>
         </Col>
-        </Row>  
+      </Row>
 
     </ConfigProvider>
   )

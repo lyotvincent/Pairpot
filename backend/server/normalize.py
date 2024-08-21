@@ -170,6 +170,7 @@ def rank(adata, organs,
          top=0.05, 
          alpha=10e-40, 
          n_jobs=16,
+         clu_key='leiden-1',
          test_func=mannwhitneyu,
          ):
   # 对每个细胞的基因表达进行排序并且提取前5%
@@ -180,7 +181,13 @@ def rank(adata, organs,
   celltype.sort()
 
   # UCell_Assign
-  adata = AUCell_UCAssign(adata, db=panglaoDB, celltype=celltype, alpha=alpha, n_jobs=n_jobs, test_func=test_func)
+  adata = AUCell_UCAssign(adata, 
+                          db=panglaoDB, 
+                          celltype=celltype, 
+                          alpha=alpha, 
+                          n_jobs=n_jobs, 
+                          clu_key=clu_key,
+                          test_func=test_func)
   return adata
 
 def anno(adata:ad.AnnData, annoDict:dict):
@@ -287,6 +294,7 @@ def Cell2Location_run(adata_sc, adata_sp, sc_max_epoches=250, sc_batch_size=2500
     adata_sp = adata_sp.copy()
     adata_sc.X = adata_sc.layers['Raw'].astype('int')
     adata_sp.X = adata_sp.layers['Raw'].astype('int')
+    print(f"Single-cell shape:{adata_sc.shape}")
     selected = cell2location.utils.filtering.filter_genes(adata_sc,
                         cell_count_cutoff=cell_count_cutoff,
                         cell_percentage_cutoff2=cell_percentage_cutoff2,

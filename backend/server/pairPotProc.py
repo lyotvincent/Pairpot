@@ -30,9 +30,12 @@ def proc_h5ad(filename, filepath, type='sp'):
     if type=='sp':
         print("doing MENDER.")
         adata = mender(adata)
+        clu_key = 'annotation'
+    else:
+        clu_key = 'leiden-1'
     
     try:
-        adata = rank(adata, organs)
+        adata = rank(adata, organs, clu_key=clu_key)
     except:
         try:
             print("Try kruskal in",filepath[0])

@@ -1,3 +1,5 @@
 .idea
 MNIST
 */__pycache__
+*/cpdb
+*/so_mender

@@ -150,6 +150,7 @@ def AUCell_UCAssign(adata,
                     alpha=10e-30, 
                     gene_col='official gene symbol', 
                     test_func=kruskal,
+                    clu_key="leiden-1",
                     n_jobs=8):
   
   # calculate UCell
@@ -169,20 +170,23 @@ def AUCell_UCAssign(adata,
   def UCAssign_Thread(i):
     ct = celltype[i]
     candidates = []
-    ucell = adata.obs[["leiden-1", f"UCell_{ct}"]].copy()
-    rank = ucell.groupby("leiden-1", observed=False).mean()
+    ucell = adata.obs[[clu_key, f"UCell_{ct}"]].copy()
+    rank = ucell.groupby(clu_key, observed=False).mean()
     rank = rank.sort_values(by=f"UCell_{ct}", ascending=False)
     rank = rank.reset_index()
-    assert len(rank) == len(adata.obs['leiden-1'].unique())
+    assert len(rank) == len(adata.obs[clu_key].unique())
 
     for i in range(len(rank)):
       anno = rank.iloc[i,0]
-      sample1 = ucell.loc[ucell['leiden-1'] == anno, f"UCell_{ct}"]
-      sample2 = ucell.loc[ucell['leiden-1'] != anno, f"UCell_{ct}"]
-      u_stat,p_val = test_func(sample1, sample2)
+      sample1 = ucell.loc[ucell[clu_key] == anno, f"UCell_{ct}"]
+      sample2 = ucell.loc[ucell[clu_key] != anno, f"UCell_{ct}"]
+      if len(sample1) > 0  and len(sample2) > 0:
+        u_stat,p_val = test_func(sample1, sample2)
+      else:
+        p_val=1
       if p_val < alpha:
         candidates.append(anno)
-        ucell = ucell[ucell['leiden-1'] != anno]
+        ucell = ucell[ucell[clu_key] != anno]
       else:
         break
     return candidates
