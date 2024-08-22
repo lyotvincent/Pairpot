@@ -234,10 +234,16 @@ const Browser = () => {
       statusSC.mutate(location.state)
       statusSP.mutate(location.state)
     }
-    else {
-      setInit(true)
-    }
   }, [location, Init])
+
+  useEffect(() => {
+    if (typeof PairRef.current !== "undefined" &&
+      typeof LassoRef.current !== "undefined" &&
+      typeof LayerRef.current !== "undefined"
+    ) {
+      setInit(true)  // set Browser initializtion finished afer all components.
+    }
+  }, [PairRef.current, LassoRef.current, LayerRef.current])
 
   useEffect(() => {
     if (statusSP.status === 'success' &&

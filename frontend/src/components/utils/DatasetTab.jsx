@@ -152,7 +152,7 @@ const DatasetTab = (props) => {
 
   const operations = (
     <Space>
-      <Button 
+      {/* <Button 
       onClick={() => {
         enterLoading(0,setLoadings)
         setCurrTip(loadingTips[0])
@@ -160,7 +160,7 @@ const DatasetTab = (props) => {
       }}
       icon={<ProductOutlined />}>
         Display All
-      </Button>
+      </Button> */}
       <Button
         onClick={() => {
           enterLoading(0,setLoadings)

@@ -66,6 +66,7 @@ def example():
 def search_dataset():
     type = request.args.get('type')
     content = request.args.get('content')
+    print("request:",type,content)
     # connect
     conn = sqlite3.connect('resources/STpair.db')
     cursor = conn.cursor()
@@ -75,13 +76,25 @@ def search_dataset():
         query_content = f"SELECT * FROM datasets"
         cursor.execute(query_content)
         res_list = cursor.fetchall()
-        response = jsonify({'data':res_list})
+        response = jsonify({'data':res_list,'type':type})
         return response
 
     if(type == 'key'):
         id_list = find_dataset(content)
-    if(type == 'id'):
+    elif(type == 'id'):
         id_list = [content] # only one
+    elif(type == 'num'):
+        if(len(content)>3):
+            id_list = []
+        else:
+            std_id = "STDS"
+            scd_id = "SCDS"
+            for i in range(7- len(content)):
+                std_id += '0'
+                scd_id += '0'
+            std_id += content
+            scd_id += content
+            id_list = [std_id, scd_id]
     # query db
     res_list = []
     for id in id_list:
@@ -90,7 +103,7 @@ def search_dataset():
         temp = cursor.fetchall()
         if len(temp) > 0: # must exist
             res_list.append(temp[0])
-    response = jsonify({'data':res_list})
+    response = jsonify({'data':res_list,'type':type})
     return response
 
 

@@ -7,3 +7,4 @@ def AddMender4SPdata(spH5adFile):
     if adata and isinstance(adata,ad.AnnData) and 'spatial' in adata.obsm:
       adata = mender(adata)
       adata.write_h5ad(spH5adFile)
+    

@@ -31,15 +31,17 @@ export const Database = () => {
   const [srcMeta, setSrcMeta] = useState({}) // get the meta data from childrens
   const [src, setSrc] = useState([1, 2, 3])
   const [selectedTags, setSelectedTags] = React.useState(null);
+  const [searchValue, steSearchValue] = useState(''); // 搜索框的值，传给search
 
   // 有搜索的时候
   const handleSearchComplete = (datas) => {
+    // datas是从search这个子组件传过来的
     console.log(datas)
     // data直接改掉src
     setSrc(prevSrc => ({
       ...prevSrc, data: {
         attributes: prevSrc.data.attributes,
-        data: datas,
+        data: datas.data,
         // add lable and item
         label: 'all',
         item: 'None',
@@ -47,9 +49,19 @@ export const Database = () => {
     }))
     TabRef.current?.Fresh(true)
     enterLoading(0, TabRef.current?.Loading)
+
+    // 下面的options都清空
+    setSelectedTags(null)
+    if(datas.type == 'all'){
+      // Rerender('all', 'all')
+      // 搜索框清空
+      steSearchValue(''); 
+    }
   }
 
   const handleChange = (tag, checked, label) => {
+    // 选择组件时也需要清空搜索框
+    steSearchValue(''); 
     if(checked){
       setSelectedTags(tag)
       Rerender(label, tag)
@@ -187,7 +199,13 @@ export const Database = () => {
               alignItems: "center"
             }} />
           </Col>
-          <Col span={16} offset={4}> <Search onSearchComplete={handleSearchComplete} /> </Col>
+          <Col span={16} offset={4}> 
+            <Search 
+                value = {searchValue}
+                onChange={steSearchValue}
+                onSearchComplete={handleSearchComplete}
+            /> 
+          </Col>
           <Col span={16} offset={4}>
           <Divider style={{marginTop:16, marginBottom: 14}}/>
           </Col>

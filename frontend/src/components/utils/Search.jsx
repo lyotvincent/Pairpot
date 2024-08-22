@@ -44,11 +44,16 @@ const options = [
     options: [renderItem('Spatial transcriptomics map of the embryonic mouse brain – a tool to explore neurogenesis', 'STDS0000235'),
     renderItem('Spatial transcriptomics combined with single-cell RNA-sequencing unravels the complex inflammatory cell network in atopic dermatitis [ST]', 'STDS0000212'),
     renderItem("Spatial transcriptomics of de novo NEPC and ARPC", 'STDS0000227'),
+    renderItem("Tertiary lymphoid structures generate and propagate anti-tumor antibody-producing plasma cells in renal cell cancer", 'STDS0000223'),
     renderItem("Spatial resolution of cellular senescence dynamics in colorectal liver metastasis", 'STDS0000219'),
     renderItem("Spatial transcriptomics of adenoid cystic carcinoma of the lacrimal gland", 'STDS0000221'),
     renderItem("Spatial transcriptomics (Visium, 10x Genomics) data of Duchenne mouse models", 'STDS0000204'),
     renderItem("Discovering Haematoma-Stimulated Circuits for Secondary Brain Injury after Intraventricular Haemorrhage by Spatial Transcriptome Analysis", 'STDS0000201'),
-    renderItem("Moxibustion Improves Hypothalamus Aqp4 Polarization in APP/PS1 Mice: Evidence from Spatial Transcriptomics", 'STDS0000189')
+    renderItem("Moxibustion Improves Hypothalamus Aqp4 Polarization in APP/PS1 Mice: Evidence from Spatial Transcriptomics", 'STDS0000189'),
+    renderItem("A topographic atlas defines developmental origins of cell heterogeneity in the human embryonic lung [ST]", "STDS0000175"),
+    renderItem("Cancer cell states recur across tumor types and form specific interactions with the tumor microenvironment", 'STDS0000153'),
+    renderItem("Intratumor heterogeneity and T cell exhaustion in primary CNS lymphoma", 'STDS0000152'),
+    renderItem("Spatially resolved transcriptomics revised human distal lung epithelial hierarchy [spatial transcriptomics]", 'STDS0000114')
     ],
   },
 ]
@@ -61,8 +66,8 @@ const Search = ({ }) => {
   const [open, setOpen] = useState(false)
   const [status, setStatus] = useState("Success")
   const fetch = useMutation({
-    mutationKey:['example'],
-    mutationFn:(e) =>{
+    mutationKey: ['example'],
+    mutationFn: (e) => {
       axios({
         method: 'GET',
         url: '/api/example',
@@ -119,16 +124,16 @@ const Search = ({ }) => {
           loading={loading[0]}
           onClick={() => { setOpen(!open) }}
           onSearch={(e) => {
-            if(e.length > 0){
+            if (e.length > 0) {
               setOpen(false)
               setStatus("Success")
               enterLoading(0, setLoading)
               setLoadText("Searching...")
               fetch.mutate(e)
-            } else{
+            } else {
               setStatus("error")
             }
-            
+
           }} />
       </AutoComplete>
     </ConfigProvider>

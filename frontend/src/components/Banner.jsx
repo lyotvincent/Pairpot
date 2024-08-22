@@ -381,6 +381,7 @@ const Help = () => {
               <p>
                 *Jian Liu, State Key Laboratory of Medical Chemical Biology, College of Computer Science, Nankai University, jianliu@nankai.edu.cn
               </p>
+              <a href="" target='_blank'>津ICP备2024022781号-1</a>
             </Col>
           </Row>
         </Footer>

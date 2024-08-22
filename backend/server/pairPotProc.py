@@ -251,30 +251,26 @@ def txtToH5ad(path):
 # }
 
 sample = {
-  "dict":"/data/rzh/RawUrls/153/STDS0000153",
+  "dict":"/data/rzh/RawUrls/209/STDS0000209",
   "path":[
-          "GSM6177623_10xVisium_processed.h5ad",
-          "GSM6177618_10xVisium_processed.h5ad",
-          "GSM6177617_10xVisium_processed.h5ad",
-          "GSM6177614_10xVisium_processed.h5ad",
-          "GSM6177612_10xVisium_processed.h5ad",
-          "GSM6177609_10xVisium_processed.h5ad",
-          "GSM6177607_10xVisium_processed.h5ad",
-          "GSM6177603_10xVisium_processed.h5ad",
-          "GSM6177601_10xVisium_processed.h5ad",
-          "GSM6177599_10xVisium_processed.h5ad",
+          "GSM6281320_S1_A1_raw_feature_bc_matrix_matrix_processed.h5ad",
+          "GSM6281321_S1_B1_raw_feature_bc_matrix_matrix_processed.h5ad",
+          "GSM6281322_S1_C1_raw_feature_bc_matrix_matrix_processed.h5ad",
+          "GSM6281323_S1_D1_raw_feature_bc_matrix_matrix_processed.h5ad",
+          "GSM6281324_S2_A1_raw_feature_bc_matrix_matrix_processed.h5ad",
+          "GSM6281325_S2_B1_raw_feature_bc_matrix_matrix_processed.h5ad",
+          "GSM6281326_S2_C1_raw_feature_bc_matrix_matrix_processed.h5ad",
+          "GSM6281327_S2_D1_raw_feature_bc_matrix_matrix_processed.h5ad",
          ],
   "name":[
-          "NYU_UCEC3",
-            "NYU_PDAC1",
-            "NYU_OVCA3",
-            "NYU_OVCA1",
-            "NYU_LIHC1",
-            "NYU_GIST2",
-            "NYU_GIST1",
-            "NYU_BRCA2",
-            "NYU_BRCA1",
-            "NYU_BRCA0",]
+          "S1A1",
+            "S1B1",
+            "S1C1",
+            "S1D1",
+            "S2A1",
+            "S2B1",
+            "S2C1",
+            "S2D1",]
 }
 json_data = json.dumps(sample)
  

@@ -55,7 +55,8 @@ const initialOptions = [
 ]
 
 
-const Search = ({ onSearchComplete }) => {
+const Search = ({ onSearchComplete, onChange, value }) => { // 增加输入框的value和改变函数onchange
+  // const [value, setValue] = useState('')  // 这里定义 value 和 setValue
   const [loadText, setLoadText] = useState("Search")
   const navigate = useNavigate()
   const [loading, setLoading] = useState([])
@@ -66,6 +67,7 @@ const Search = ({ onSearchComplete }) => {
   const fetch = useMutation({
     mutationKey: ['search_key'],
     mutationFn: (e) => {
+      console.log(e)
       axios({
         method: 'GET',
         url: '/api/search_key',
@@ -74,7 +76,9 @@ const Search = ({ onSearchComplete }) => {
           content: e.content
         },
       }).then((response) => {
-        let datas = response.data.data
+        // let datas = response.data.data
+        let datas = response.data
+        console.log(datas)
         onSearchComplete(datas)  // to parent
         quitLoading(0, setLoading)
         setLoadText("Search")
@@ -88,15 +92,21 @@ const Search = ({ onSearchComplete }) => {
 
   // 下拉框根据输入来动态更新
   const handleSearch = (value) => {
+    onChange(value) // 更新搜索框状态
     if (value.length > 0) {
-      const filteredOptions = initialOptions.map(optionGroup => ({
-        ...optionGroup,
-        options: optionGroup.options.filter(item => item.label.props.children[0].props.children.toLowerCase().includes(value.toLowerCase()))
-      }))
-      setOptions(filteredOptions)
+        const filteredOptions = initialOptions.map(optionGroup => ({
+          ...optionGroup,
+          options: optionGroup.options.filter(item => item.label.props.children[0].props.children.toLowerCase().includes(value.toLowerCase()))
+        }))
+        setOptions(filteredOptions)
     } else {
       setOptions(initialOptions)  // 如果没有输入内容，则重置为初始的选项
     }
+  }
+
+  // 检查字符串是不是纯数字
+  const isNumeric = (str) => {
+    return str.split('').every(char => char >= '0' && char <= '9');
   }
 
 
@@ -119,9 +129,15 @@ const Search = ({ onSearchComplete }) => {
             options={options}
             open={open}
             onBlur={() => { setOpen(false) }}
-            onSelect={() => { setOpen(false) }}
+            // onSelect={() => { setOpen(false) }}
+            onSelect={(selectedValue) => {  // 点击选项时触发
+              onChange(selectedValue)  // 更新父组件的value
+              setOpen(false)  // 关闭下拉框
+            }}
             onSearch={handleSearch}  // 输入变化
             size="large"
+            value={value} // 父组件Database传来的value值
+            // onChange={(newValue) => setValue(newValue)} // 更新输入框中的value
           >
 
             <Input.Search
@@ -148,12 +164,22 @@ const Search = ({ onSearchComplete }) => {
                       content: e
                     }
                   }
-                  else { // case2: keyword
+                  else if(isNumeric(e)){
+                    // case2: num
+                    // 包装成id
+                    res = {
+                      type: 'num',
+                      content: e
+                    }
+                  }
+                  else { 
+                    // case3: keyword
                     res = {
                       type: 'key',
                       content: e
                     }
                   }
+
 
 
                   fetch.mutate(res)
@@ -171,14 +197,16 @@ const Search = ({ onSearchComplete }) => {
           <Button
             size="large"
             type="primary"
+            loading={loading[0]}
             onClick={() => {
+              // onChange('') // 清空搜索框 不需要，父组件已经处理过了！！！
+              // setValue('')
               var res = {
                 type: 'all',
                 content: 'all'
               }
               fetch.mutate(res)
             }}
-            loading={loading[0]}
           >
             Display All
           </Button>
