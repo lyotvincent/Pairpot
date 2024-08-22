@@ -126,7 +126,7 @@ const Search = ({ onSearchComplete }) => {
 
             <Input.Search
               size="large"
-              placeholder="Search for a Study to Browse."
+              placeholder="e.g., STDS0000235, mouse brain, cancer, etc."
               enterButton={loadText}
               status={status}
               loading={loading[0]}
