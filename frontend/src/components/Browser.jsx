@@ -188,14 +188,14 @@ const Browser = () => {
   })
 
   useEffect(() => {
-    if (example.status === 'success' && typeof example.data !== 'undefined') {
-      MetaRef.current?.Trigger(example.data)
+    if (example.status === 'success' && typeof example.data !== 'undefined' && location.state === null) {
       setLocState(example.data)
     }
-  }, [example.data, MetaRef])
+  }, [example.data])
 
   useEffect(() => {
-    if (typeof locState !== 'undefined') {
+    if (typeof locState !== 'undefined' && location.state === null) {
+      MetaRef.current?.Trigger(locState)
       statusSC.mutate(locState)
       statusSP.mutate(locState)
     }
@@ -203,6 +203,9 @@ const Browser = () => {
 
   useEffect(() => {
     if (Init && location.state !== null) {
+      // set MetaInfo
+      MetaRef.current?.Trigger(location.state)
+
       setComponentLoad({  // reset ComponentLoad
         "LassoView": false,
         "LayerView": false,
@@ -234,7 +237,7 @@ const Browser = () => {
     else {
       setInit(true)
     }
-  }, [location])
+  }, [location, Init])
 
   useEffect(() => {
     if (statusSP.status === 'success' &&
@@ -327,6 +330,7 @@ const Browser = () => {
             <Suspense fallback={<h1>Loading for MetaInfo...</h1>}>
               <Card id="MetaInfo" ref={MetaAnchor}>
                 <MetaInfo onRef={MetaRef} />
+                {/* <div>{JSON.stringify(location.state)}</div> */}
               </Card>
             </Suspense>
             <Divider />

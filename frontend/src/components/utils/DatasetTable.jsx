@@ -9,7 +9,8 @@ import Highlighter from 'react-highlight-words'
 import { Button, Input, Space, Table, Pagination, Tooltip } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import DatasetDescription from './DatasetDescription'
-
+import { useQuery } from 'react-query'
+import axios from 'axios'
 const IconTip = ({ icon, attr, onClick, placement = 'bottom' }) => (
   <Tooltip placement={placement} title={attr} arrow={false} align={'center'}>
     {React.createElement(icon, (onClick = { onClick }))}
@@ -188,6 +189,22 @@ const DatasetTable = ({ src, col, oriSrc }) => {
 
   const [dyColumns, setDyColumns] = useState(initColumns)
 
+  const OriginResponse = useQuery({
+    queryKey: ['db'],
+    queryFn: () => axios.get('/api/datasets').then((response) => {
+      return response.data
+    }).catch((error) => {
+      console.log(error)
+    }),
+    staleTime: Infinity,
+    retry: false,
+    refetchOnWindowFocus: false,
+  })
+
+  const GetscItem = (scid) => {
+    return OriginResponse.data?.data.find((item) => item[1] === scid)
+  }
+
   useEffect(() => {
     setDataCol(col)
     var attrStack = {}
@@ -304,7 +321,7 @@ const DatasetTable = ({ src, col, oriSrc }) => {
                 placement="top"
                 onClick={() => {
                   let scid = record['has_paired']
-                  let scitem = oriSrc.find((item) => item[1] === scid)
+                  let scitem = GetscItem(scid)
                   let state = {
                     st: record
                   }

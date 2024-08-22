@@ -16,6 +16,7 @@ import {
   Rate,
   Tag,
 } from 'antd'
+import { useQuery } from 'react-query'
 import DatasetDescription from './DatasetDescription'
 import TextCollapse from './TextCollapse'
 import { useNavigate } from 'react-router-dom'
@@ -52,6 +53,22 @@ const DatasetList = ({ src, col }) => {
   const [dataCol, setDataCol] = useState({})
   // const [descOpen, setDescOpen] = useState(false)
   // const [descInfo, setDescInfo] = useState([])
+  const OriginResponse = useQuery({
+    queryKey: ['db'],
+    queryFn: () => axios.get('/api/datasets').then((response) => {
+      return response.data
+    }).catch((error) => {
+      console.log(error)
+    }),
+    staleTime: Infinity,
+    retry: false,
+    refetchOnWindowFocus: false,
+  })
+
+  const GetscItem = (scid) => {
+    return OriginResponse.data?.data.find((item) => item[1] === scid)
+  }
+
   useEffect(() => {
     setDataSrc(src)
     setDataCol(col)
@@ -125,7 +142,7 @@ const DatasetList = ({ src, col }) => {
                     dataCol.map((k, i) => [k, item[i]])
                   )
                   let scid = values['has_paired']
-                  let scitem = dataSrc.find((item) => item[1] === scid)
+                  let scitem = GetscItem(scid)
                   let state = {
                     st: values
                   }
@@ -134,6 +151,9 @@ const DatasetList = ({ src, col }) => {
                       dataCol.map((k, i) => [k, scitem[i]])
                     )
                     state['sc'] = scvalues
+                  }
+                  else{
+                    console.log("No paired sc data found.")
                   }
                   navigate('/browse', { state: state })
                 }}
