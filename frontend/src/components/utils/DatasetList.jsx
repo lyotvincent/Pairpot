@@ -18,6 +18,7 @@ import {
 } from 'antd'
 import { useQuery } from 'react-query'
 import DatasetDescription from './DatasetDescription'
+import DatasetPaired from './DatasetPaired'
 import TextCollapse from './TextCollapse'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
@@ -160,13 +161,14 @@ const DatasetList = ({ src, col }) => {
               />
               <br />
               <br />
-              <IconText
+              {/* <IconText
                 icon={LinkOutlined}
                 text="Paired Datasets"
                 key="list-vertical-Paired-Datasets-o"
                 attr="Link paired datasets"
                 placement="left"
                 onClick={() => {
+                  // 跳转链接
                   let values = Object.fromEntries(
                     dataCol.map((k, i) => [k, item[i]])
                   )
@@ -175,9 +177,21 @@ const DatasetList = ({ src, col }) => {
                     Object.fromEntries(dataCol.map((k, i) => [k, item[i]]))
                   )
                 }}
+              /> */}
+              <DatasetPaired // 新组件
+                descCol={dataCol}
+                descInfo={item}
+                text={'Paired Datasets'}
+                placement={'left'}
+                // scInfo={item}
+                scInfo={
+                  // src.find(s => s[1] === item[26])
+                  Array.isArray(src) && item.length > 26 
+                  ? src.find(s => Array.isArray(s) && s[1] === item[26]) || item
+                  : item
+                }
               />
               <br/>
-              <br />
               <IconText
                 icon={CloudDownloadOutlined}
                 text="Download Datasets"
@@ -185,7 +199,19 @@ const DatasetList = ({ src, col }) => {
                 attr="Download datasets"
                 placement="left"
                 onClick={() => {
-                  axios
+                  console.log(src)
+                  console.log(item[26])
+                  const x = src.find(s => s[1] === item[26])
+                  console.log(x)
+                  const url = item[23];  // 获取 item[23] 作为 URL
+                  console.log(url);
+                  if (url) {
+                    /*** 直接跳转数据集的标签页 ***/
+                    window.open(url, '_blank');  // 在新标签页中打开链接
+                  } else {
+                    /*** 从我们的resource中直接下载 ***/
+                    console.error('URL is invalid');
+                    axios
                     .get('/api/query', {
                       responseType: 'blob',
                     })
@@ -206,6 +232,7 @@ const DatasetList = ({ src, col }) => {
                     .catch(error => {
                       console.error('Error fetching blob:', error)
                     })
+                  }
                 }}
               />
             </div>

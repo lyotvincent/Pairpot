@@ -114,14 +114,14 @@ const Help = () => {
                           {`A Database with Real-time Lasso-Based Analysis Tailored for Paired Single-cell and Spatial Transcriptomics`}
                         </h3>
                         <p>
-                           Paired single-cell and spatial resolved transcriptomics (SRT) data supplement and complement each other, yielding in-depth insights into biological processes and disease mechanisms. 
-                        Pairpot is a database tailored for paired single-cell and SRT data with real-time heuristic analysis. 
-                        Pairpot curates 99 high-quality pairs including 1,425,656 spots from 299 datasets, and creates the association networks. 
-                        Pairpot constructs the curated pairs by integrating multiple slices and establishing potential associations between single-cell and SRT data. 
-                        <br/>
-                        <br/>
-                        On this basis, Pairpot adopts semi-supervised learning that enables real-time heuristic analysis for SC-SP pairs where Lasso-View refines the user-selected SRT domains within milliseconds, Pair-View infers cell proportions of spots based on user-selected cell types in real-time, and Layer-View displays SRT slices using a 3D hierarchical layout. 
-                        In summary, Pairpot provides valuable database resources and powerful heuristic analysis that empower researchers to streamline single-cell and SRT integrative analysis in real-time.
+                          Paired single-cell and spatial resolved transcriptomics (SRT) data supplement and complement each other, yielding in-depth insights into biological processes and disease mechanisms.
+                          Pairpot is a database tailored for paired single-cell and SRT data with real-time heuristic analysis.
+                          Pairpot curates 99 high-quality pairs including 1,425,656 spots from 299 datasets, and creates the association networks.
+                          Pairpot constructs the curated pairs by integrating multiple slices and establishing potential associations between single-cell and SRT data.
+                          <br />
+                          <br />
+                          On this basis, Pairpot adopts semi-supervised learning that enables real-time heuristic analysis for SC-SP pairs where Lasso-View refines the user-selected SRT domains within milliseconds, Pair-View infers cell proportions of spots based on user-selected cell types in real-time, and Layer-View displays SRT slices using a 3D hierarchical layout.
+                          In summary, Pairpot provides valuable database resources and powerful heuristic analysis that empower researchers to streamline single-cell and SRT integrative analysis in real-time.
                         </p>
                         <Button style={{ margin: 0, fontWeight: 500 }}
                           size='large'
@@ -153,7 +153,7 @@ const Help = () => {
                             //     )
                             //     state['sc'] = scvalues
                             //   }
-                          
+
                             // })
                             quitLoading(0, setLoading)
                             setLoadText("Example Prepared.")
@@ -370,8 +370,15 @@ const Help = () => {
                   {' '}
                   <img src={contactImg} style={{ width: '20%', height: '20%' }}></img>
                 </h3>
-
               </Space>
+              <a href="https://beian.miit.gov.cn" target='_blank'
+                style={{
+                  color: 'rgba(0, 0, 0, 0.6)',
+                  textDecoration: 'none',
+                  fontSize: 13
+                }}>
+                津ICP备2024022781号-1
+              </a>
             </Col>
             <Col offset={1}>
               <p>
@@ -381,7 +388,6 @@ const Help = () => {
               <p>
                 *Jian Liu, State Key Laboratory of Medical Chemical Biology, College of Computer Science, Nankai University, jianliu@nankai.edu.cn
               </p>
-              <a href="" target='_blank'>津ICP备2024022781号-1</a>
             </Col>
           </Row>
         </Footer>
