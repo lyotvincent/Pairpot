@@ -1,10 +1,16 @@
 import React, { useRef, useState, useEffect } from 'react'
-import { Descriptions, Modal, Space, Tooltip } from 'antd'
+import { Descriptions, Modal, Space, Tooltip,Button,Row,Col } from 'antd'
 import { FileTextOutlined } from '@ant-design/icons'
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { useQuery } from 'react-query'
+
+
 
 const DatasetDescription = ({ descCol, descInfo, text, placement }) => {
   const [modal1Open, setModal1Open] = useState(false)
   const [descItem, setDescItem] = useState([])
+  const navigate = useNavigate()
 
   const lgItemSpan = {
     xl: 6,
@@ -56,6 +62,22 @@ const DatasetDescription = ({ descCol, descInfo, text, placement }) => {
 
   const excludeItems = ['cell_types']
 
+    const OriginResponse = useQuery({
+      queryKey: ['db'],
+      queryFn: () => axios.get('/api/datasets').then((response) => {
+        return response.data
+      }).catch((error) => {
+        console.log(error)
+      }),
+      staleTime: Infinity,
+      retry: false,
+      refetchOnWindowFocus: false,
+    })
+
+    const GetscItem = (scid) => {
+      return OriginResponse.data?.data.find((item) => item[1] === scid)
+    }
+
   useEffect(() => {
     let items = []
     if (descInfo.length > 0) {
@@ -81,7 +103,7 @@ const DatasetDescription = ({ descCol, descInfo, text, placement }) => {
   }, [descCol, descInfo])
   return (
     <div>
-      <Tooltip
+      {/* <Tooltip
         placement={placement}
         title="Show Descriptions"
         arrow={false}
@@ -99,21 +121,51 @@ const DatasetDescription = ({ descCol, descInfo, text, placement }) => {
         onOk={() => setModal1Open(false)}
         onCancel={() => setModal1Open(false)}
         style={{ top: '15%' }}
-        width={1000}>
-        <Descriptions
-          bordered
-          size="small"
-          column={{
-            xs: 2,
-            sm: 4,
-            md: 6,
-            lg: 6,
-            xl: 6,
-            xxl: 6,
-          }}
-          items={descItem}
-        />
-      </Modal>
+        width={1000}> */}
+      <Descriptions
+        bordered
+        size="small"
+        column={{
+          xs: 2,
+          sm: 4,
+          md: 6,
+          lg: 6,
+          xl: 6,
+          xxl: 6,
+        }}
+        items={descItem}
+      />
+      <Row justify="center" style={{marginTop:'20px'}}>
+      <Col>
+      <Button 
+        type='primary'
+        onClick={() => {
+          let item = descInfo
+          let dataCol = descCol
+          console.log(dataCol)
+          let values = Object.fromEntries(
+              dataCol.map((k, i) => [k, item[i]])
+          )
+          let scid = values['has_paired']
+          let scitem = GetscItem(scid)
+          let state = {
+          st: values
+          }
+          if (typeof scitem !== 'undefined') {
+          let scvalues = Object.fromEntries(
+              dataCol.map((k, i) => [k, scitem[i]])
+          )
+          state['sc'] = scvalues
+          }
+          else{
+          console.log("No paired sc data found.")
+          }
+          navigate('/browse', { state: state })
+      }}>
+        visualization</Button>
+        </Col>
+        </Row>
+      {/* </Modal> */}
     </div>
   )
 }

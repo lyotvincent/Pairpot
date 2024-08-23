@@ -72,7 +72,7 @@ const DatasetTab = (props) => {
           Graph
         </span>
       ),
-      children: <DatasetGraph config={graphCfg} />,
+      children: <DatasetGraph config={graphCfg} src={dataSrc} col={dataCol}/>,
     },
     {
       key: '4',

@@ -35,12 +35,12 @@ const IconText = ({ icon, text, attr, onClick, placement = 'bottom' }) => (
 )
 
 const PairedScoreTips = {
-  0:"No available paired data",
-  1:"Bad pair",
-  2:"Paired with atlas",
-  3:"Paired with some similar conditions",
-  4:"Paired with almost same conditions",
-  5:"Paired data from same study"
+  0: "No available paired data",
+  1: "Bad pair",
+  2: "Paired with atlas",
+  3: "Paired with some similar conditions",
+  4: "Paired with almost same conditions",
+  5: "Paired data from same study"
 }
 
 const AddCommas = (num) => {
@@ -139,6 +139,8 @@ const DatasetList = ({ src, col }) => {
                 attr="Visualize this Dataset"
                 placement="left"
                 onClick={() => {
+                  // console.log(dataCol)
+                  // console.log(item)
                   let values = Object.fromEntries(
                     dataCol.map((k, i) => [k, item[i]])
                   )
@@ -153,7 +155,7 @@ const DatasetList = ({ src, col }) => {
                     )
                     state['sc'] = scvalues
                   }
-                  else{
+                  else {
                     console.log("No paired sc data found.")
                   }
                   navigate('/browse', { state: state })
@@ -186,12 +188,12 @@ const DatasetList = ({ src, col }) => {
                 // scInfo={item}
                 scInfo={
                   // src.find(s => s[1] === item[26])
-                  Array.isArray(src) && item.length > 26 
-                  ? src.find(s => Array.isArray(s) && s[1] === item[26]) || item
-                  : item
+                  Array.isArray(src) && item.length > 26
+                    ? src.find(s => Array.isArray(s) && s[1] === item[26]) || item
+                    : item
                 }
               />
-              <br/>
+              <br />
               <IconText
                 icon={CloudDownloadOutlined}
                 text="Download Datasets"
@@ -199,39 +201,39 @@ const DatasetList = ({ src, col }) => {
                 attr="Download datasets"
                 placement="left"
                 onClick={() => {
-                  console.log(src)
-                  console.log(item[26])
-                  const x = src.find(s => s[1] === item[26])
-                  console.log(x)
-                  const url = item[23];  // 获取 item[23] 作为 URL
-                  console.log(url);
+                  // console.log(src)
+                  // console.log(item[26])
+                  let x = src.find(s => s[1] === item[26])
+                  // console.log(x)
+                  let url = item[23]  // 获取 item[23] 作为 URL
+                  // console.log(url);
                   if (url) {
                     /*** 直接跳转数据集的标签页 ***/
-                    window.open(url, '_blank');  // 在新标签页中打开链接
+                    window.open(url, '_blank')  // 在新标签页中打开链接
                   } else {
                     /*** 从我们的resource中直接下载 ***/
-                    console.error('URL is invalid');
+                    console.error('URL is invalid')
                     axios
-                    .get('/api/query', {
-                      responseType: 'blob',
-                    })
-                    .then((response) => {
-                      console.log(response)
-                      let blob = response.data
-                      let url = window.URL.createObjectURL(blob)
-                      let a = document.createElement('a')
-                      a.href = url
-                      a.download = `${item[1]}.h5ad`
-                      document.body.appendChild(a)
-                      a.click()
+                      .get('/api/query', {
+                        responseType: 'blob',
+                      })
+                      .then((response) => {
+                        // console.log(response)
+                        let blob = response.data
+                        let url = window.URL.createObjectURL(blob)
+                        let a = document.createElement('a')
+                        a.href = url
+                        a.download = `${item[1]}.h5ad`
+                        document.body.appendChild(a)
+                        a.click()
 
-                      // 清理
-                      window.URL.revokeObjectURL(url)
-                      document.body.removeChild(a)
-                    })
-                    .catch(error => {
-                      console.error('Error fetching blob:', error)
-                    })
+                        // 清理
+                        window.URL.revokeObjectURL(url)
+                        document.body.removeChild(a)
+                      })
+                      .catch(error => {
+                        console.error('Error fetching blob:', error)
+                      })
                   }
                 }}
               />

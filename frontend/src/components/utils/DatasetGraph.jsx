@@ -1,18 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { NeoVis } from 'neovis.js';
-import { Spin, Card, Col, Button, Row, Space } from 'antd';
+import { Spin, Card, Col, Button, Row, Space, Modal, Descriptions } from 'antd';
 import loadingTips from '../charts/LoadingTip';
 import Loading from '../charts/Loading';
 import ToggleAccordion from './ToggleAccordion';
+import { ChevronDoubleLeft } from 'react-bootstrap-icons';
+import DatasetDescription from './NodeDescription'
 const { enterLoading, quitLoading } = Loading
 
 
-const DatasetGraph = ({ config }) => {
+const DatasetGraph = ({ config, src, col }) => {
   const container = useRef(null);
   const [loadings, setLoadings] = useState([false]) // loadings for [network]
   const [currTip, setCurrTip] = useState(loadingTips[0])
   // const [rerender, setRerender] = useState(false)
   const visRef = useRef(null)
+
+  const [modalVisible, setModalVisible] = useState(false); // 控制模态框的显示
+  const [nodeData, setNodeData] = useState({}); // 保存点击节点的数据
+
   let newConfig = {
     containerId: 'viz',
     neo4j: {
@@ -63,6 +69,17 @@ const DatasetGraph = ({ config }) => {
     setCurrTip(loadingTips[0])
     visRef.current = new NeoVis(newConfig)
     visRef.current.renderWithCypher("MATCH p=()-[r:PAIR]->() RETURN p LIMIT 25")
+    
+    // 监听节点点击事件
+    visRef.current.registerOnEvent('clickNode', (event) => {
+      // const clickedNodeData = event.node.raw.properties; // 获取节点的属性数据
+      const id = event.node.label
+      // 在src中找到完整的id的数据
+      const clickedNodeData = src.find(s => Array.isArray(s) && s[1] === id)
+      setNodeData(clickedNodeData); // 设置节点数据
+      setModalVisible(true); // 打开模态框
+    });
+
     quitLoading(0, setLoadings)
   }, []);
 
@@ -119,6 +136,33 @@ const DatasetGraph = ({ config }) => {
         </Space>
       </Col>
     </Row>
+
+    {/* 节点信息的模态框 */}
+    <Modal
+        title="Node Details"
+        open={modalVisible}
+        onCancel={() => setModalVisible(false)}
+        footer={null}
+        width={1200}
+        // height={400}
+      >
+        {/* <Descriptions bordered column={2}>
+          {Object.entries(nodeData)
+            .filter(([key]) => ['id', 'species', 'technologies', 'tissues', 'title'].includes(key))  // 过滤特定字段
+            .map(([key, value]) => (
+              <Descriptions.Item label={key} key={key}>
+                {value}
+              </Descriptions.Item>
+            ))}
+        </Descriptions> */}
+        <DatasetDescription
+          descCol = {col}
+          descInfo = {nodeData}
+          text={'Descriptions'}
+          placement={'left'}
+        >
+        </DatasetDescription>
+      </Modal>
   </Spin>
   );
 };

@@ -194,15 +194,18 @@ const Browser = () => {
   }, [example.data])
 
   useEffect(() => {
-    if (typeof locState !== 'undefined' && location.state === null) {
-      MetaRef.current?.Trigger(locState)
+    if (typeof locState !== 'undefined' &&
+      location.state === null &&
+      typeof MetaRef.current !== 'undefined') {
+      MetaRef.current.Trigger(example.data)
       statusSC.mutate(locState)
       statusSP.mutate(locState)
     }
-  }, [locState])
+  }, [locState, MetaRef.current])
 
   useEffect(() => {
     if (Init && location.state !== null) {
+      console.log("Init", Init)
       // set MetaInfo
       MetaRef.current?.Trigger(location.state)
 
@@ -216,19 +219,31 @@ const Browser = () => {
       })
 
       // set loading status for each components
-      LassoRef.current.Tip(loadingTips[3])
-      enterLoading(0, LassoRef.current.Loading)
-      LayerRef.current.Tip(loadingTips[3])
-      enterLoading(0, LayerRef.current.Loading)
-      PairRef.current.Tip(loadingTips[3])
-      enterLoading(1, PairRef.current.Loading)
-      MarkerRef.current.Tip(loadingTips[3])
-      enterLoading(0, MarkerRef.current.Loading)
-      enterLoading(1, MarkerRef.current.Loading)
-      CPDBRef.current.Tip(loadingTips[3])
-      enterLoading(0, CPDBRef.current.Loading)
-      NetRef.current.Tip(loadingTips[3])
-      enterLoading(0, NetRef.current.Loading)
+      LassoRef.current?.Tip(loadingTips[3])
+      if (LassoRef.current !== null)
+        enterLoading(0, LassoRef.current.Loading)
+
+      LayerRef.current?.Tip(loadingTips[3])
+      if (LayerRef.current !== null)
+        enterLoading(0, LayerRef.current.Loading)
+
+      PairRef.current?.Tip(loadingTips[3])
+      if (PairRef.current !== null)
+        enterLoading(1, PairRef.current.Loading)
+
+      MarkerRef.current?.Tip(loadingTips[3])
+      if (MarkerRef.current !== null) {
+        enterLoading(0, MarkerRef.current.Loading)
+        enterLoading(1, MarkerRef.current.Loading)
+      }
+
+      CPDBRef.current?.Tip(loadingTips[3])
+      if (CPDBRef.current !== null)
+        enterLoading(0, CPDBRef.current.Loading)
+
+      NetRef.current?.Tip(loadingTips[3])
+      if (NetRef.current !== null)
+        enterLoading(0, NetRef.current.Loading)
 
       // mutation of datasets
       statusSC.mutate(location.state)
@@ -239,11 +254,13 @@ const Browser = () => {
   useEffect(() => {
     if (typeof PairRef.current !== "undefined" &&
       typeof LassoRef.current !== "undefined" &&
-      typeof LayerRef.current !== "undefined"
+      typeof LayerRef.current !== "undefined" &&
+      typeof MetaRef.current !== "undefined" &&
+      !Init
     ) {
       setInit(true)  // set Browser initializtion finished afer all components.
     }
-  }, [PairRef.current, LassoRef.current, LayerRef.current])
+  }, [PairRef.current, LassoRef.current, LayerRef.current, MetaRef.current])
 
   useEffect(() => {
     if (statusSP.status === 'success' &&

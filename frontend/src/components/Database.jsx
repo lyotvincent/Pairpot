@@ -30,13 +30,13 @@ export const Database = () => {
   //const [collapsed, setCollapsed] = useState(false)
   const [srcMeta, setSrcMeta] = useState({}) // get the meta data from childrens
   const [src, setSrc] = useState([1, 2, 3])
-  const [selectedTags, setSelectedTags] = React.useState(null);
-  const [searchValue, steSearchValue] = useState(''); // 搜索框的值，传给search
+  const [selectedTags, setSelectedTags] = React.useState(null)
+  const [searchValue, steSearchValue] = useState('') // 搜索框的值，传给search
 
   // 有搜索的时候
   const handleSearchComplete = (datas) => {
     // datas是从search这个子组件传过来的
-    console.log(datas)
+    //console.log(datas)
     // data直接改掉src
     setSrc(prevSrc => ({
       ...prevSrc, data: {
@@ -52,24 +52,24 @@ export const Database = () => {
 
     // 下面的options都清空
     setSelectedTags(null)
-    if(datas.type == 'all'){
+    if (datas.type == 'all') {
       // Rerender('all', 'all')
       // 搜索框清空
-      steSearchValue(''); 
+      steSearchValue('')
     }
   }
 
   const handleChange = (tag, checked, label) => {
     // 选择组件时也需要清空搜索框
-    steSearchValue(''); 
-    if(checked){
+    steSearchValue('')
+    if (checked) {
       setSelectedTags(tag)
       Rerender(label, tag)
-    } else{
+    } else {
       setSelectedTags(null)
       Rerender('all', tag)
     }
-  };
+  }
   //const [selectedKey, setSelectedKey] = useState('datasets')
   //const [visible, setVisible] = useState(true)
   // const onClickTopMenu = (e) => {
@@ -151,7 +151,7 @@ export const Database = () => {
       newSrcData = filterDiseases(item)
     } else if (label === 'all') {
       newSrcData = response.data.data
-    } else{
+    } else {
       newSrcData = src.data.data
     }
     // console.log(newSrcData)
@@ -199,15 +199,15 @@ export const Database = () => {
               alignItems: "center"
             }} />
           </Col>
-          <Col span={16} offset={4}> 
-            <Search 
-                value = {searchValue}
-                onChange={steSearchValue}
-                onSearchComplete={handleSearchComplete}
-            /> 
+          <Col span={16} offset={4}>
+            <Search
+              value={searchValue}
+              onChange={steSearchValue}
+              onSearchComplete={handleSearchComplete}
+            />
           </Col>
           <Col span={16} offset={4}>
-          <Divider style={{marginTop:16, marginBottom: 14}}/>
+            <Divider style={{ marginTop: 16, marginBottom: 14 }} />
           </Col>
           <Col span={18} offset={3}>
             <TagCollapse
@@ -397,7 +397,7 @@ export const Database = () => {
             </Flex> */}
           </Col>
           <Col span={18} offset={3}>
-          <TagCollapse
+            <TagCollapse
               tags={Topics.map((tag) => (<Tag.CheckableTag style={{ margin: 3, fontSize: 16 }}
                 key={tag}
                 checked={selectedTags === tag}
@@ -442,7 +442,7 @@ export const Database = () => {
               </Tag>
             </Flex> */}
           </Col>
-          <Divider style={{marginTop:14, marginBottom: 18}}/>
+          <Divider style={{ marginTop: 14, marginBottom: 18 }} />
           <Card>
             <DatasetTab sendData={setSrcMeta} response={src} onRef={TabRef} />
           </Card>
