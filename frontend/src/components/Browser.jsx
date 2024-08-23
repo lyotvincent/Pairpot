@@ -196,7 +196,7 @@ const Browser = () => {
   useEffect(() => {
     if (typeof locState !== 'undefined' &&
       location.state === null &&
-      typeof MetaRef.current !== 'undefined') {
+      MetaRef.current !== null) {
       MetaRef.current.Trigger(example.data)
       statusSC.mutate(locState)
       statusSP.mutate(locState)
@@ -205,9 +205,8 @@ const Browser = () => {
 
   useEffect(() => {
     if (Init && location.state !== null) {
-      console.log("Init", Init)
       // set MetaInfo
-      MetaRef.current?.Trigger(location.state)
+      MetaRef.current.Trigger(location.state)
 
       setComponentLoad({  // reset ComponentLoad
         "LassoView": false,
@@ -252,10 +251,10 @@ const Browser = () => {
   }, [location, Init])
 
   useEffect(() => {
-    if (typeof PairRef.current !== "undefined" &&
-      typeof LassoRef.current !== "undefined" &&
-      typeof LayerRef.current !== "undefined" &&
-      typeof MetaRef.current !== "undefined" &&
+    if (PairRef.current !== null &&
+      LassoRef.current !== null &&
+      LayerRef.current !== null &&
+      MetaRef.current !== null &&
       !Init
     ) {
       setInit(true)  // set Browser initializtion finished afer all components.
