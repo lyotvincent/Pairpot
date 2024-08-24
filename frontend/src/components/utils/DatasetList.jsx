@@ -180,17 +180,18 @@ const DatasetList = ({ src, col }) => {
                   )
                 }}
               /> */}
-              <DatasetPaired // 新组件
+              <DatasetPaired
                 descCol={dataCol}
                 descInfo={item}
                 text={'Paired Datasets'}
                 placement={'left'}
                 // scInfo={item}
                 scInfo={
+                  src.find(s => s[1] === item[26])
                   // src.find(s => s[1] === item[26])
-                  Array.isArray(src) && item.length > 26
-                    ? src.find(s => Array.isArray(s) && s[1] === item[26]) || item
-                    : item
+                  // Array.isArray(src) && item.length > 26
+                  //   ? src.find(s => Array.isArray(s) && s[1] === item[26]) || item
+                  //   : null
                 }
               />
               <br />

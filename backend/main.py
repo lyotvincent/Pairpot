@@ -66,7 +66,7 @@ def example():
 def search_dataset():
     type = request.args.get('type')
     content = request.args.get('content')
-    print("request:",type,content)
+    # print("request:",type,content)
     # connect
     conn = sqlite3.connect('resources/STpair.db')
     cursor = conn.cursor()
@@ -249,34 +249,39 @@ def get_global_wordcloud():
     return word_dict
 
 
-@app.route('/filted_words', methods=['GET'])
+@app.route('/filted_words', methods=['POST'])
 def get_filted_wordcloud():
-    # changed param
-    label = request.args.get("label")
-    item = request.args.get("item")
-    print(label, item)
-    # None: return error message
-    if label is None or item is None:
-        # return jsonify({"error": "Missing required parameters"}), 400
-        return jsonify({"data":{}})
-    
-    # deal with data
-    # step1: connect
-    conn = sqlite3.connect('resources/STpair.db')
-    cursor = conn.cursor()
-
-    # step2: query
-    if label == "all":
-        query_content = f"SELECT title, summary, overall_design, species,organ_parts, cell_types FROM datasets"
-    else: 
-        # "SELECT * FROM table1 WHERE species = 'x'"
-        # 'datasets': ["title", "species",	"tissues", "organ_parts", "cell_types", "summary", "overall_design"],
-        query_content = f"SELECT title, summary, overall_design, species,organ_parts, cell_types FROM datasets where {label} like '%{item}%'"
-    cursor.execute(query_content)
-    res = cursor.fetchall()
-    # res.append(cursor.fetchall())
+    res = request.get_json()
+    res = res['params']['src']
+    # save : title, summary, overall_design, species,organ_parts, cell_types
+    res = [[item[2], item[3], item[4], item[5], item[6],item[12], item[16], item[17]] for item in res]
     text = []
-    # print(len(res))
+    # print(len(res)
+     # changed param
+    # label = request.args.get("label")
+    # item = request.args.get("item")
+    # print(label, item)
+    # # None: return error message
+    # if label is None or item is None:
+    #     # return jsonify({"error": "Missing required parameters"}), 400
+    #     return jsonify({"data":{}})
+    
+    # # deal with data
+    # # step1: connect
+    # conn = sqlite3.connect('resources/STpair.db')
+    # cursor = conn.cursor()
+
+    # # step2: query
+    # if label == "all":
+    #     query_content = f"SELECT title, summary, overall_design, species,organ_parts, cell_types FROM datasets"
+    # else: 
+    #     # "SELECT * FROM table1 WHERE species = 'x'"
+    #     # 'datasets': ["title", "species",	"tissues", "organ_parts", "cell_types", "summary", "overall_design"],
+    #     query_content = f"SELECT title, summary, overall_design, species,organ_parts, cell_types FROM datasets where {label} like '%{item}%'"
+    # cursor.execute(query_content)
+    # res = cursor.fetchall()
+    # # res.append(cursor.fetchall())
+    # text = []
     for i in range(len(res)):
         item_str = str(res[i])
         item_str = re.sub(r'[^\w\s]', ' ', item_str)

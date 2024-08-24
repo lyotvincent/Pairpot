@@ -453,6 +453,15 @@ export const Database = () => {
             textAlign: 'center',
           }}>
           PairPot Copyright © 2024. Centre for Bioinformatics and Intelligent Medicine, Nankai University.
+          <h3></h3>
+          <a href="https://beian.miit.gov.cn" target='_blank'
+                style={{
+                  color: 'rgba(0, 0, 0, 0.6)',
+                  textDecoration: 'none',
+                  fontSize: 13
+                }}>
+                津ICP备2024022781号-1
+              </a>
         </Footer>
       </Layout>
     </Layout>

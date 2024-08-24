@@ -15,6 +15,7 @@ import './bg.scss'
 
 const DatasetPaired = ({ descCol, descInfo, text, placement, scInfo }) => {
   const [modal1Open, setModal1Open] = useState(false)
+  // console.log(scInfo)
 
   const Columns = [
     {
@@ -43,19 +44,20 @@ const DatasetPaired = ({ descCol, descInfo, text, placement, scInfo }) => {
       key: '1',
       attr: 'Dataset ID',
       st: descInfo[1],
-      sc: scInfo[1],
+      // sc: scInfo[1],
+      sc: scInfo == null? 'SC data': scInfo[1]
     },
     {
       key: '2',
       attr: 'Title',
       st: descInfo[2],
-      sc: scInfo[2],
+      sc: scInfo == null? 'SC title': scInfo[2],
     },
     {
       key: '3',
       attr: 'Contributor(s)',
       st: descInfo[20],
-      sc: scInfo[20],
+      sc: scInfo == null? 'SC Contributor(s)': scInfo[20],
     },
     {
       key: '4',
@@ -63,44 +65,45 @@ const DatasetPaired = ({ descCol, descInfo, text, placement, scInfo }) => {
       // st: descInfo[16],
       // sc: scInfo[16],
       st: <TextCollapse text={descInfo[16]} />,
-      sc: <TextCollapse text={scInfo[16]} />,
+      // sc: <TextCollapse text={scInfo == null? 'SC Summary': scInfo[16]} />,
+      sc: scInfo == null?  'SC Summary' : <TextCollapse text={scInfo[16]}/>
 
     },
     {
       key: '5',
       attr: 'Species',
       st: descInfo[3],
-      sc: scInfo[3],
+      sc: scInfo == null? 'SC Species': scInfo[3],
     },
     {
       key: '6',
       attr: 'Tissues',
       st: descInfo[4],
-      sc: scInfo[4],
+      sc: scInfo == null? 'SC Tissues': scInfo[4],
     },
     {
       key: '7',
       attr: 'Technologies',
       st: descInfo[12],
-      sc: scInfo[12],
+      sc: scInfo == null? 'SC Technologies': scInfo[12],
     },
     {
       key: '8',
       attr: 'Contacts',
       st: descInfo[21],
-      sc: scInfo[21],
+      sc: scInfo == null? 'SC Contacts': scInfo[21],
     },
     {
       key: '9',
       attr: 'Citation',
       st: descInfo[22],
-      sc: scInfo[22],
+      sc: scInfo == null? 'SC Citation': scInfo[22],
     },
     {
       key: '10',
       attr: 'Accessions',
       st: descInfo[23],
-      sc: scInfo[23],
+      sc: scInfo == null? 'SC Accessions': scInfo[23],
     },
   ]
 

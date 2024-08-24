@@ -27,7 +27,7 @@ import Search from './utils/Search'
 import loadingTips from './charts/LoadingTip'
 import Loading from './charts/Loading'
 import { useMutation, useQuery, QueryCache } from "react-query"
-const { Content, Sider, Header } = Layout
+const { Content, Sider, Header, Footer } = Layout
 const { enterLoading } = Loading
 
 const MetaInfo = memo(lazy(() => (import('./utils/DatasetDetails'))))
@@ -471,6 +471,18 @@ const Browser = () => {
             </Card>
             {/* <div style={{color: 'black'}}>{JSON.stringify(location.state)}</div> */}
           </Content>
+          <Footer>
+          <a href="https://beian.miit.gov.cn" target='_blank'
+                style={{
+                  color: 'rgba(0, 0, 0, 0.6)',
+                  textDecoration: 'none',
+                  fontSize: 13,
+                  display: 'block',
+                  textAlign: 'center', 
+                }}>
+                津ICP备2024022781号-1
+          </a>
+          </Footer>
         </Layout>
       </Layout>
     </ConfigProvider>
