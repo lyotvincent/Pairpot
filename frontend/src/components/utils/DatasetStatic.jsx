@@ -37,17 +37,17 @@ const DatasetStatic = ({ src, col, height, width, margin, _label, _item }) => {
   const wordCloudRef = useRef(null)
 
   /***** save the global query api *****/
-  const globalWordCloudResponse = useQuery({  // change axios to reactQuery
-    queryKey: ['wordcloud0'],
-    queryFn: () => axios.get('/api/global_words').then((response) => {
-      return response.data
-    }).catch((error) => {
-      console.log(error)
-    }),
-    staleTime: Infinity,
-    retry: false,
-    refetchOnWindowFocus: false,
-  })
+  // const globalWordCloudResponse = useQuery({  // change axios to reactQuery
+  //   queryKey: ['wordcloud0'],
+  //   queryFn: () => axios.get('/api/global_words').then((response) => {
+  //     return response.data
+  //   }).catch((error) => {
+  //     console.log(error)
+  //   }),
+  //   staleTime: Infinity,
+  //   retry: false,
+  //   refetchOnWindowFocus: false,
+  // })
 
   /***** proportion graph *****/
   const strategyResponse = useQuery({
@@ -346,17 +346,19 @@ const DatasetStatic = ({ src, col, height, width, margin, _label, _item }) => {
   // useMutation
 
 
-  const getFiltedWord = (label,item) => (
-    axios.get('/api/filted_words', {
+  const getFiltedWord = (label,item,src) => (
+    axios.post('/api/filted_words', {
       params: {
         // param_name: value
         label: label,
-        item: item
+        item: item,
+        src: src
       },
       responseType: 'json',
     }).then((response) => {
         // deal with response
         // console.log(response.data.data)
+        // console.log(label, item)
         return response.data.data
     }).catch((error) => {
       console.error('Error fetching word cloud:', error);
@@ -366,7 +368,7 @@ const DatasetStatic = ({ src, col, height, width, margin, _label, _item }) => {
 
   const wordCloudResponse = useMutation({
     mutationKey:['wordcloud'],
-    mutationFn: (state) => getFiltedWord(state.label, state.item),
+    mutationFn: (state) => getFiltedWord(state.label, state.item, state.src),
     staleTime: Infinity, 
     retry: false, 
     refetchOnWindowFocus: false, 
@@ -376,13 +378,15 @@ const DatasetStatic = ({ src, col, height, width, margin, _label, _item }) => {
     if(typeof src != 'undefined' && Init){
       wordCloudResponse.mutate({
         label: _label,
-        item: _item
+        item: _item,
+        src: src
       })
     }
   },[src])
 
   const GenWordCloud = (dataList) =>{
     if(dataList!=null && dataList.length>0){
+      console.log("here word")
       var wc = new Js2WordCloud(wordCloudRef.current);
       wc.setOption({
         tooltip: {
@@ -421,25 +425,27 @@ const DatasetStatic = ({ src, col, height, width, margin, _label, _item }) => {
           }
         }
       })
+      console.log("word finish")
     }
   }
 
-  useEffect(()=>{
-    if (globalWordCloudResponse.status === 'success' && typeof globalWordCloudResponse.data !== 'undefined'){
-      console.log("calling globalWord")
-      let dataList = Object.entries(globalWordCloudResponse.data)
-      GenWordCloud(dataList)
-    }
-  }, [globalWordCloudResponse.data])
+  // useEffect(()=>{
+  //   if (globalWordCloudResponse.status === 'success' && typeof globalWordCloudResponse.data !== 'undefined'){
+  //     console.log("calling globalWord")
+  //     let dataList = Object.entries(globalWordCloudResponse.data)
+  //     GenWordCloud(dataList)
+  //   }
+  // }, [globalWordCloudResponse.data])
 
   useEffect(() => {
       if (wordCloudResponse.status === 'success' && typeof wordCloudResponse.data !== 'undefined') {
         console.log("calling localWord")
+        console.log(wordCloudResponse.data.length)
         let dataList = Object.entries(wordCloudResponse.data)
         GenWordCloud(dataList)
       }      
       
-  }, [wordCloudResponse.data])
+  }, [wordCloudResponse.data ,src])
 
   return (
     <>
