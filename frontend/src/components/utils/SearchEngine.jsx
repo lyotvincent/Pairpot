@@ -79,7 +79,7 @@ const Search = ({ onSearchComplete, onChange, value }) => { // 增加输入框�
         // let datas = response.data.data
         let datas = response.data
         console.log(datas)
-        onSearchComplete(datas)  // to parent
+        onSearchComplete(datas, e)  // to parent
         quitLoading(0, setLoading)
         setLoadText("Search")
         return datas

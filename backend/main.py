@@ -251,37 +251,46 @@ def get_global_wordcloud():
 
 @app.route('/filted_words', methods=['POST'])
 def get_filted_wordcloud():
-    res = request.get_json()
-    res = res['params']['src']
+    response = request.get_json()['params']
+    print(response)
     # save : title, summary, overall_design, species,organ_parts, cell_types
-    res = [[item[2], item[3], item[4], item[5], item[6],item[12], item[16], item[17]] for item in res]
-    text = []
-    # print(len(res)
+    # res = [[item[2], item[3], item[4], item[5], item[6],item[12], item[16], item[17]] for item in res]
      # changed param
-    # label = request.args.get("label")
-    # item = request.args.get("item")
-    # print(label, item)
-    # # None: return error message
-    # if label is None or item is None:
-    #     # return jsonify({"error": "Missing required parameters"}), 400
-    #     return jsonify({"data":{}})
-    
-    # # deal with data
-    # # step1: connect
-    # conn = sqlite3.connect('resources/STpair.db')
-    # cursor = conn.cursor()
+    label = None if "label" not in response.keys() else response["label"]
+    item =  None if "item" not in response.keys() else response["item"]
+    src = [] if "src" not in response.keys() else response["src"]
+    print(label, item, src)
 
-    # # step2: query
-    # if label == "all":
-    #     query_content = f"SELECT title, summary, overall_design, species,organ_parts, cell_types FROM datasets"
-    # else: 
-    #     # "SELECT * FROM table1 WHERE species = 'x'"
-    #     # 'datasets': ["title", "species",	"tissues", "organ_parts", "cell_types", "summary", "overall_design"],
-    #     query_content = f"SELECT title, summary, overall_design, species,organ_parts, cell_types FROM datasets where {label} like '%{item}%'"
-    # cursor.execute(query_content)
-    # res = cursor.fetchall()
-    # # res.append(cursor.fetchall())
-    # text = []
+    full_content = query_content = "SELECT title, summary, overall_design, species,organ_parts, cell_types FROM datasets"
+    
+    # step1: connect
+    conn = sqlite3.connect('resources/STpair.db')
+    cursor = conn.cursor()
+
+    # step2: query
+    if label == "all":  # using label & item
+        query_content = full_content
+        cursor.execute(query_content)
+    elif label is not None and item is not None:
+        query_content = f"SELECT title, summary, overall_design, species,organ_parts, cell_types FROM datasets where {label} like '%{item}%'"
+        cursor.execute(query_content)
+    elif len(src) > 0:  # using src 
+        cursor.execute(f"SELECT COUNT(*) FROM datasets")  # fetch the data length
+        row_count = cursor.fetchone()[0]
+        if len(src) >= row_count:  # return all if src array is too large
+            query_content = full_content
+            cursor.execute(query_content)
+        else:
+            query_content = f"SELECT title, summary, overall_design, species,organ_parts, cell_types FROM datasets where dataset_id IN ({','.join(['?' for _ in src])})"
+            cursor.execute(query_content, src)
+    else:  # return message error
+        cursor.close()
+        conn.close()
+        return jsonify({"error": "Missing required labels or filter words"}), 400
+    res = cursor.fetchall()
+
+    # step3: calculate TF-IDF    
+    text = []
     for i in range(len(res)):
         item_str = str(res[i])
         item_str = re.sub(r'[^\w\s]', ' ', item_str)
@@ -289,8 +298,6 @@ def get_filted_wordcloud():
         text.append(words)
         # print(i)
     # print(text)
-
-    # step3: calculate TF-IDF
     corpus = [' '.join(sentence) for sentence in text]
     # print(corpus)
     custom_stop_words = [

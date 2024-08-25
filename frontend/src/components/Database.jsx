@@ -34,7 +34,7 @@ export const Database = () => {
   const [searchValue, steSearchValue] = useState('') // 搜索框的值，传给search
 
   // 有搜索的时候
-  const handleSearchComplete = (datas) => {
+  const handleSearchComplete = (datas, param) => {
     // datas是从search这个子组件传过来的
     //console.log(datas)
     // data直接改掉src
@@ -43,7 +43,7 @@ export const Database = () => {
         attributes: prevSrc.data.attributes,
         data: datas.data,
         // add lable and item
-        label: 'all',
+        label: param.type === 'all' ? 'all' : 'Search',
         item: 'None',
       }
     }))
@@ -220,41 +220,6 @@ export const Database = () => {
               threshold={5}
               prefix={<b style={{ margin: 3 }}>Species:</b>}
             />
-            {/* <Flex gap={6} wrap justify='left'>
-            Species:
-            <Tag color="magenta"
-              onClick={() => {
-                let newSrcData = filterSpecies("Homo sapiens")
-                setSrc(prevSrc => ({
-                  ...prevSrc, data: {
-                    attributes: prevSrc.data.attributes,
-                    data: newSrcData
-                  }
-                }))
-                TabRef.current?.Fresh(true)
-                enterLoading(0, TabRef.current?.Loading)
-              }}>
-              Homo sapiens
-            </Tag>
-            <Tag color="red" onClick={() => {
-              Rerender("species", 'Mus musculus')
-            }}>Mus musculus</Tag>
-            <Tag color="volcano" onClick={() => {
-              Rerender("species", 'Oryctolagus cuniculus')
-            }}>
-              Oryctolagus cuniculus
-            </Tag>
-            <Tag color="orange" onClick={() => {
-              Rerender("species", 'Danio rerio')
-            }}>
-              Danio rerio
-            </Tag>
-            <Tag color="gold" onClick={() => {
-              Rerender("species", 'Gallus gallus')
-            }}>
-              Gallus gallus
-            </Tag>
-          </Flex> */}
           </Col>
           <Col span={18} offset={3}>
             <TagCollapse
@@ -267,75 +232,6 @@ export const Database = () => {
               threshold={10}
               prefix={<b style={{ margin: 3 }}>Tissues:</b>}
             />
-            {/* <Flex gap={6} wrap justify='left'>
-            Tissues:
-            <Tag color="magenta"
-              onClick={() => {
-                Rerender('tissues', 'Brain')
-              }}>
-              Brain
-            </Tag>
-            <Tag color="red"
-              onClick={() => {
-                Rerender('tissues',"Skin")
-              }}>
-              Skin
-            </Tag>
-            <Tag color="volcano"
-              onClick={() => {
-                Rerender('tissues',"Breast")
-              }}>
-              Breast
-            </Tag>
-            <Tag color="orange"
-              onClick={() => {
-                Rerender('tissues',"Kidney")
-              }}>
-              Kidney
-            </Tag>
-            <Tag color="gold"
-              onClick={() => {
-                Rerender('tissues',"Heart")
-              }}>
-              Heart
-            </Tag>
-            <Tag color="lime"
-              onClick={() => {
-                Rerender('tissues',"Lung")
-              }}>
-              Lung
-            </Tag>
-            <Tag color="green"
-              onClick={() => {
-                Rerender('tissues',"Muscle")
-              }}>
-              Muscle
-            </Tag>
-            <Tag color="cyan"
-              onClick={() => {
-                Rerender('tissues',"Prostate")
-              }}>
-              Prostate
-            </Tag>
-            <Tag color="blue"
-              onClick={() => {
-                Rerender('tissues',"Overian")
-              }}>
-              Overian
-            </Tag>
-            <Tag color="geekblue"
-              onClick={() => {
-                Rerender('tissues',"Pancreas")
-              }}>
-              Pancreas
-            </Tag>
-            <Tag color="purple"
-              onClick={() => {
-                Rerender('tissues',"Spinal Cord")
-              }}>
-              Spinal Cord
-            </Tag>
-          </Flex> */}
           </Col>
           <Col span={18} offset={3}>
             <TagCollapse
@@ -348,53 +244,6 @@ export const Database = () => {
               threshold={6}
               prefix={<b style={{ margin: 3 }}>Platforms:</b>}
             />
-            {/* <Flex gap={6} wrap justify='left'>
-              Platforms:
-              <Tag color="magenta"
-                onClick={() => {
-                  Rerender('technologies', "10x Visium")
-                }}>
-                10x Visium
-              </Tag>
-              <Tag color="red"
-                onClick={() => {
-                  Rerender('technologies', "scRNA")
-                }}>
-                scRNA-seq
-              </Tag>
-              <Tag color="volcano"
-                onClick={() => {
-                  let newSrcData = filterTechs("snRNA")
-                  setSrc(prevSrc => ({
-                    ...prevSrc, data: {
-                      attributes: prevSrc.data.attributes,
-                      data: newSrcData
-                    }
-                  }))
-                  TabRef.current?.Fresh(true)
-                  enterLoading(0, TabRef.current?.Loading)
-                }}>
-                snRNA-seq
-              </Tag>
-              <Tag color="orange"
-                onClick={() => {
-                  Rerender('technologies', "Stereo-Seq")
-                }}>
-                Stereo-Seq
-              </Tag>
-              <Tag color="gold"
-                onClick={() => {
-                  Rerender('technologies', "MERFISH")
-                }}>
-                MERFISH
-              </Tag>
-              <Tag color="lime"
-                onClick={() => {
-                  Rerender('technologies', "Spatial Transcriptomics")
-                }}>
-                Spatial Transcriptomics
-              </Tag>
-            </Flex> */}
           </Col>
           <Col span={18} offset={3}>
             <TagCollapse
@@ -407,40 +256,6 @@ export const Database = () => {
               threshold={6}
               prefix={<b style={{ margin: 3 }}>Topics:</b>}
             />
-
-            {/* <Flex gap={6} wrap justify='left'>
-              Topics:
-              <Tag color="magenta"
-                onClick={() => {
-                  Rerender("disease", "cancer")
-                }}>
-                Cancer
-              </Tag>
-              <Tag color="red"
-                onClick={() => {
-                  Rerender("disease", "injury")
-                }}>
-                Injury
-              </Tag>
-              <Tag color="volcano"
-                onClick={() => {
-                  Rerender("disease", "Alzheimer")
-                }}>
-                Alzheimer
-              </Tag>
-              <Tag color="orange"
-                onClick={() => {
-                  Rerender("disease", "melanoma")
-                }}>
-                Melanoma
-              </Tag>
-              <Tag color="gold"
-                onClick={() => {
-                  Rerender("disease", "carcinoma")
-                }}>
-                Carcinoma
-              </Tag>
-            </Flex> */}
           </Col>
           <Divider style={{ marginTop: 14, marginBottom: 18 }} />
           <Card>

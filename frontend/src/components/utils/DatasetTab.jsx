@@ -28,6 +28,7 @@ const DatasetTab = (props) => {
   const [dataLabel, setdataLabel] = useState({})
   const [dataItem, setdataItem] = useState({})
   const [fresh, setFresh] = useState(true)
+  const [tabKey, setTabKey] = useState("1")
   const [loadings, setLoadings] = useState([])
   const [showAll, setShowAll] = useState(false)
   const [currTip, setCurrTip] = useState(loadingTips[0])
@@ -82,7 +83,12 @@ const DatasetTab = (props) => {
           Static
         </span>
       ),
-      children: <DatasetStatic src={dataSrc} col={dataCol} _label={dataLabel} _item={dataItem} />,
+      children: <DatasetStatic 
+      src={dataSrc} 
+      col={dataCol} 
+      _label={dataLabel} 
+      _item={dataItem}
+      onTab={tabKey === '4' ? true : false} />,
     },
   ]
 
@@ -231,7 +237,10 @@ const DatasetTab = (props) => {
   // }, [fresh])
 
   return (<Spin spinning={loadings[0]} size="large" tip={currTip}>
-    <Tabs defaultActiveKey="1" items={items} tabBarExtraContent={operations} />
+    <Tabs activeKey={tabKey} 
+      items={items} 
+      tabBarExtraContent={operations}
+      onChange={(e) => setTabKey(e)} />
     </Spin>
   )
 }
