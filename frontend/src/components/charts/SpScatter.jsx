@@ -55,7 +55,7 @@ const { useToken } = theme
 const { quitLoading, enterLoading } = Loading
 
 // left figure is umap2 and right figure is spatial3
-const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin }) => {
+const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta }) => {
   const chartRef = useRef(null) // get current DOM container
   const commandRef = useRef('') // get the current command for useEffect
   const [action, setAction] = useState(0)
@@ -69,7 +69,7 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin }) => {
   const [clusterOps, setClusterOps] = useState([])
   const [embedOps, setEmbedOps] = useState([])
   const [batchOps, setBatchOps] = useState([])
-  const [loading, setLoading] = useState([false])
+  const [loading, setLoading] = useState([])
   const [itemSize, setItemSize] = useState(2)
   const [itemOpacity, setItemOpacity] = useState(0.8)
   const [xInv, setxInv] = useState(false)
@@ -299,7 +299,7 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin }) => {
         try {
           let h5info = H5adLoader(file, event, ['meta'])
           _setData(h5info.data)
-          setTitle(h5info.title)
+          setTitle(meta?.st.dataset_id)
           setClusterOps(h5info.clusters)
           if (h5info.clusters.map((item) => item.label).includes('batch'))
             setBatchName('batch')
@@ -389,7 +389,6 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin }) => {
         symbolSizeRef.current = source.length > 5000 ? 4 : 6
         setItemSize(symbolSizeRef.current)
         setCellNum(source.length)
-
         // 2.set annotations and batches
         let defaultAnno = 'annotation'
         setClusterCur({ value: 0, label: defaultAnno, attr: 'categories' })
@@ -742,7 +741,6 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin }) => {
       }
     } else {
       var myChart = echarts.init(chartRef.current) //init the echart container
-
       let axis = Axis.setEmptyAxis(0)
       let axis3D = Axis.setEmptyAxis3D(0)
       myChart.setOption({
@@ -1034,9 +1032,26 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin }) => {
                 Settings
               </Button>
             </Popover>
-            <Button type="primary" block icon={<CloudDownloadOutlined />} ref={SaveRef}>
+            <Popover content={"Save the original file of current data"}>
+            <Button type="primary" block 
+            icon={<CloudDownloadOutlined />} 
+            ref={SaveRef}
+            onClick={()=>{
+              let blob = spfile
+              let url = window.URL.createObjectURL(blob)
+              let a = document.createElement('a')
+              a.href = url
+              a.download = `sp_meta_${meta?.st.dataset_id}.h5ad`
+              document.body.appendChild(a)
+              a.click()
+
+              // 清理
+              window.URL.revokeObjectURL(url)
+              document.body.removeChild(a)
+            }}>
               Save
             </Button>
+            </Popover>
           </Space>
           <div ref={StatusRef}>
             <div>
@@ -1052,6 +1067,7 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin }) => {
               <div>Spot Radius: {"55um"}</div>
             </div>
           </div>
+          {/* <div>{JSON.stringify(meta)}</div> */}
         </Space>
       </ConfigProvider>
       <Tour open={tourOpen} onClose={() => setTourOpen(false)} steps={steps} />
@@ -1061,8 +1077,8 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin }) => {
 
 SpScatter.defaultProps = {
   query: false,
-  height: '30rem',
-  width: '55rem',
+  height: '35rem',
+  width: '60rem',
   margin: '1rem',
 }
 
@@ -1073,6 +1089,7 @@ SpScatter.propTypes = {
   height: PropTypes.string,
   width: PropTypes.string,
   margin: PropTypes.string,
+  meta: PropTypes.object,
 }
 
 export default SpScatter

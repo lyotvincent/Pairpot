@@ -50,6 +50,8 @@ import {
   SlidersOutlined,
   UploadOutlined,
   InboxOutlined,
+  FileZipOutlined,
+  FileTextOutlined,
 } from '@ant-design/icons'
 import Loading from './Loading'
 echarts.use([
@@ -65,7 +67,7 @@ const { Dragger } = Upload
 const { useToken } = theme
 const {enterLoading, quitLoading} = Loading
 
-const ScScatter = ({ scfile, spfile, setCompLoad, location, onRef, height, width, margin }) => {
+const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, margin }) => {
   const [api, contextHolder] = notification.useNotification()
   const [isInit, setInit] = useState(false) // whether echart object is inited
   const chartRef = useRef(null) // current DOM container
@@ -91,8 +93,9 @@ const ScScatter = ({ scfile, spfile, setCompLoad, location, onRef, height, width
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [refineValue, setRefineValue] = useState([])
   const [refineOpen, setRefineOpen] = useState(false)
+  const [saveOpen, setSaveOpen] = useState(false)
   const itemGroupRef = useRef([])
-  const [title, setTitle] = useState('CID4971-umap-sc')
+  const [title, setTitle] = useState()
   const FileLoaderRef = useRef('')
   const symbolSizeRef = useRef('')
   const [loadings, setLoadings] = useState([])
@@ -454,7 +457,7 @@ const ScScatter = ({ scfile, spfile, setCompLoad, location, onRef, height, width
         ScH5adLoader(scfile).then((h5info) => {
           console.log("All data reloaded in LassoView.")
           _setData(h5info.data)
-          setTitle(h5info.title)
+          setTitle(meta?.sc.dataset_id)
           setClusterOps(h5info.clusters)
           setEmbedOps(h5info.embdOps)
           setScData(h5info)
@@ -842,7 +845,7 @@ const ScScatter = ({ scfile, spfile, setCompLoad, location, onRef, height, width
         axios
           .post('/api/refine', {
             data: {
-              id: location.state?.st?.dataset_id,
+              id: meta.st?.dataset_id,
               type: _datakey ? "sc" : "sp",
               anno: brushRef.current,
               refiner: refineValue.value,
@@ -920,13 +923,11 @@ const ScScatter = ({ scfile, spfile, setCompLoad, location, onRef, height, width
       }
       if (commandRef.current === 'Download') {
         let jsonFile = {}
-        jsonFile.columns = ['barcode', 'umap_0', 'umap_1', 'annotation']
+        jsonFile.columns = ['barcode', 'annotation']
         jsonFile.data = []
         for (let item of brushArray) {
           let itemData = item.data.map((index) => [
             _data[index]['index'],
-            _data[index]['umap_0'],
-            _data[index]['umap_1'],
             item.name,
           ])
           jsonFile.data = [...jsonFile.data, ...itemData]
@@ -940,27 +941,6 @@ const ScScatter = ({ scfile, spfile, setCompLoad, location, onRef, height, width
       var myChart = echarts.init(chartRef.current)
       enterLoading(0, setLoadings)
       setCurrTip(loadingTips[0])
-      // spfile.then((file) => {
-      //   SpH5adLoader(file).then((h5info) => {
-      //     //console.log("sp data loaded.")
-      //     setSpData(h5info)
-      //   })
-      // }).catch(error => {
-      //   console.error('Error fetching blob in LassoView:', error)
-      // })
-      // scfile.then((file) => {
-      //   SpH5adLoader(file).then((h5info) => {
-      //     console.log("All data loaded in LassoView.")
-      //     _setData(h5info.data)
-      //     setTitle(h5info.title)
-      //     setClusterOps(h5info.clusters)
-      //     setEmbedOps(h5info.embdOps)
-      //     setScData(h5info)
-      //     toggleAnno("Upload")
-      //   })
-      // }).catch(error => {
-      //   console.error('Error fetching blob in LassoView:', error)
-      // })
       let axis0 = Axis.setEmptyAxis(0)
       let axis1 = Axis.setEmptyAxis(1)
       myChart.setOption({
@@ -1081,7 +1061,7 @@ const ScScatter = ({ scfile, spfile, setCompLoad, location, onRef, height, width
         try {
           let h5info = H5adLoader(file, event, ['meta'])
           _setData(h5info.data)
-          setTitle(h5info.title)
+          setTitle(meta?.sc.dataset_id)
           setClusterOps(h5info.clusters)
           if (h5info.clusters.map((item) => item.label).includes('batch'))
             setBatchName('batch')
@@ -1113,7 +1093,7 @@ const ScScatter = ({ scfile, spfile, setCompLoad, location, onRef, height, width
         try {
           let h5info = H5adLoader(file, event, ['meta'])
           _setData(h5info.data)
-          setTitle(h5info.title)
+          setTitle(meta?.st.dataset_id)
           setClusterOps(h5info.clusters)
           if (h5info.clusters.map((item) => item.label).includes('batch'))
             setBatchName('batch')
@@ -1258,7 +1238,7 @@ const ScScatter = ({ scfile, spfile, setCompLoad, location, onRef, height, width
                   setDatakey(value)
                   let h5info = value ? _scdata : _spdata
                   _setData(h5info.data)
-                  setTitle(h5info.title)
+                  setTitle(value ? meta?.sc.dataset_id : meta?.st.dataset_id)
                   setClusterOps(h5info.clusters)
                   setEmbedOps(h5info.embdOps)
                   toggleAnno("Upload")
@@ -1635,17 +1615,67 @@ const ScScatter = ({ scfile, spfile, setCompLoad, location, onRef, height, width
                   Delete
                 </Button>
               </Popover>
-              <Popconfirm
-                title="Select the download file mode"
-                okText="JSON"
-                onConfirm={() => {
-                  toggleAnno('Download')
+              <Popover title={"Select the download file."}
+                content={
+                  <div>
+                    <Row>
+                      <ul>
+                        <li>`Meta` is the original file of current data.</li>
+                        <li>`Annotation` stores the annotation by users.</li>
+                      </ul>
+                    </Row>
+                  <Row>
+                  <Space size="small">
+                      <Button
+                        block
+                        size='small'
+                        icon={<CloseOutlined />}
+                        onClick={() => {
+                          setSaveOpen(false)
+                        }}>
+                        Cancel
+                      </Button>
+                      <Button
+                        block
+                        type='primary'
+                        size='small'
+                        icon={<FileZipOutlined />}
+                        onClick={() => {
+                          let blob = _datakey ? scfile : spfile
+                          let url = window.URL.createObjectURL(blob)
+                          let a = document.createElement('a')
+                          a.href = url
+                          a.download = _datakey ? `sc_meta_${meta?.sc.dataset_id}.h5ad` : `sp_meta_${meta?.st.dataset_id}.h5ad`
+                          document.body.appendChild(a)
+                          a.click()
+                          window.URL.revokeObjectURL(url)
+                          document.body.removeChild(a)
+                        }}>
+                        Meta
+                      </Button>
+                      <Button
+                        block
+                        type='primary'
+                        size='small'
+                        icon={<FileTextOutlined/>}
+                        onClick={() => {
+                          toggleAnno("Download")
+                        }}>
+                        Annotation
+                      </Button>
+                  </Space>
+                  </Row>
+                  </div>
+                }                
+                open={saveOpen}
+                onOpenChange={(newOpen) => {
+                  setSaveOpen(newOpen)
                 }}
-                cancelText="Table">
+                trigger="click" >
                 <Button type="primary" block icon={<CloudDownloadOutlined />} ref={SaveRef}>
                   Save
                 </Button>
-              </Popconfirm>
+              </Popover>
             </Space>
             <div ref={StatusRef}>
               <b>Current Status</b>
@@ -1679,7 +1709,7 @@ ScScatter.propTypes = {
   scfile: PropTypes.object,
   spfile: PropTypes.object,
   setCompLoad: PropTypes.func,
-  location: PropTypes.object,
+  meta: PropTypes.object,
   onRef: PropTypes.any,
   height: PropTypes.string,
   width: PropTypes.string,

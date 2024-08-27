@@ -10,11 +10,12 @@ import Tissues from './metas/Tissues'
 import Topics from './metas/Topics'
 import axios from 'axios'
 import { useQuery } from 'react-query'
-import { Card, Layout, theme, Tag, Col, Divider, ConfigProvider } from 'antd'
+import { Card, Layout, theme, Tag, Row, Col, Space, Divider, ConfigProvider } from 'antd'
 import logoFig from "../assets/img/mylogo.png"
 import TagCollapse from './utils/TagCollapse'
 // import loadingTips from './charts/LoadingTip'
 import Loading from './charts/Loading'
+import contactImg from "../assets/img/contact.png"
 import {
   DatabaseOutlined,
   ProfileOutlined,
@@ -263,13 +264,16 @@ export const Database = () => {
           </Card>
           {/* <div>{JSON.stringify(Array.from(new Set(src.data?.data.map((item) => item[4]))))}</div> */}
         </Content>
-        <Footer
-          style={{
-            textAlign: 'center',
-          }}>
-          PairPot Copyright © 2024. Centre for Bioinformatics and Intelligent Medicine, Nankai University.
-          <h3></h3>
-          <a href="https://beian.miit.gov.cn" target='_blank'
+        <Footer>
+          <Row>
+            <Col span={4}>
+              <Space direction='horizontal'>
+                <h3>Contact us
+                  {' '}
+                  <img src={contactImg} style={{ width: '20%', height: '20%' }}></img>
+                </h3>
+              </Space>
+              <a href="https://beian.miit.gov.cn" target='_blank'
                 style={{
                   color: 'rgba(0, 0, 0, 0.6)',
                   textDecoration: 'none',
@@ -277,6 +281,17 @@ export const Database = () => {
                 }}>
                 津ICP备2024022781号-1
               </a>
+            </Col>
+            <Col offset={1}>
+              <p>
+                *Zhihan Ruan, Centre for Bioinformatics and Intelligent
+                Medicine, Nankai University, rrrzhan@nankai.edu.cn
+              </p>
+              <p>
+                *Jian Liu, State Key Laboratory of Medical Chemical Biology, College of Computer Science, Nankai University, jianliu@nankai.edu.cn
+              </p>
+            </Col>
+          </Row>
         </Footer>
       </Layout>
     </Layout>

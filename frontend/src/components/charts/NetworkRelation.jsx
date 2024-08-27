@@ -13,7 +13,7 @@ import { LineChart, LinesChart } from 'echarts/charts'
 import { UniversalTransition } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
 import Loading from './Loading'
-import { Spin, Switch } from 'antd'
+import { Col, Spin, Switch } from 'antd'
 import loadingTips from './LoadingTip'
 echarts.use([
   GraphicComponent,

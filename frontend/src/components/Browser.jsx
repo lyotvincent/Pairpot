@@ -8,6 +8,8 @@ import {
   Col,
   Form,
   Steps,
+  Row,
+  Space,
   Layout,
   theme,
   Divider,
@@ -26,6 +28,7 @@ import RelHeat from './charts/Relation-Heatmap-test'
 import Search from './utils/Search'
 import loadingTips from './charts/LoadingTip'
 import Loading from './charts/Loading'
+import contactImg from "../assets/img/contact.png"
 import { useMutation, useQuery, QueryCache } from "react-query"
 const { Content, Sider, Header, Footer } = Layout
 const { enterLoading } = Loading
@@ -207,7 +210,7 @@ const Browser = () => {
     if (Init && location.state !== null) {
       // set MetaInfo
       MetaRef.current.Trigger(location.state)
-
+      setLocState(location.state)
       setComponentLoad({  // reset ComponentLoad
         "LassoView": false,
         "LayerView": false,
@@ -359,20 +362,30 @@ const Browser = () => {
             <Suspense fallback={<h1>Loading for LassoView...</h1>}>
               <Card>
                 <ToggleAccordion header={
-                  <h3 id="LassoView" ref={LassoAnchor}>{"Lasso View "}
+                  <h3 id="LassoView" ref={LassoAnchor}>Lasso-View
                   </h3>}>
                   {<div>
-                    (left) These are the assignments of each spot to clusters by an
-                    automated clustering algorithm in a single slice. The clustering groups together spots that
-                    have similar expression profiles. In this plot, spots are colored according
-                    to their cluster assignment and projected on to the tissue image. Only spots
-                    under tissue are used in the clustering algorithm.
+                    <b>Overview:</b> Lasso-View is a heuristic analysis that discovers extra omitted
+                    cells (spots) similar to the lassoed ones in both single-cell
+                    and SRT datasets based on semi-supervised machine learning.
                     <br />
-                    (right) These are the assignments of each spot to clusters by an
-                    automated clustering algorithm in a single slice. The clustering groups together spots that
-                    have similar expression profiles. In this plot, spots are colored according
-                    to their cluster assignment and projected on to the tissue image. Only spots
-                    under tissue are used in the clustering algorithm.
+                    <b>Left Chart:</b> The embeddings of single-cell or SRT data with predefined annotations
+                    of spatial domains and cell types.
+                    <br />
+                    <b>Right Chart:</b> The embeddings of single-cell or SRT data with customized annotations according to user-selction.
+                    <br />
+                    <b>Usage:</b>
+                    <ol>
+                      <li>Click the lasso tools at TopRight, and then select the
+                        cells of interests in the left chart. </li>
+                      <li>Use select modes and tools to zoom, draw, and erase the
+                        customized cells. </li>
+                      <li>Click the `Rename` button and type in the name of your selected cells. Your annotations are in the legends (bottom of the charts).</li>
+                      <li>Click the `Refine` button, choose a refiner (currently `LabelPropagation` is available), and then click `Refine` button to refine your annotations.</li>
+                      <li>Click `Confirm` button to ensure your current annotation. Then you can lasso for other annotations.</li>
+                      <li>Lasso your new anntations as same as step 1. You can delete your annotations through `Delete` button.</li>
+                      <li>Save your annotations as a JSON file.</li>
+                    </ol>
                   </div>}
                 </ToggleAccordion>
                 <Button type="primary"
@@ -383,23 +396,26 @@ const Browser = () => {
                   }}>
                   {"Begin Tour >>>"}
                 </Button>
-                <LassoView spfile={statusSP.data} scfile={statusSC.data} setCompLoad={setComponentLoad} location={location} onRef={LassoRef} />
+                <LassoView spfile={statusSP.data} scfile={statusSC.data} setCompLoad={setComponentLoad} meta={locState} onRef={LassoRef} />
               </Card>
             </Suspense>
             <Divider />
             <Suspense fallback={<h1>Loading for LayerView...</h1>}>
               <Card>
-                <ToggleAccordion header={<h3 id="LayerView" ref={LayerAnchor}>Layer View</h3>}>
+                <ToggleAccordion header={<h3 id="LayerView" ref={LayerAnchor}>Layer-View</h3>}>
                   {<div>
-                    (left) These are the assignments of each cell to clusters by an
-                    automated clustering algorithm in single-cell or spatal transcriptomics data. The clustering groups together cells that
-                    have similar expression profiles. These clusters are further annotated manually according to their marker genes for single-cell data.
-                    In this plot, cells are colored according to their cluster assignment and projected to UMAP space. In this space, pairs of cells that are close to each other have
-                    more similar gene expression profiles than cells that are distant from each other.
+                    <b>Overview:</b> Inspired by 3D Landscape in De-spot, Pairpot develops
+                    Layer-View to dynamically display gene expressions and
+                    annotations of multiple slices in 3D hierarchical layouts
+                    Users can explore all slices of a study in the
+                    left chart, and explore a single slice precisely in the right chart.In the 3D layout, the x-axis and y-axis denote the
+                    spatial coordinates of the slices, and the z-axis represents
+                    different batches of these slices.
                     <br />
-                    (right)In this plot, cells are not colored but projected to UMAP space.
-                    After lasso selection in the left figure, the selected region series would display in this plot.
-                    After Online refine, the refined region series would also display in this plot.
+                    Users can rotate the axis to
+                    different perspectives according to their interests. Users can
+                    click ’Inverse’ to hide all annotations and strengthen specific
+                    domains by clicking their legends.
                   </div>}
                 </ToggleAccordion>
                 <Button
@@ -413,24 +429,36 @@ const Browser = () => {
                   }}>
                   {"Begin Tour >>>"}
                 </Button>
-                <LayerView id='LayerView' query={true} spfile={statusSP.data} setCompLoad={setComponentLoad} onRef={LayerRef} />
+                <LayerView id='LayerView' query={true} spfile={statusSP.data} setCompLoad={setComponentLoad} onRef={LayerRef} meta={locState} />
               </Card>
             </Suspense>
             <Divider />
             <Suspense fallback={<h1>Loading for PairView...</h1>}>
               <Card>
-                <ToggleAccordion header={<h3 id="PairView" ref={PairAnchor}>Pair View</h3>}>
+                <ToggleAccordion header={<h3 id="PairView" ref={PairAnchor}>Pair-View</h3>}>
                   {<div>
-                    (left) These are the assignments of each cell to clusters by an
-                    automated clustering algorithm in single-cell data. The clustering groups together cells that
-                    have similar expression profiles. These clusters are further annotated manually according to their marker genes.
-                    In this plot, cells are downsampled to 3000 and colored according to their cluster assignment and projected to UMAP space. In this space, pairs of cells that are close to each other have
-                    more similar gene expression profiles than cells that are distant from each other.
-                    <br />
-                    (right) Spots are colored by clustering assignment and shown in t-SNE space.
-                    The axes correspond to the 2-dimensional embedding produced by the t-SNE
-                    algorithm. In this space, pairs of spots that are close to each other have
-                    more similar gene expression profiles than spots that are distant from each other.
+                    <b>Overview:</b> Pair-View is another heuristic analysis that aids users to quickly
+                    infer cell proportions of spots using their customized cells
+                    from single-cell data in real time. Pair-
+                    View API performs NNLS online based on the UCell scores
+                    pre-analyzed by Pair-View, which uses the Mann-Whitney U
+                    statistic to evaluate the related gene expression in single-cell
+                    and SRT data.
+                    <br/>
+                    <b>Left Chart:</b> The embedding of single-cell data with pre-defined cell types.
+                    <br/>
+                    <b>Right Chart:</b> The embedding of SRT data with pre-defined spatial domains.
+                    <br/>
+                    <b>Usage:</b>
+                    <ol>
+                      <li>Click the Lasso Tools at TopRight, then select the cells of interests in the left chart.</li>
+                      <li>Use Select modes and tools to zoom, draw, and erase the customized cells.</li>
+                      <li>Click the `Deconv` buttons to infer cell proportions of spots using the user-selected cells. It would cost a few seconds. </li>
+                      <li>Users can also refine the selected current cell types as same as the operations in LassoView.</li>
+                      <li>Drag the bar at the top of charts to adjust the thresholds.</li> 
+                      <li>Explore cell proportions of different batches through `Batches` in `Settings` button.</li>
+                      <li>Click `Save` to download the customized cell types and their proportions.</li>
+                    </ol>
                   </div>}
                 </ToggleAccordion>
                 <Button
@@ -451,7 +479,9 @@ const Browser = () => {
             <Card>
               <ToggleAccordion header={<h3 id="SpatialMarkers" ref={MarkerAnchor}>Spatial Markers</h3>}>
                 {<div>
-                  (left) These are the assignments of each spot-barcode to clusters by an
+                  <b>Top:</b> List of spatial markers in each cluster. The clusters are segmented by MENDER in SRT data, and are indentified by Leiden in single-cell data. Users can change the number of markers for each cluster.
+                  <br/>
+                  <b>Bottom:</b> Heatmap of spatial markers in each cluster. Rows are genes and columns are clusters. 
                   <br />
                 </div>}
               </ToggleAccordion>
@@ -461,27 +491,48 @@ const Browser = () => {
             <Card>
               <ToggleAccordion header={<h3 id="CellInteractions" ref={CPDBAnchor}>Cell Interactions</h3>}>
                 {<div>
-                  (left) These are the assignments of each spot-barcode to clusters by an
+                  <b>Top:</b> Cell-Cell interaction networks. Click the switch to change the chart from single-cell to SRT data. Click the legends to rerender the chart.
                   <br />
-                  (right) Spots are colored by clustering assignment and shown in t-SNE space.
+                  <b>Bottom:</b> Ligand-Receptor pairs. Click the switch to change the chart from single-cell to SRT data. Select the cluster ID to display its related L-R pairs. 
                 </div>}
               </ToggleAccordion>
+              <Row>
+              <Col span={12} offset={5}>
               <NetworkRelation spfile={statusSP.data} scfile={statusSC.data} setCompLoad={setComponentLoad} onRef={NetRef} />
+              </Col>
+              </Row>
               <RelHeat spfile={statusSP.data} scfile={statusSC.data} setCompLoad={setComponentLoad} onRef={CPDBRef} />
             </Card>
             {/* <div style={{color: 'black'}}>{JSON.stringify(location.state)}</div> */}
           </Content>
           <Footer>
-          <a href="https://beian.miit.gov.cn" target='_blank'
-                style={{
-                  color: 'rgba(0, 0, 0, 0.6)',
-                  textDecoration: 'none',
-                  fontSize: 13,
-                  display: 'block',
-                  textAlign: 'center', 
-                }}>
-                津ICP备2024022781号-1
-          </a>
+            <Row>
+              <Col span={4}>
+                <Space direction='horizontal'>
+                  <h3>Contact us
+                    {' '}
+                    <img src={contactImg} style={{ width: '20%', height: '20%' }}></img>
+                  </h3>
+                </Space>
+                <a href="https://beian.miit.gov.cn" target='_blank'
+                  style={{
+                    color: 'rgba(0, 0, 0, 0.6)',
+                    textDecoration: 'none',
+                    fontSize: 13
+                  }}>
+                  津ICP备2024022781号-1
+                </a>
+              </Col>
+              <Col offset={1}>
+                <p>
+                  *Zhihan Ruan, Centre for Bioinformatics and Intelligent
+                  Medicine, Nankai University, rrrzhan@nankai.edu.cn
+                </p>
+                <p>
+                  *Jian Liu, State Key Laboratory of Medical Chemical Biology, College of Computer Science, Nankai University, jianliu@nankai.edu.cn
+                </p>
+              </Col>
+            </Row>
           </Footer>
         </Layout>
       </Layout>

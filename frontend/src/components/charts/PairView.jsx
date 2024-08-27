@@ -75,10 +75,10 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
   const [_spdata, _setSpData] = useState({})
   const [seriesArray, setSeriesArray] = useState([])
   const [nameArray, setNameArray] = useState([])
-  const snumRef = useRef()
-  const datasetRef = useRef()
-  const seriesRef = useRef()
-  const commandRef = useRef()
+  const snumRef = useRef()     // current series nums
+  const datasetRef = useRef()  // current dataset
+  const seriesRef = useRef()   // current series
+  const commandRef = useRef()  // current command
   const nameRef = useRef()
   const brushRef = useRef([])
   const [brushArray, setBrushArray] = useState([])
@@ -91,11 +91,11 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
   const [refineOpen, setRefineOpen] = useState(false)
   const itemGroupRef = useRef([])
   const [title, setTitle] = useState('PairView Title')
-  const FileLoaderRef = useRef('')
   const symbolSizeRef = useRef('')
   const [loadings, setLoadings] = useState([false, false])
   const brushMode = useRef('Select')
   const [brushModeState, setBrushModeState] = useState('Select')
+  const [currProps, setCurrProps] = useState([])
 
   // Item size and Opacity for Single-cell and Spatial
   const [itemSizeSc, setItemSizeSc] = useState(2)
@@ -104,14 +104,14 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
   const [itemOpacitySp, setItemOpacitySp] = useState(0.8)
   const prevCluster = useRef('')
 
-  // Clusters and Embedings for Single-cell
+  // Clusters and Embeddings for Single-cell
   const [clusterCurSc, setClusterCurSc] = useState({})
   const [embedCurSc, setEmbedCurSc] = useState('')
   const [clusterOpsSc, setClusterOpsSc] = useState({})
   const [embedOpsSc, setEmbedOpsSc] = useState({})
   const [annoCurSc, setAnnoCurSc] = useState([])
 
-  // Clusters, Batches and Embedings for ST
+  // Clusters, Batches and Embeddings for SRT
   const [clusterCurSp, setClusterCurSp] = useState({})
   const [embedCurSp, setEmbedCurSp] = useState('')
   const [clusterOpsSp, setClusterOpsSp] = useState({})
@@ -1043,10 +1043,17 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
             },
           }).then((response) => {
             if (response.data.success) {
+              setBrushArray([  // set current brush array
+                ...brushArray,
+                {
+                  name: nameRef.current,
+                  data: brushRef.current,
+                  value: snumRef.current - itemGroupRef.current.length,
+                },
+              ])
               let endtime = response.data.endtime
               let props = response.data.props
-              console.log(props)
-              let option = myChart.getOption()
+              let option = myChart.getOption()   // set options
               // set sp source
               let _sclen = annoCurSc.length + 1
               if (annoCurSc.length === 0) {
@@ -1055,22 +1062,24 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
               let _dataset = option.dataset
               let _spsource = _dataset[_sclen].source
               let _spdims = _dataset[_sclen].dimensions
-              if (_spdims[_spdims.length - 1] === "Customed Cell Props") { // if exists Cell props
+              // set current customized props
+              setCurrProps(_spsource.map((item, id)=>[item[_spdims.indexOf("index")], props[id]]))
+              if (_spdims[_spdims.length - 1] === "Customized cell props") { // if exists Cell props
                 _spsource = _spsource.map((item, id) => {  // 2d array
                   item[item.length - 1] = props[id]
                   return item
                 })
                 let _clusterOpsSp = clusterOpsSp
-                _clusterOpsSp[clusterOpsSp.length - 1] = { value: clusterOpsSp.length - 1, label: "Customed Cell Props", attr: 'values' }
+                _clusterOpsSp[clusterOpsSp.length - 1] = { value: clusterOpsSp.length - 1, label: "Customized cell props", attr: 'values' }
                 setClusterOpsSp(_clusterOpsSp)
-                setClusterCurSp({ value: clusterOpsSp.length - 1, label: "Customed Cell Props", attr: 'values' })
+                setClusterCurSp({ value: clusterOpsSp.length - 1, label: "Customized cell props", attr: 'values' })
               } else {
-                _spdims = [..._spdims, "Customed Cell Props"]
+                _spdims = [..._spdims, "Customized cell props"]
                 _spsource = _spsource.map((item, id) => {  // 2d array
                   return [...item, props[id]]
                 })
-                setClusterOpsSp([...clusterOpsSp, { value: clusterOpsSp.length, label: "Customed Cell Props", attr: 'values' }])
-                setClusterCurSp({ value: clusterOpsSp.length, label: "Customed Cell Props", attr: 'values' })
+                setClusterOpsSp([...clusterOpsSp, { value: clusterOpsSp.length, label: "Customized cell props", attr: 'values' }])
+                setClusterCurSp({ value: clusterOpsSp.length, label: "Customized cell props", attr: 'values' })
               }
 
               // set Options
@@ -1103,10 +1112,11 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
           })
       }
       if (commandRef.current === 'Rename') {
-        seriesRef.current.name = inputValue
+        let option = myChart.getOption() 
+        let _series = option.series
+        _series[_series.length-1].name = inputValue
         let prevName = nameRef.current
         nameRef.current = inputValue
-        _series.push(seriesRef.current)
         myChart.setOption({
           series: _series,
         })
@@ -1117,6 +1127,11 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
           placement: 'topRight',
         })
         commandRef.current = null
+        // modify corresponding item in brush array
+        let _newbrush = brushArray
+        let _idx = _newbrush.findIndex(item=>item.name === prevName)
+        _newbrush[_idx].name = inputValue
+        setBrushArray(_newbrush)
       }
       if (commandRef.current === 'Refine') {
         let starttime = Date.now()
@@ -1137,7 +1152,7 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
             if (response.data.success) {
               let endtime = response.data.endtime
               let refScatter = response.data.refined
-              let option = myChart.getOption()
+              let option = myChart.getOption()  // set options
               let newOption = setBrushedMap(option, refScatter, true, 'Select')
               myChart.setOption(newOption)
               api.success({
@@ -1201,17 +1216,17 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
       }
       if (commandRef.current === 'Download') {
         let jsonFile = {}
-        jsonFile.columns = ['barcode', 'umap_0', 'umap_1', 'annotation']
-        jsonFile.data = []
+        jsonFile.sc_columns = ['barcode', 'annotation']
+        jsonFile.sc_annotation = []
         for (let item of brushArray) {
           let itemData = item.data.map((index) => [
             _scdata[index]['index'],
-            _scdata[index]['umap_0'],
-            _scdata[index]['umap_1'],
             item.name,
           ])
-          jsonFile.data = [...jsonFile.data, ...itemData]
+          jsonFile.sc_annotation = [...jsonFile.sc_annotation, ...itemData]
         }
+        jsonFile.sp_columns = ['barcode', 'proportion']
+        jsonFile.sp_proportion = currProps
         const fileStream = JSON.stringify(jsonFile)
         const blob = new Blob([fileStream])
         saveAs(blob, `Annotation-${new Date().getTime()}.json`)
@@ -1877,6 +1892,7 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
                 <div>Cell number: {cellNum}</div>
               </div>
             </div>
+            {/* <div>{JSON.stringify(brushArray)}</div> */}
           </Space>
         </ConfigProvider>
         <Tour open={tourOpen} onClose={() => setTourOpen(false)} steps={steps} />
