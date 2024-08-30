@@ -797,7 +797,7 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta }) 
           feature: {
             mark: { show: true },
             dataView: { show: true, readOnly: true },
-            restore: { show: true },
+            restore: { show: false },
             saveAsImage: {
               show: true,
               pixelRatio: 4,
@@ -1015,7 +1015,16 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta }) 
                     </Form.Item>
                   </Form>
                   <Space size="small">
-                    <Button icon={<ReloadOutlined />}>Reset</Button>
+                    <Button 
+                    icon={<ReloadOutlined />}
+                    onClick={()=>{
+                      setItemSize(6)
+                      setItemOpacity(0.8)
+                      setyInv(false)
+                      setxInv(false)
+                      toggleAnno("Setting")
+                    }}
+                    >Reset</Button>
                     <Button
                       type="primary"
                       icon={<SettingOutlined />}

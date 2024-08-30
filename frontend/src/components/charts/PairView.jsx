@@ -1063,7 +1063,7 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
               let _spsource = _dataset[_sclen].source
               let _spdims = _dataset[_sclen].dimensions
               // set current customized props
-              setCurrProps(_spsource.map((item, id)=>[item[_spdims.indexOf("index")], props[id]]))
+              setCurrProps(_spsource.map((item, id) => [item[_spdims.indexOf("index")], props[id]]))
               if (_spdims[_spdims.length - 1] === "Customized cell props") { // if exists Cell props
                 _spsource = _spsource.map((item, id) => {  // 2d array
                   item[item.length - 1] = props[id]
@@ -1112,9 +1112,9 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
           })
       }
       if (commandRef.current === 'Rename') {
-        let option = myChart.getOption() 
+        let option = myChart.getOption()
         let _series = option.series
-        _series[_series.length-1].name = inputValue
+        _series[_series.length - 1].name = inputValue
         let prevName = nameRef.current
         nameRef.current = inputValue
         myChart.setOption({
@@ -1129,7 +1129,7 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
         commandRef.current = null
         // modify corresponding item in brush array
         let _newbrush = brushArray
-        let _idx = _newbrush.findIndex(item=>item.name === prevName)
+        let _idx = _newbrush.findIndex(item => item.name === prevName)
         _newbrush[_idx].name = inputValue
         setBrushArray(_newbrush)
       }
@@ -1270,7 +1270,7 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
             },
             mark: { show: true },
             dataView: { show: true, readOnly: true },
-            restore: { show: true },
+            restore: { show: false },
             saveAsImage: {
               show: true,
               pixelRatio: 3,
@@ -1517,7 +1517,16 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
                       </Form.Item>
                     </Form>
                     <Space size="small">
-                      <Button icon={<ReloadOutlined />}>Reset</Button>
+                      <Button icon={<ReloadOutlined />}
+                        onClick={() => {
+                          setItemSizeSc(4)
+                          setItemOpacitySc(0.8)
+                          setBrushModeState('Select')
+                          setyInv(false)
+                          setxInv(false)
+                          toggleAnno("scConfigs")
+                        }}
+                      >Reset</Button>
                       <Button
                         type="primary"
                         icon={<SettingOutlined />}
@@ -1693,7 +1702,17 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
                       </Form.Item>
                     </Form>
                     <Space size="small">
-                      <Button icon={<ReloadOutlined />}>Reset</Button>
+                      <Button 
+                      icon={<ReloadOutlined />}
+                      onClick={()=>{
+                        setItemSizeSp(4)
+                        setItemOpacitySp(0.8)
+                        setBrushModeState('Select')
+                        setyInv(false)
+                        setxInv(false)
+                        toggleAnno("spConfigs")
+                      }}
+                      >Reset</Button>
                       <Button
                         type="primary"
                         icon={<SettingOutlined />}

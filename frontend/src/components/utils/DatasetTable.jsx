@@ -9,6 +9,7 @@ import Highlighter from 'react-highlight-words'
 import { Button, Input, Space, Table, Pagination, Tooltip } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import DatasetDescription from './DatasetDescription'
+import DatasetPaired from './DatasetPaired'
 import { useQuery } from 'react-query'
 import axios from 'axios'
 const IconTip = ({ icon, attr, onClick, placement = 'bottom' }) => (
@@ -335,19 +336,59 @@ const DatasetTable = ({ src, col, oriSrc }) => {
                   navigate('/browse', { state: state })
                 }}
               />
-              <IconTip
-                icon={LinkOutlined}
-                key="list-vertical-Paired-Datasets-o"
-                attr="Link paired datasets"
-                placement="top"
-                onClick={() => {
-                  navigate('/submit', { state: record })
-                }}
+              <DatasetPaired
+                descCol={col}
+                descInfo={Object.values(record)}
+                placement={'top'}
+                // scInfo={item}
+                scInfo={
+                  src.find(s => s[1] === record['has_paired'])
+                  // src.find(s => s[1] === item[26])
+                  // Array.isArray(src) && item.length > 26
+                  //   ? src.find(s => Array.isArray(s) && s[1] === item[26]) || item
+                  //   : null
+                }
               />
               <IconTip
                 icon={CloudDownloadOutlined}
-                attr={'Download from:' + record.accessions}
+                attr={'Download datasets'}
                 placement="top"
+                onClick={() => {
+                  // console.log(src)
+                  // console.log(item[26])
+                  let x = src.find(s => s[1] === record['has_paired'])
+                  // console.log(x)
+                  let url = record['accessions']  // 获取 item[23] 作为 URL
+                  // console.log(url);
+                  if (url) {
+                    /*** 直接跳转数据集的标签页 ***/
+                    window.open(url, '_blank')  // 在新标签页中打开链接
+                  } else {
+                    /*** 从我们的resource中直接下载 ***/
+                    console.error('URL is invalid')
+                    axios
+                      .get('/api/query', {
+                        responseType: 'blob',
+                      })
+                      .then((response) => {
+                        // console.log(response)
+                        let blob = response.data
+                        let url = window.URL.createObjectURL(blob)
+                        let a = document.createElement('a')
+                        a.href = url
+                        a.download = `${record['dataset_id']}.h5ad`
+                        document.body.appendChild(a)
+                        a.click()
+
+                        // 清理
+                        window.URL.revokeObjectURL(url)
+                        document.body.removeChild(a)
+                      })
+                      .catch(error => {
+                        console.error('Error fetching blob:', error)
+                      })
+                  }
+                }}
               />
             </Space>
           </>
