@@ -967,7 +967,7 @@ const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, ma
             },
             mark: { show: true },
             dataView: { show: true, readOnly: true },
-            restore: { show: true },
+            restore: { show: false },
             saveAsImage: { show: true, pixelRatio: 5, },
             dataZoom: {},
           },
@@ -1450,7 +1450,17 @@ const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, ma
                       </Form.Item>
                     </Form>
                     <Space size="small">
-                      <Button icon={<ReloadOutlined />}>Reset</Button>
+                      <Button 
+                      icon={<ReloadOutlined />}
+                      onClick={() => {
+                        setItemSize(4)
+                        setItemOpacity(0.8)
+                        setBrushModeState('Select')
+                        setyInv(false)
+                        setxInv(false)
+                        toggleAnno("Setting")
+                      }}
+                      >Reset</Button>
                       <Button
                         type="primary"
                         icon={<SettingOutlined />}

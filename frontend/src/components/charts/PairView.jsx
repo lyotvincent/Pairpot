@@ -1089,6 +1089,7 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
               let _spdims = _dataset[_sclen].dimensions
               // set current customized props
               setCurrProps(_spsource.map((item, id) => [item[_spdims.indexOf("index")], props[id]]))
+              setCurrProps(_spsource.map((item, id) => [item[_spdims.indexOf("index")], props[id]]))
               if (_spdims[_spdims.length - 1] === "Customized cell props") { // if exists Cell props
                 _spsource = _spsource.map((item, id) => {  // 2d array
                   item[item.length - 1] = props[id]
@@ -1565,7 +1566,16 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
                       </Form.Item>
                     </Form>
                     <Space size="small">
-                      <Button icon={<ReloadOutlined />}>Reset</Button>
+                      <Button icon={<ReloadOutlined />}
+                        onClick={() => {
+                          setItemSizeSc(4)
+                          setItemOpacitySc(0.8)
+                          setBrushModeState('Select')
+                          setyInv(false)
+                          setxInv(false)
+                          toggleAnno("scConfigs")
+                        }}
+                      >Reset</Button>
                       <Button
                         type="primary"
                         icon={<SettingOutlined />}
@@ -1752,7 +1762,17 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
                       </Form.Item>
                     </Form>
                     <Space size="small">
-                      <Button icon={<ReloadOutlined />}>Reset</Button>
+                      <Button
+                        icon={<ReloadOutlined />}
+                        onClick={() => {
+                          setItemSizeSp(4)
+                          setItemOpacitySp(0.8)
+                          setBrushModeState('Select')
+                          setyInv(false)
+                          setxInv(false)
+                          toggleAnno("spConfigs")
+                        }}
+                      >Reset</Button>
                       <Button
                         type="primary"
                         icon={<SettingOutlined />}
