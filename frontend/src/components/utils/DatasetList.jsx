@@ -80,6 +80,10 @@ const DatasetList = ({ src, col }) => {
       attrStack[colname] = i
     }
     setAttr(attrStack)
+    console.log(attrStack)
+    console.log(attr)
+    // console.log(col)
+    // console.log(OriginResponse.data)
   }, [src, col])
   return (
     <List
@@ -285,6 +289,17 @@ const DatasetList = ({ src, col }) => {
                       <div>
                         <Tag color="gold" size="middle">
                           {item[15]}
+                        </Tag>
+                      </div>
+                    ) : (
+                      ' '
+                    ))
+                  }
+                  {
+                    (item[attr.n_samples] ? (
+                      <div>
+                        <Tag color="yellow" size="middle">
+                          {AddCommas(item[attr.n_samples])} samples
                         </Tag>
                       </div>
                     ) : (

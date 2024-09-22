@@ -402,7 +402,7 @@ PYBIND11_MODULE(label_propagation, m) {
         .def("createMat", &matCoo::createMat)
         .def("matTimes", &matCoo::matTimes)
         .def("append", &matCoo::append);
-
+        
     py::class_<mat>(m, "mat")
         .def(py::init<int, int>())
         .def("createMat", &mat::createMat)

@@ -34,6 +34,43 @@ export const Database = () => {
   const [selectedTags, setSelectedTags] = React.useState(null)
   const [searchValue, steSearchValue] = useState('') // 搜索框的值，传给search
 
+  // tech-bin
+  // const techBin = {
+  //   "10x Visium": "55μm",
+  //   "Spatial Transcriptomics": "100μm",
+  //   "Stereo-Seq": "220nm",
+  //   "Slide-seqV2": "10μm",
+  //   "Slide-seq": "10μm",
+  //   "DBiT-seq": "10μm",
+  //   "Seq-Scope": "0.5-0.8μm",
+  //   "HDST": "2μm",
+  //   "sciMAP-ATAC-seq": "100μm"
+  // }
+
+  const techBin = {
+    // "2μm": ["Seq-Scope","HDST"],
+    // "10μm": ["Slide-seqV2","Slide-seq","DBiT-seq"],
+    // "50μm": ["10x Visium"],
+    // "100μm": ["Spatial Transcriptomics","sciMAP-ATAC-seq"],
+    // "200nm": ["Stereo-Seq"],
+    // "50-100μm": [],
+    "10μm": ["Seq-Scope","HDST","Stereo-Seq" ],
+    "25μm": ["Slide-seqV2","Slide-seq","DBiT-seq"],
+    "50μm": ["10x Visium","Spatial Transcriptomics","sciMAP-ATAC-seq"],
+    "cell-bin": [],
+  }
+
+  const cellBinTech = [
+    "GeoMx DSP",
+    "MERFISH",
+    "ClampFISH",
+    "EASI-FISH",
+    "seqFish",
+    "seqFISH+",
+    "STARmap",
+  ]
+
+
   // 有搜索的时候
   const handleSearchComplete = (datas, param) => {
     // datas是从search这个子组件传过来的
@@ -97,8 +134,36 @@ export const Database = () => {
     return (response.data.data.filter((item) => item[4]?.split(";").includes(tissues)))
   }
 
-  const filterTechs = (species) => {
-    return (response.data.data.filter((item) => item[12]?.split(";").includes(species)))
+  const filterTechs = (species, bin) => {
+    if(bin){
+      const filteredData = response.data.data.filter((item) => {
+        const splitArray = item[12]?.split(";");
+        if (!splitArray) 
+          return false;
+        let speciesArray;
+        // if(String(species) === "50-100μm"){
+        //   let spArray = Technologies.slice(0, 33)
+        //   let existTechs = []
+        //   Object.entries(techBin).forEach(([key, values]) => {
+        //     existTechs.push(values);
+        //   });
+        //   existTechs = existTechs.flat() // dimension: 2->1
+        //   speciesArray = spArray.filter(item => !existTechs.includes(item));
+        // }
+        if(String(species) == "cell-bin"){
+          speciesArray = cellBinTech
+        }
+        else
+          speciesArray = techBin[species]
+        console.log(speciesArray)
+        return speciesArray.some((species) => splitArray.includes(species));
+      })
+      return filteredData
+    
+    }
+    else{
+      return (response.data.data.filter((item) => item[12]?.split(";").includes(species)))
+    }
   }
 
   const filterDiseases = (disease) => {
@@ -145,7 +210,9 @@ export const Database = () => {
       TabRef.current?.GraphConfig(`{species: \"${item}\"}`)
     }
     else if (label === "technologies") {
-      newSrcData = filterTechs(item)
+      console.log(item)
+      let binFlag = item in techBin? true : false
+      newSrcData = filterTechs(item, binFlag)
       TabRef.current?.GraphConfig(`{technologies: \"${item}\"}`)
     }
     else if (label === "disease") {
@@ -236,12 +303,17 @@ export const Database = () => {
           </Col>
           <Col span={18} offset={3}>
             <TagCollapse
-              tags={Technologies.map((tag) => (<Tag.CheckableTag style={{ margin: 3, fontSize: 16 }}
+              tags={Technologies.map((tag) => 
+                (<Tag.CheckableTag style={{ margin: 3, fontSize: 16 }}
                 key={tag}
                 checked={selectedTags === tag}
                 onChange={(checked) => {
                   handleChange(tag, checked, 'technologies')
-                }}>{tag}</Tag.CheckableTag>))}
+                }}>
+                  {/* {tag}{techBin[tag]? "("+techBin[tag]+")":''} */}
+                  {tag}
+                  </Tag.CheckableTag>
+                  ))}
               threshold={6}
               prefix={<b style={{ margin: 3 }}>Platforms:</b>}
             />

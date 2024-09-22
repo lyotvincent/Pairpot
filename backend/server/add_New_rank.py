@@ -1,7 +1,8 @@
 from AddRank import AddRank4SPdata
 import os
 # path='/data/rzh/RawUrls'
-path='/data/rzh/RawUrls/209/STDS0000209'
+# path='/data/rzh/RawUrls/128/SCDS0000128'
+path='/data/rzh/cncb/cncb'
 errors=[]
 for root,dirs,files in os.walk(path):
     if not 'sc' in root and not 'SC' in root and not 'sc' in files:

@@ -3,6 +3,7 @@ import * as echarts from 'echarts'
 import PropTypes from 'prop-types'
 import '../theme/dark'
 import '../theme/vintage'
+import strokeColor from '../theme/strokeColor'
 import { TooltipComponent, VisualMapComponent } from 'echarts/components'
 import Axis from './Axis'
 import loadingTips from './LoadingTip'
@@ -27,6 +28,7 @@ import {
   Spin,
   Form,
   Flex,
+  Progress,
   Tour
 } from 'antd'
 import {
@@ -55,7 +57,7 @@ const { useToken } = theme
 const { quitLoading, enterLoading } = Loading
 
 // left figure is umap2 and right figure is spatial3
-const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta }) => {
+const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta, progress }) => {
   const chartRef = useRef(null) // get current DOM container
   const commandRef = useRef('') // get the current command for useEffect
   const [action, setAction] = useState(0)
@@ -301,6 +303,7 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta }) 
           _setData(h5info.data)
           setTitle(meta?.st.dataset_id)
           setClusterOps(h5info.clusters)
+          console.log(h5info.clusters)
           if (h5info.clusters.map((item) => item.label).includes('batch'))
             setBatchName('batch')
           setEmbedOps(h5info.embdOps)
@@ -361,6 +364,7 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta }) 
 
   useEffect(() => {
 
+    console.log(commandRef.current)
     if (isInit) {
       var myChart = echarts.getInstanceByDom(chartRef.current)
       if (commandRef.current === "Reload") {
@@ -394,6 +398,7 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta }) 
         setClusterCur({ value: 0, label: defaultAnno, attr: 'categories' })
         prevCluster.current = { value: 0, label: defaultAnno, attr: 'categories' }
         let annotations = setItemGroup(source, _dims.indexOf(defaultAnno))
+        console.log(annotations)
 
         let batches = []
         let _batchName = batchName
@@ -423,7 +428,7 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta }) 
 
         // 4.set datasets
         let _datasets = setBatchDataset(source, _dims, defaultAnno, annotations, batches[0], _batchName)
-        //console.log(_datasets)
+        console.log(_datasets)
         // 5.set 3D series
         let _series = []
         let _snum = 0
@@ -515,6 +520,9 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta }) 
         //   seriesIndex: [...Array(annotations).keys()],
         // }
 
+        console.log(axis)
+        console.log(_datasets)
+        console.log(_series)
 
         // 9.render charts
         myChart.setOption({
@@ -817,7 +825,14 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta }) 
 
   return (
     <Flex justify="center" gap='middle'>
-      <Spin spinning={loading[0]} size="large" tip={currTip}>
+      <Spin
+        spinning={loading[0]}
+        size="large"
+        tip={
+          <div>{currTip}
+            <Progress percent={progress} strokeColor={strokeColor} size={[300, 15]} />
+          </div>
+        }>
         <div
           ref={chartRef}
           className="chart"
@@ -1033,24 +1048,24 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta }) 
               </Button>
             </Popover>
             <Popover content={"Save the original file of current data"}>
-            <Button type="primary" block 
-            icon={<CloudDownloadOutlined />} 
-            ref={SaveRef}
-            onClick={()=>{
-              let blob = spfile
-              let url = window.URL.createObjectURL(blob)
-              let a = document.createElement('a')
-              a.href = url
-              a.download = `sp_meta_${meta?.st.dataset_id}.h5ad`
-              document.body.appendChild(a)
-              a.click()
+              <Button type="primary" block
+                icon={<CloudDownloadOutlined />}
+                ref={SaveRef}
+                onClick={() => {
+                  let blob = spfile
+                  let url = window.URL.createObjectURL(blob)
+                  let a = document.createElement('a')
+                  a.href = url
+                  a.download = `sp_meta_${meta?.st.dataset_id}.h5ad`
+                  document.body.appendChild(a)
+                  a.click()
 
-              // 清理
-              window.URL.revokeObjectURL(url)
-              document.body.removeChild(a)
-            }}>
-              Save
-            </Button>
+                  // 清理
+                  window.URL.revokeObjectURL(url)
+                  document.body.removeChild(a)
+                }}>
+                Save
+              </Button>
             </Popover>
           </Space>
           <div ref={StatusRef}>
@@ -1090,6 +1105,7 @@ SpScatter.propTypes = {
   width: PropTypes.string,
   margin: PropTypes.string,
   meta: PropTypes.object,
+  process: PropTypes.number,
 }
 
 export default SpScatter

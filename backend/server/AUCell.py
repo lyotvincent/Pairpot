@@ -164,7 +164,7 @@ def AUCell_UCAssign(adata,
   ucells_col = [f"UCell_{ct}" for ct in celltype]
   ucells_df = pd.DataFrame(ucells, index=ucells_col, columns=adata.obs_names).T
   for ct in ucells_col:
-    adata.obs[ct] = ucells_df[ct]
+    adata.obs[ct] = ucells_df[ct].astype("float")
   
   # Assign annotations by UCell
   def UCAssign_Thread(i):

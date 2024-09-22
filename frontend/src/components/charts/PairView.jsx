@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import '../theme/dark'
 import '../theme/vintage'
 import vega_20 from '../theme/vega_20'
+import strokeColor from '../theme/strokeColor'
 import {
   GraphicComponent,
   GridComponent,
@@ -39,7 +40,8 @@ import {
   Form,
   Flex,
   Spin,
-  Tour
+  Tour,
+  Progress
 } from 'antd'
 import {
   CheckOutlined,
@@ -52,6 +54,7 @@ import {
   SlidersOutlined,
   UploadOutlined,
   InboxOutlined,
+  ContactsOutlined,
 } from '@ant-design/icons'
 import loadingTips from './LoadingTip'
 echarts.use([
@@ -67,7 +70,7 @@ echarts.use([
 const { useToken } = theme
 const { quitLoading, enterLoading } = Loading
 
-const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width, margin }) => {
+const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, meta, progress }) => {
   const [api, contextHolder] = notification.useNotification()
   const [isInit, setInit] = useState(false) // whether echart object is inited
   const chartRef = useRef(null) // current DOM container
@@ -114,13 +117,15 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
   // Clusters, Batches and Embeddings for SRT
   const [clusterCurSp, setClusterCurSp] = useState({})
   const [embedCurSp, setEmbedCurSp] = useState('')
-  const [clusterOpsSp, setClusterOpsSp] = useState({})
-  const [embedOpsSp, setEmbedOpsSp] = useState({})
+  const [clusterOpsSp, setClusterOpsSp] = useState([])
+  const [embedOpsSp, setEmbedOpsSp] = useState([])
   const [annoCurSp, setAnnoCurSp] = useState([])
   const stAnnoLength = useRef(0)
   const [batchName, setBatchName] = useState("batch")
   const [batchCur, setBatchCur] = useState({})
   const [batchOps, setBatchOps] = useState([])
+  const [propOpsSp, setPropOpsSp] = useState([])
+  const [propCurSp, setPropCurSp] = useState([])
 
   const [tourOpen, setTourOpen] = useState(false)
   const [currTip, setCurrTip] = useState(loadingTips[0])
@@ -392,16 +397,18 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
         try {
           let h5info = H5adLoader(file, event, ['meta'])
           _setSpData(h5info.data)
-          setTitle(h5info.title)
+          setTitle(meta?.st.dataset_id)
           if (h5info.clusters.map((item) => item.label).includes('batch'))
             setBatchName('batch')
           setClusterOpsSp(h5info.clusters)
           setEmbedOpsSp(h5info.embdOps)
+          setPropOpsSp(h5info.propOps)
           return resolve({
             data: h5info.data,
             title: h5info.title,
             clusters: h5info.clusters,
-            embdOps: h5info.embdOps
+            embdOps: h5info.embdOps,
+            propOps: h5info.propOps,
           })
         } catch (error) {
           reject(error)
@@ -445,10 +452,11 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
     })
 
   }
-
+  const actionRef = useRef(0)
   const toggleAnno = (command) => {
     commandRef.current = command
-    setAction(action + 1)
+    actionRef.current = actionRef.current + 1
+    setAction(actionRef.current)
   }
 
   useImperativeHandle(onRef, () => ({  // explode trigger for parent components
@@ -511,12 +519,13 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
         if (_spdims.includes('annotation')) {
           spdefaultAnno = 'annotation'
         } else {
-          spdefaultAnno = 'leiden'
+          spdefaultAnno = 'leiden-1'
         }
         setClusterCurSp({ value: 0, label: spdefaultAnno, attr: 'categories' })
         let _spannotations = setItemGroup(_spsource, _spdims.indexOf(spdefaultAnno), 'categories', false)
         setAnnoCurSp(_spannotations)
         stAnnoLength.current = _spannotations.length
+        setPropCurSp(propOpsSp.find(item => item.label === "Cell2Location"))
 
         // set sp batches
         let batches = []
@@ -594,13 +603,14 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
           })
         }
         snumRef.current = _snum
+        brushRef.current = []
         // set visualMap
         myChart.setOption({
           color: vega_20,
           title: [
             {
               text: "Single-cell Data",
-              left: '16%',
+              left: '18%',
               top: '10%',
               textStyle: {
                 fontSize: 20,
@@ -638,7 +648,7 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
           grid: [
             {
               top: '18%',
-              left: '5%',
+              left: '8%',
               width: '42%',
               bottom: '18%',
             },
@@ -664,6 +674,14 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
           },
         }, {
           replaceMerge: ['dataset', 'series', 'visualMap'],  // enable replaceMerge for datasets
+        })
+
+        myChart.on('click', function (params) {
+          if (params.componentType === 'series' &&
+            params.componentSubType === 'scatter'
+          ) {
+            hoverClu(params.seriesName)
+          }
         })
         quitLoading(1, setLoadings)
       }
@@ -835,11 +853,10 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
           }
         )
         prevCluster.current = clusterCurSc
-        console.log(myChart.getOption())
+        //console.log(myChart.getOption())
       }
       if (commandRef.current === 'spConfigs') {
         let option = myChart.getOption()
-
         // set sp source
         let _sclen = annoCurSc.length + 1
         if (annoCurSc.length === 0) {
@@ -866,12 +883,20 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
         // |--------|------------|
         // |-sclen-1|---stAnno---|
         let clu = clusterCurSp.label
-        let cluIdx = _spdims.indexOf(clusterCurSp.label)
+        let attr = clusterCurSp.attr
+        // use cell proportions from current dcv method.
+        if (annoCurSc.includes(clu)) {
+          let _clu = clusterOpsSp.find(item => item.label === `${propCurSp.label}_${annoCurSc.indexOf(clu)}`)
+          setClusterCurSp(_clu)
+          clu = _clu.label
+          attr = _clu.attr
+        }
+        let cluIdx = _spdims.indexOf(clu)
         let prevAnnoLen = stAnnoLength.current + _sclen + 1
         if (stAnnoLength.current === 0) {
           prevAnnoLen = prevAnnoLen + 1
         }
-        let annotations = setItemGroup(_spsource, cluIdx, clusterCurSp.attr, false)  // spconfig do not change the item group
+        let annotations = setItemGroup(_spsource, cluIdx, attr, false)  // spconfig do not change the item group
         let annoLenOffset = stAnnoLength.current - annotations.length
         if (stAnnoLength.current === 0) {
           annoLenOffset = annoLenOffset + 1
@@ -880,12 +905,12 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
         setAnnoCurSp(annotations)
         let _spdatasets = Dataset.setBatchDataset(_spsource, _spdims, clu, annotations, batchCur.label, batchName, _sclen, false)
         let _datasets = [...option.dataset.slice(0, _sclen), ..._spdatasets, ...option.dataset.slice(prevAnnoLen, prevAnnoLen + 1)]
-        console.log(prevAnnoLen, _datasets)
+        //console.log(prevAnnoLen, _datasets)
         // set series and VisualMap
         let _spSeries = []
         let _snum = _sclen
         let myVisualMap = []
-        if (clusterCurSp.attr === 'categories') {
+        if (attr === 'categories') {
           for (let anno in annotations) {
             _snum = _snum + 1
             _spSeries.push({
@@ -933,7 +958,7 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
             calculable: true,
             dimension: clu,
             seriesIndex: _sclen - 1,
-            right: '3%',
+            left: '60%',
             top: '0%',
             orient: 'horizontal',
             precision: 2,
@@ -963,9 +988,9 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
           manualSeries[i].datasetIndex =
             manualSeries[i].datasetIndex - annoLenOffset
         }
-        console.log(manualSeries)
+        //console.log(manualSeries)
         let _series = [...option.series.slice(0, _sclen - 1), ..._spSeries, ...manualSeries]
-
+        snumRef.current = _series.length - manualSeries.length
         // set VisualMap
         let preVisualMap = option.visualMap
         let _visualMap
@@ -994,7 +1019,7 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
           {
             replaceMerge: ['series', 'dataset', 'visualMap'],
           })
-        console.log(myChart.getOption())
+        //console.log(myChart.getOption())
       }
       if (commandRef.current === 'Confirm') {
         snumRef.current = snumRef.current + 1
@@ -1034,7 +1059,7 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
         axios
           .post('/api/deconv', {
             data: {
-              id: location.state?.st?.dataset_id,
+              id: meta.st?.dataset_id,
               anno: brushRef.current,
               starttime: starttime,
             },
@@ -1063,7 +1088,7 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
               let _spsource = _dataset[_sclen].source
               let _spdims = _dataset[_sclen].dimensions
               // set current customized props
-              setCurrProps(_spsource.map((item, id)=>[item[_spdims.indexOf("index")], props[id]]))
+              setCurrProps(_spsource.map((item, id) => [item[_spdims.indexOf("index")], props[id]]))
               if (_spdims[_spdims.length - 1] === "Customized cell props") { // if exists Cell props
                 _spsource = _spsource.map((item, id) => {  // 2d array
                   item[item.length - 1] = props[id]
@@ -1112,9 +1137,9 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
           })
       }
       if (commandRef.current === 'Rename') {
-        let option = myChart.getOption() 
+        let option = myChart.getOption()
         let _series = option.series
-        _series[_series.length-1].name = inputValue
+        _series[_series.length - 1].name = inputValue
         let prevName = nameRef.current
         nameRef.current = inputValue
         myChart.setOption({
@@ -1129,7 +1154,7 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
         commandRef.current = null
         // modify corresponding item in brush array
         let _newbrush = brushArray
-        let _idx = _newbrush.findIndex(item=>item.name === prevName)
+        let _idx = _newbrush.findIndex(item => item.name === prevName)
         _newbrush[_idx].name = inputValue
         setBrushArray(_newbrush)
       }
@@ -1138,7 +1163,7 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
         axios
           .post('/api/refine', {
             data: {
-              id: location.state?.st?.dataset_id,
+              id: meta.st?.dataset_id,
               type: "sc",
               anno: brushRef.current,
               refiner: refineValue.value,
@@ -1206,7 +1231,7 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
         )
         setSeriesArray(__series)
         setDeleteValue([])
-        console.log(myChart.getOption())
+        //console.log(myChart.getOption())
         api.warning({
           message: 'Annotation Deleted',
           description:
@@ -1270,7 +1295,6 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
             },
             mark: { show: true },
             dataView: { show: true, readOnly: true },
-            restore: { show: true },
             saveAsImage: {
               show: true,
               pixelRatio: 3,
@@ -1290,7 +1314,7 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
         grid: [
           {
             top: '18%',
-            left: '5%',
+            left: '8%',
             width: '43%',
             bottom: '18%',
           },
@@ -1307,12 +1331,21 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
       myChart.on('brushSelected', function (params) {
         let brushed = []
         let brushComponent = params.batch[0]
-        let selectedIdx = brushComponent.selected.map((item) => {
+        let selected = brushComponent.selected
+        console.log(brushRef.current)
+        if (brushRef.current.length > 0) {  // existing brushed series
+          console.log(selected.length, snumRef.current)
+          if (selected.length > snumRef.current) {
+            selected = selected.slice(0, -1)  // brushed series is rendered
+          }
+        }
+        let selectedIdx = selected.map((item) => {
           return item.seriesIndex
         })
-        let selectedInd = brushComponent.selected.map((item) => {
+        let selectedInd = selected.map((item) => {
           return item.dataIndex
         })
+
         for (let i = 0; i < selectedIdx.length; i++) {
           // search for each seriesIndex
           let sIdx = selectedIdx[i]
@@ -1338,6 +1371,14 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
       })
     }
   }, [action])
+
+  const hoverClu = (label) => {
+    let _clu = clusterOpsSp.find((item) => item.label === label)
+    if (typeof _clu !== 'undefined') {
+      setClusterCurSp(_clu)
+      toggleAnno("spConfigs")
+    }
+  }
 
   const JsonLoader = (file) => {
     let newTitle = file.name.replace(/\.json$/, '')
@@ -1368,7 +1409,14 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
       {contextHolder}
 
       <Flex justify="center" gap='middle'>
-        <Spin spinning={loadings[1]} size="large" tip={currTip}>
+        <Spin
+          spinning={loadings[1]}
+          size="large"
+          tip={
+            <div>{currTip}
+              <Progress percent={progress} strokeColor={strokeColor} size={[300, 15]} />
+            </div>
+          }>
           <div
             ref={chartRef}
             className="chart"
@@ -1613,20 +1661,31 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
                         </Space>
                       </Form.Item>
                       <Form.Item
-                        label="Pictures"
+                        label="Props"
                         labelCol={{
                           span: 6,
                         }}>
-                        <Space>
-                          Left:
-                          <Switch /> Right:
-                          <Switch />
-                        </Space>
+                        <Select
+                          labelInValue
+                          placeholder="Methods"
+                          style={{
+                            width: '100%',
+                          }}
+                          placement="topLeft"
+                          options={propOpsSp}
+                          value={propCurSp}
+                          onChange={(target) => {
+                            setPropCurSp({
+                              value: target.value,
+                              label: target.label,
+                            })
+                          }}
+                        />
                       </Form.Item>
                       <Form.Item
                         label="Cluster"
                         labelCol={{
-                          span: 7,
+                          span: 6,
                         }}>
                         {' '}
                         <Select
@@ -1649,9 +1708,9 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
                         />
                       </Form.Item>
                       <Form.Item
-                        label="Embedding"
+                        label="Reduction"
                         labelCol={{
-                          span: 9,
+                          span: 7,
                         }}>
                         {' '}
                         <Select
@@ -1888,6 +1947,7 @@ const PairView = ({ spfile, scfile, setCompLoad, location, onRef, height, width,
                 <div>Clustering: {clusterCurSc.label}</div>
                 <div>Embedding 0: {embedCurSc}</div>
                 <div>Embedding 1: {embedCurSp}</div>
+                <div>Deconv Method: {propCurSp.label}</div>
                 <div>Annotated Clusters: {snumRef.current}</div>
                 <div>Cell number: {cellNum}</div>
               </div>
@@ -1911,11 +1971,12 @@ PairView.propTypes = {
   spfile: PropTypes.object,
   scfile: PropTypes.object,
   setCompLoad: PropTypes.func,
-  location: PropTypes.object,
   onRef: PropTypes.any,
   height: PropTypes.string,
   width: PropTypes.string,
   margin: PropTypes.string,
+  meta: PropTypes.object,
+  progress: PropTypes.number,
 }
 
 export default PairView

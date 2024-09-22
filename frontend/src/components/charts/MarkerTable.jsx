@@ -7,9 +7,10 @@ import {
   LinkOutlined,
   SearchOutlined,
 } from '@ant-design/icons'
+import strokeColor from '../theme/strokeColor'
 import H5adLoader from '../utils/H5adLoader'
 import Highlighter from 'react-highlight-words'
-import { Button, Input, Space, Table, Tooltip, Row, Col, Select, Spin } from 'antd'
+import { Button, Input, Space, Table, Tooltip, Row, Col, Select, Spin, Progress } from 'antd'
 import * as echarts from 'echarts'
 import {
   GraphicComponent,
@@ -37,7 +38,7 @@ echarts.use([
 
 const { enterLoading, quitLoading } = Loading
 
-const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin }) => {
+const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin, progress }) => {
   const commandRef = useRef('')  // current command
   const [action, setAction] = useState(0)
   const [Init, setInit] = useState(false)  // is Inited
@@ -61,6 +62,17 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin })
   const [searchText, setSearchText] = useState('')
   const [searchedColumn, setSearchedColumn] = useState('')
   const searchInput = useRef(null)
+  const [key, setKey] = useState(true)
+
+  // // 滚动条
+  // var xData = key? cells : genes
+  // let standardLen = 20
+  // var isXTooLong = xData.length > standardLen;
+  const [xData, setXData] = useState([])
+  const standardLen = 20
+  const [Genes, setGenes] = useState([])
+  const [Cells, setCells] = useState([])
+
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm()
     setSearchText(selectedKeys[0])
@@ -334,6 +346,8 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin })
         setDyColumns(_columns)
         quitLoading(0, setLoadings)
 
+        console.log(_data)
+
         // set dendrogram
         let den_data = []
         for (let i = 0; i < den.color_list?.length; i++) {
@@ -362,11 +376,32 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin })
         genes = genes.reverse()
         _data = _data.sort((a, b) => cells.indexOf(a.clu) - cells.indexOf(b.clu))
         _data = _data.sort((a, b) => genes.indexOf(a.name) - genes.indexOf(b.name))
+        console.log(_data)
+        console.log(genes)
+        let source_test = _data.map((item) => {
+          return [item.clu, item.name, item.expr, item.frac]
+        })
+        console.log(source_test)
+        console.log(cells)
+
+        setGenes(genes)
+        setCells(cells)
+
+        if (key)
+          setXData(cells)
+        else
+          setXData(genes)
+
+        var isXTooLong = xData.length > standardLen
+
+        console.log(key)
+        console.log(isXTooLong)
+        console.log(xData)
         myChart.setOption({
           grid: [
             {
               top: '12%',
-              left: '15%',
+              left: 25,
               right: '15%',
               bottom: '10%',
               axisLine: {
@@ -379,10 +414,11 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin })
                   color: '#ffbd67',
                 },
               },
+              containLabel: true,
             },
             {
               top: '4%',
-              left: '15%',
+              left: 88,
               right: '17%',
               height: '8%',
               show: false,
@@ -391,10 +427,38 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin })
           yAxis: [
             {
               gridIndex: 0,
-              data: genes,
+              name: 'Top Markers',
+              nameLocation: 'middle',
+              nameGap: 70,
+              nameRotate: 90,
+              nameTextStyle: {
+                fontWeight: 'bold',
+                fontSize: 16,
+              },
+              type: 'category',
               splitArea: {
                 show: true,
                 interval: showTop,
+              },
+              axisLabel: {
+                formatter: function (value, index) {
+                  // margin: x label
+                  // total: 60 labels
+                  // var margin = Math.round(showTop/10)+1
+                  // return index % (margin*2) === 0 ? value : '';
+                  let margin = Math.round(genes.length / 70)
+                  // console.log(margin)
+                  return index % margin == 0 ? value : ''
+                },
+                rotate: 0,
+              },
+              axisTick: {
+                show: true,
+                interval: function (index) {
+                  // 让刻度线间隔与 axisLabel 一致
+                  let margin = Math.round(genes.length / 70)
+                  return index % margin === 0
+                },
               },
             },
             {
@@ -407,6 +471,9 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin })
             {
               gridIndex: 0,
               data: cells,
+              axisLabel: {
+                rotate: 0,
+              }
             }, {
               gridIndex: 1,
               min: 0,
@@ -449,11 +516,30 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin })
               lineStyle: { color: '#gray', width: 2 },
               drawPoint: true,
               silent: false,
-            },]
+            },],
+          dataZoom: isXTooLong ? [
+            {
+              type: 'slider',
+              xAxisIndex: 0,
+              start: 0,
+              end: (standardLen / xData.length) * 100,
+              show: true,
+            }
+          ] : [
+            {
+              type: 'slider',
+              show: false,
+              xAxisIndex: 0,
+              start: 0,
+              end: 100,
+            },
+          ],
         })
+        console.log(myChart.dataZoom)
         quitLoading(1, setLoadings)
       }
-    } else {
+    }
+    else {
       var myChart = echarts.init(chartRef.current) //init the echart container
       enterLoading(0, setLoadings)
       enterLoading(1, setLoadings)
@@ -475,9 +561,10 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin })
         grid: [
           {
             top: '12%',
-            left: '15%',
+            left: '20',
             right: '15%',
             bottom: '5%',
+            // containLabel: false,
             axisLine: {
               lineStyle: {
                 color: '#fff',
@@ -491,7 +578,7 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin })
           },
           {
             top: '4%',
-            left: '15%',
+            left: '88',
             right: '21%',
             height: '8%',
             show: false,
@@ -516,12 +603,15 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin })
             },
             axisTick: {
               alignWithLabel: true,
+              // show: true
             },
             axisLabel: {
               interval: 0,
               rotate: 0,
               margin: 10,
               fontSize: 10,
+              // show: true,
+              // overflow: 'break', // 标签可以超出
             },
           },
           {
@@ -557,12 +647,15 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin })
             },
             axisTick: {
               alignWithLabel: true,
+              // show: true,
             },
             axisLabel: {
               interval: 0,
               fontSize: 14,
               rotate: 0,
               margin: 12,
+              // show: true,
+              // overflow: 'break', // 标签可以超出
             },
           },
           {
@@ -649,13 +742,22 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin })
               options={[5, 10, 15, 30, 50, 100].map(item => ({ value: item }))}
               onChange={(value) => {
                 setShowTop(value)
+                setKey(true)
+                setXData(Cells)
                 toggleAnno("Upload")
               }} />
             {' '} Markers of each Cluster
           </div>
         </Col>
         <Col span={22} offset={1}>
-          <Spin spinning={loadings[0]} size="large" tip={currTip}>
+          <Spin
+            spinning={loadings[0]}
+            size="large"
+            tip={
+              <div>{currTip}
+                <Progress percent={progress} strokeColor={strokeColor} size={[300, 15]} />
+              </div>
+            }>
             <Table
               columns={dyColumns}
               dataSource={data}
@@ -675,12 +777,158 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin })
         </Col>
       </Row>
       <Row>
-        <Spin spinning={loadings[0]} size="large" tip={currTip}>
+        <Spin
+          spinning={loadings[0]}
+          size="large"
+          tip={
+            <div>{currTip}
+              <Progress percent={progress} strokeColor={strokeColor} size={[300, 15]} />
+            </div>
+          }>
+          <Button
+            onClick={() => {
+              // chart update
+
+              var mychart = echarts.getInstanceByDom(chartRef.current)
+              const currentOption = mychart.getOption()
+
+              // dataste : [x, y, value1, value2] -> [y, x, value1, value2]
+              console.log(currentOption)
+              var source = currentOption.dataset[0].source
+              var dimensions = currentOption.dataset[0].dimensions
+
+              // exchange dimensions
+              dimensions = [dimensions[1], dimensions[0], dimensions[3], dimensions[2]]
+
+              // exchange source
+              for (let i = 0; i < source.length; i++) {
+                let temp_data = source[i]
+                source[i] = [temp_data[1], temp_data[0], temp_data[3], temp_data[2]]
+              }
+
+              console.log(source)
+              console.log(dimensions)
+
+              const newXAxis = currentOption.yAxis.map(yAxisItem => ({
+                ...yAxisItem,
+                data: currentOption.yAxis[0].data,
+              }))
+
+              const newYAxis = currentOption.xAxis.map(xAxisItem => ({
+                ...xAxisItem,
+                data: currentOption.xAxis[0].data,
+              }))
+
+              if (key) {
+                newXAxis[0].axisLabel = {
+                  rotate: 90,
+                }
+                newXAxis[0].nameRotate = 0
+                newYAxis[0].nameRotate = 90
+              }
+              else {
+                newXAxis[0].axisLabel = {
+                  rotate: 0,
+                }
+                newYAxis[0].axisLabel = {
+                  rotate: 0,
+                }
+                newXAxis[0].nameRotate = 0
+                newYAxis[0].nameRotate = 90
+              }
+
+              // 修改 series 的 encode，确保 x 和 y 轴的映射也被交换
+              const newSeries = currentOption.series.map(series => ({
+                ...series,
+                encode: {
+                  x: key ? 'gene' : 'cell',
+                  y: key ? 'cell' : 'gene',
+                  tooltip: [0, 1, 2, 3],
+                },
+              }))
+              console.log(newSeries)
+
+              if (key) {
+                setXData(Genes)
+              }
+              else {
+                setXData(Cells)
+              }
+              var newDataZoom
+              if (key)
+                newDataZoom = {
+                  type: 'slider',
+                  xAxisIndex: 0,
+                  start: 0,
+                  end: (standardLen / Genes.length) * 100,
+                  show: true,
+                }
+              else
+                newDataZoom = []
+
+
+              console.log(xData)
+
+              const newOption = {
+                ...currentOption,
+                // xAxis: currentOption.yAxis,
+                // yAxis: currentOption.xAxis,
+                xAxis: newXAxis,
+                yAxis: newYAxis,
+                grid: [
+                  {
+                    top: '12%',
+                    left: 20,
+                    right: '15%',
+                    bottom: '10%',
+                    axisLine: {
+                      lineStyle: {
+                        color: '#fff',
+                      },
+                    },
+                    axisPointer: {
+                      lineStyle: {
+                        color: '#ffbd67',
+                      },
+                    },
+                    containLabel: true,
+                  },
+                  {
+                    top: '4%',
+                    left: 88,
+                    right: '17%',
+                    height: '8%',
+                    show: false,
+                  },
+                ],
+                dataset: {
+                  dimensions: dimensions,
+                  source: source
+                },
+                series: newSeries,
+                dataZoom: newDataZoom,
+              }
+
+
+              mychart.setOption(newOption, true) // 更新图表
+
+              if (key) {
+                setKey(false)
+              }
+              else {
+                setKey(true)
+              }
+
+            }}>rotation</Button>
           <div
             ref={chartRef}
             className="chart"
             //the target DOM container needs height and width
-            style={{ height: height, width: width, margin: margin }}></div>
+            style={{
+              height: height,
+              width: width,
+              margin: margin
+            }}></div>
         </Spin>
       </Row>
     </>
@@ -701,6 +949,7 @@ MarkerTable.propTypes = {
   height: PropTypes.string,
   width: PropTypes.string,
   margin: PropTypes.string,
+  progress: PropTypes.number,
 }
 
 export default MarkerTable

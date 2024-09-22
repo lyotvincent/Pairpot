@@ -53,7 +53,8 @@ const options = [
     renderItem("A topographic atlas defines developmental origins of cell heterogeneity in the human embryonic lung [ST]", "STDS0000175"),
     renderItem("Cancer cell states recur across tumor types and form specific interactions with the tumor microenvironment", 'STDS0000153'),
     renderItem("Intratumor heterogeneity and T cell exhaustion in primary CNS lymphoma", 'STDS0000152'),
-    renderItem("Spatially resolved transcriptomics revised human distal lung epithelial hierarchy [spatial transcriptomics]", 'STDS0000114')
+    renderItem("Spatially resolved transcriptomics revised human distal lung epithelial hierarchy [spatial transcriptomics]", 'STDS0000114'),
+    renderItem("SAW: An efficient and accurate data analysis workflow for Stereo-seq spatial transcriptomics]", 'STDS0000234')
     ],
   },
 ]

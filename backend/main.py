@@ -108,6 +108,7 @@ def search_dataset():
 
 
 def find_dataset(key):
+    key = key.replace("'", "")
     # keys = key.split(" ")
     # title > summary > overall_design > species/Tissues/Platforms/disease
     conn = sqlite3.connect('resources/STpair.db')
@@ -489,6 +490,28 @@ def query_sc():
     if id not in builtID:
         id = '235'
     return send_file(f'./resources/{id}/sc_meta.h5ad')
+
+@app.route('/query/spgz', methods=['GET'])
+def query_spgz():
+    id = request.args.get("id")
+    if id is not None:
+        if id[:2] == "ST":
+            id = id[-3:]
+    print(id)
+    if id not in builtID:
+        id = '235'
+    return send_file(f'./resources/{id}/sp_meta.h5ad.zip')
+
+@app.route('/query/scgz', methods=['GET'])
+def query_scgz():
+    id = request.args.get("id")
+    if id is not None:
+        if id[:2] == "ST":
+            id = id[-3:]
+    print(id)
+    if id not in builtID:
+        id = '235'
+    return send_file(f'./resources/{id}/sc_meta.h5ad.zip')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5522)

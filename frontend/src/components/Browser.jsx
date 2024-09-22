@@ -1,5 +1,7 @@
 import { DotChartOutlined, FileDoneOutlined, FileSearchOutlined, FileTextOutlined, HeatMapOutlined, LinkOutlined, OneToOneOutlined, SelectOutlined, SlidersOutlined, UnorderedListOutlined } from '@ant-design/icons'
 import React, { useState, useEffect, lazy, Suspense, useRef, memo } from 'react'
+import JSZip from 'jszip'
+import { ZipReader, BlobReader, BlobWriter } from "@zip.js/zip.js"
 import logoFig from "../assets/img/mylogo.png"
 import {
   Menu,
@@ -18,6 +20,7 @@ import {
   ConfigProvider,
   Anchor,
   Flex,
+  Segmented,
 } from 'antd'
 import ToggleAccordion from './utils/ToggleAccordion'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -39,6 +42,7 @@ const LayerView = lazy(() => (import('./charts/SpScatter')))
 const PairView = lazy(() => (import('./charts/PairView')))
 
 const Browser = () => {
+  const testFlag = true
   const navigate = useNavigate()
   const location = useLocation()
   const [Init, setInit] = useState(false)
@@ -46,32 +50,77 @@ const Browser = () => {
   const [locState, setLocState] = useState(false)
   const [action, setAction] = useState(0)
   const commandRef = useRef()
+  const stProgress = useRef()
+  const scProgress = useRef()
   const onClickSideMenu = (e) => {
 
   }
+  // const [myVal, setMyval] = useState()
+  const myVal = location.state != null ? location.state.myVal : 'null'
+  // const myVal = () => {
+  //   if(location.state == null)
+  //     return 'null'
+  //   if(location.state.myVal == 'LassoView' ||
+  //      location.state.myVal == "Layer View" ||
+  //      location.state.myVal == "Pair View" || 
+  //      location.state.myVal == "Cell Interactions"
+  //   ){
+  //     const val = location.state.myVal
+  //     // 使用 navigate 只更新 state，不改变路径
+  //     // navigate('.', { replace: true, state: null });
+  //     return val
+  //   }
+  // }
+
+  const [modelKey, setModelKey] = useState(true)
+
   const fetchSPData = (state) => (
-    axios.get('/api/query/sp', {
+    axios.get('/api/query/spgz', {
       params: {
         id: state.st?.dataset_id
       },
       responseType: 'blob',
+      onDownloadProgress: (progressEvent) => {
+        stProgress.current = Math.round(progressEvent.loaded / progressEvent.total * 100)
+      }
     }).then((response) => {
       let spblob = response.data
-      let _spfile = new File([spblob], "sp_meta.h5ad")
-      return _spfile
+      let zipFileReader = new BlobReader(spblob)
+      let zipReader = new ZipReader(zipFileReader)
+      let firstEntry = zipReader.getEntries().then((entry) => { return (entry.shift()) })
+      return (
+        firstEntry.then((entry) => entry.getData(new BlobWriter()))
+          .then((_blob) => {
+            return (new File([_blob], "sp_meta.h5ad"))
+          })
+      )
+    }).then((_scfile) => {
+      return (_scfile)
     })
   )
 
   const fetchSCData = (state) => (
-    axios.get('/api/query/sc', {
+    axios.get('/api/query/scgz', {
       params: {
         id: state.st?.dataset_id
       },
       responseType: 'blob',
+      onDownloadProgress: (progressEvent) => {
+        scProgress.current = Math.round(progressEvent.loaded / progressEvent.total * 100)
+      }
     }).then((response) => {
       let scblob = response.data
-      let _scfile = new File([scblob], "sc_sampled.h5ad")
-      return _scfile
+      let zipFileReader = new BlobReader(scblob)
+      let zipReader = new ZipReader(zipFileReader)
+      let firstEntry = zipReader.getEntries().then((entry) => { return (entry.shift()) })
+      return (
+        firstEntry.then((entry) => entry.getData(new BlobWriter()))
+          .then((_blob) => {
+            return (new File([_blob], "sc_meta.h5ad"))
+          })
+      )
+    }).then((_scfile) => {
+      return (_scfile)
     })
   )
 
@@ -130,31 +179,25 @@ const Browser = () => {
   const CPDBAnchor = React.createRef() // location of LassoView
   const sideMenuItems = [
     {
-      label: 'Search',
-      ref: SearchAnchor,
-      key: 'Search',
-      icon: <FileSearchOutlined />
-    },
-    {
       label: 'MetaInfo',
       ref: MetaAnchor,
       key: 'MetaInfo',
       icon: <FileDoneOutlined />
     },
     {
-      label: 'LassoView',
+      label: 'Lasso-View',
       ref: LassoAnchor,
       key: 'LassoView',
       icon: <SelectOutlined />
     },
     {
-      label: 'Layer View',
+      label: 'Layer-View',
       ref: LayerAnchor,
       key: 'LayerView',
       icon: <DotChartOutlined />
     },
     {
-      label: 'Pair View',
+      label: 'Pair-View',
       ref: PairAnchor,
       key: 'PairView',
       icon: <OneToOneOutlined />
@@ -191,14 +234,20 @@ const Browser = () => {
   })
 
   useEffect(() => {
-    if (example.status === 'success' && typeof example.data !== 'undefined' && location.state === null) {
+    // console.log(location.state)
+    console.log(example)
+    if (example.status === 'success' && typeof example.data !== 'undefined' &&
+      (location.state === null || 'myVal' in location.state)) {
+      // console.log("setting example")
       setLocState(example.data)
+      // console.log("example finished")
     }
   }, [example.data])
 
   useEffect(() => {
     if (typeof locState !== 'undefined' &&
-      location.state === null &&
+      // location.state === null &&
+      (location.state === null || 'myVal' in location.state) &&
       MetaRef.current !== null) {
       MetaRef.current.Trigger(example.data)
       statusSC.mutate(locState)
@@ -207,7 +256,7 @@ const Browser = () => {
   }, [locState, MetaRef.current])
 
   useEffect(() => {
-    if (Init && location.state !== null) {
+    if (Init && location.state !== null && !('myVal' in location.state)) {
       // set MetaInfo
       MetaRef.current.Trigger(location.state)
       setLocState(location.state)
@@ -221,7 +270,7 @@ const Browser = () => {
       })
 
       // set loading status for each components
-      LassoRef.current?.Tip(loadingTips[3])
+      LassoRef.current?.Tip(<div>{loadingTips[3]}</div>)
       if (LassoRef.current !== null)
         enterLoading(0, LassoRef.current.Loading)
 
@@ -265,33 +314,176 @@ const Browser = () => {
   }, [PairRef.current, LassoRef.current, LayerRef.current, MetaRef.current])
 
   useEffect(() => {
-    if (statusSP.status === 'success' &&
-      typeof statusSP.data !== "undefined") {
-      if (!componentLoad['LayerView']) {
-        LayerRef.current?.Trigger("Reload")  // only reload once
+    if (!modelKey) {
+      if (statusSP.status === 'success' &&
+        typeof statusSP.data !== "undefined") {
+        if (!componentLoad['LayerView']) {
+          LayerRef.current?.Trigger("Reload")  // only reload once
+        }
+        if (!componentLoad['MarkerTable']) {
+          MarkerRef.current?.Trigger("Reload")
+        }
       }
-      if (!componentLoad['MarkerTable']) {
-        MarkerRef.current?.Trigger("Reload")
+      if (statusSP.status === 'success' &&
+        statusSC.status === 'success' &&
+        typeof statusSC.data !== "undefined" &&
+        typeof statusSP.data !== "undefined") {
+        if (!componentLoad['LassoView']) {
+          LassoRef.current?.Trigger("Reload")
+        }
+        if (!componentLoad['PairView']) {
+          PairRef.current?.Trigger("Reload")
+        }
+        if (!componentLoad['NetWorkRelation']) {
+          NetRef.current?.Trigger("Reload")
+        }
+        if (!componentLoad['CPDBHeatmap']) {
+          CPDBRef.current?.Trigger("Reload")
+        }
       }
     }
-    if (statusSP.status === 'success' &&
-      statusSC.status === 'success' &&
-      typeof statusSC.data !== "undefined" &&
-      typeof statusSP.data !== "undefined") {
-      if (!componentLoad['LassoView']) {
-        LassoRef.current?.Trigger("Reload")
-      }
-      if (!componentLoad['PairView']) {
-        PairRef.current?.Trigger("Reload")
-      }
-      if (!componentLoad['NetWorkRelation']) {
-        NetRef.current?.Trigger("Reload")
-      }
-      if (!componentLoad['CPDBHeatmap']) {
-        CPDBRef.current?.Trigger("Reload")
+    else {
+      if (statusSP.status === 'success' &&
+        statusSC.status === 'success' &&
+        typeof statusSC.data !== "undefined" &&
+        typeof statusSP.data !== "undefined") {
+        if (selectedKey === sideMenuItems[1].key &&
+          !componentLoad['LassoView']
+        ) {  // LassoView
+          LassoRef.current?.Trigger("Reload")
+        }
+        if (selectedKey === sideMenuItems[2].key &&
+          !componentLoad['LayerView']
+        ) {  // LayerView
+          LayerRef.current?.Trigger("Reload")
+        }
+        if (selectedKey === sideMenuItems[3].key &&
+          !componentLoad['PairView']
+        ) {  // PairView
+          PairRef.current?.Trigger("Reload")
+        }
+        if (selectedKey === sideMenuItems[4].key &&
+          !componentLoad['MarkerTable']
+        ) {  // MarkerTable
+          MarkerRef.current?.Trigger("Reload")
+        }
+        if (selectedKey === sideMenuItems[5].key &&
+          !componentLoad['NetWorkRelation']
+        ) {  // NetWorkRelation
+          NetRef.current?.Trigger("Reload")
+        }
+        if (selectedKey === sideMenuItems[5].key &&
+          !componentLoad['CPDBHeatmap']
+        ) {  // CPDBHeatmap
+          CPDBRef.current?.Trigger("Reload")
+        }
       }
     }
   }, [statusSP.variables, statusSC.variables, PairRef])
+
+  useEffect(() => {
+    // console.log(myVal)
+    if (
+      LassoAnchor.current != null &&
+      LayerAnchor.current != null &&
+      PairAnchor.current != null &&
+      CPDBAnchor.current != null &&
+      SearchAnchor.current != null
+      || true // only need true
+    ) {
+      console.log(myVal)
+      if (myVal != 'null' && myVal != 'undefined') {
+        switch (myVal) {
+          case 'Lasso-View':
+            // setMyValItem(sideMenuItems[2]);
+            setSelectedKey(sideMenuItems[1].key)
+            // sideMenuItems[2].ref.current.scrollIntoView({ behavior: "smooth", block: 'start' })
+            break
+          case 'Layer-View':
+            // setMyValItem(sideMenuItems[3]);
+            // console.log(myValItem)
+            setSelectedKey(sideMenuItems[2].key)
+            // sideMenuItems[3].ref.current.scrollIntoView({ behavior: "smooth", block: 'start' })
+            break
+          case 'Pair-View':
+            // setMyValItem(sideMenuItems[4]);
+            setSelectedKey(sideMenuItems[3].key)
+            // sideMenuItems[4].ref.current.scrollIntoView({ behavior: "smooth", block: 'start' })
+            break
+          case 'Cell Interactions':
+            // setMyValItem(sideMenuItems[6]);
+            setSelectedKey(sideMenuItems[5].key)
+            // sideMenuItems[6].ref.current.scrollIntoView({ behavior: "smooth", block: 'start' })
+            break
+          default:
+            // setMyValItem(sideMenuItems[0]);
+            setSelectedKey(sideMenuItems[0].key)
+            // sideMenuItems[0].ref.current.scrollIntoView({ behavior: "smooth", block: 'start' })
+            break
+        }
+
+      }
+    }
+
+    // // if --> async
+    // // conditions
+    // const checkCondition = () => {
+    //   return (
+    //     PairRef.current !== null &&
+    //     LassoRef.current !== null &&
+    //     LayerRef.current !== null &&
+    //     MetaRef.current !== null
+    //   );
+    // };
+
+    // const waitForCondition = async () => {
+    //   while (!checkCondition()) {
+    //     console.log("Waiting for refs to be ready...");
+    //     await new Promise((resolve) => setTimeout(resolve, 100)); // 每隔 100ms 检查一次
+    //   }
+    //   // 条件满足后执行后续操作
+    //   console.log("All refs are ready!");
+    //   // 这里写你的逻辑，当 if 条件满足时执行
+
+    //   if( myVal != 'null' && myVal != 'undefined'){
+    //     console.log("here")
+    //     switch(myVal){
+    //       case 'LassoView':
+    //         // setMyValItem(sideMenuItems[2]);
+    //         setSelectedKey(sideMenuItems[2].key)
+    //         sideMenuItems[2].ref.current.scrollIntoView({ behavior: "smooth", block: 'start' })
+    //         break;
+    //       case 'Layer View':
+    //         // setMyValItem(sideMenuItems[3]);
+    //         // console.log(myValItem)
+    //         setSelectedKey(sideMenuItems[3].key)
+    //         sideMenuItems[3].ref.current.scrollIntoView({ behavior: "smooth", block: 'start' })
+    //         break;
+    //       case 'Pair View':
+    //         // setMyValItem(sideMenuItems[4]);
+    //         setSelectedKey(sideMenuItems[4].key)
+    //         sideMenuItems[4].ref.current.scrollIntoView({ behavior: "smooth", block: 'start' })
+    //         break;
+    //       case 'Cell Interactions' :
+    //         // setMyValItem(sideMenuItems[6]);
+    //         setSelectedKey(sideMenuItems[6].key)
+    //         sideMenuItems[6].ref.current.scrollIntoView({ behavior: "smooth", block: 'start' })
+    //         break;
+    //       default:
+    //         // setMyValItem(sideMenuItems[0]);
+    //         setSelectedKey(sideMenuItems[0].key)
+    //         sideMenuItems[0].ref.current.scrollIntoView({ behavior: "smooth", block: 'start' })
+    //         break;
+    //     }
+
+    //   }
+
+    // };
+
+    // waitForCondition(); // 启动异步轮询
+
+
+  }, [myVal, Init])
 
   return (
     <ConfigProvider
@@ -323,6 +515,25 @@ const Browser = () => {
               position: 'fixed'
             }}
           >
+            {/* <Switch
+            checkedChildren="card"
+            unCheckedChildren="roll" */}
+            <Segmented block
+              options={[
+                { label: 'card', value: true },
+                { label: 'roll', value: false },
+              ]}
+              value={modelKey}
+              // style={{
+              //   zIndex: 1000,
+              //   left: '50px',
+              //   top: '680px',
+              //   position: 'fixed'
+              // }}
+              onChange={(value) => {
+                setModelKey(value)
+              }}
+            />
             {sideMenuItems.map((item) => (
               <Menu.Item
                 key={item.key}
@@ -330,6 +541,7 @@ const Browser = () => {
                 onClick={(e) => {
                   setSelectedKey(e.key)
                   item.ref.current.scrollIntoView({ behavior: "smooth", block: 'start' })
+                  console.log(e.key)
                 }}>
                 {item.label}
               </Menu.Item>
@@ -353,14 +565,15 @@ const Browser = () => {
             <Divider />
             {/* <div>compLoad:{JSON.stringify(componentLoad)}</div> */}
             <Suspense fallback={<h1>Loading for MetaInfo...</h1>}>
-              <Card id="MetaInfo" ref={MetaAnchor}>
+              <Card style={{ display: selectedKey == "MetaInfo" || !modelKey ? 'block' : 'none' }}
+                id="MetaInfo" ref={MetaAnchor}>
                 <MetaInfo onRef={MetaRef} />
                 {/* <div>{JSON.stringify(location.state)}</div> */}
               </Card>
             </Suspense>
-            <Divider />
+            <Divider style={{ display: !modelKey ? 'block' : 'none' }} />
             <Suspense fallback={<h1>Loading for LassoView...</h1>}>
-              <Card>
+              <Card style={{ display: selectedKey == "LassoView" || !modelKey ? 'block' : 'none' }}>
                 <ToggleAccordion header={
                   <h3 id="LassoView" ref={LassoAnchor}>Lasso-View
                   </h3>}>
@@ -396,12 +609,20 @@ const Browser = () => {
                   }}>
                   {"Begin Tour >>>"}
                 </Button>
-                <LassoView spfile={statusSP.data} scfile={statusSC.data} setCompLoad={setComponentLoad} meta={locState} onRef={LassoRef} />
+                <LassoView
+                  spfile={statusSP.data}
+                  scfile={statusSC.data}
+                  setCompLoad={setComponentLoad}
+                  meta={locState}
+                  onRef={LassoRef}
+                  progress={(stProgress.current + scProgress.current) / 2} />
               </Card>
+              {/* )} */}
             </Suspense>
-            <Divider />
+            <Divider style={{ display: !modelKey ? 'block' : 'none' }} />
             <Suspense fallback={<h1>Loading for LayerView...</h1>}>
-              <Card>
+              {/* { selectedKey == "LayerView" &&( */}
+              <Card style={{ display: selectedKey == "LayerView" || !modelKey ? 'block' : 'none' }}>
                 <ToggleAccordion header={<h3 id="LayerView" ref={LayerAnchor}>Layer-View</h3>}>
                   {<div>
                     <b>Overview:</b> Inspired by 3D Landscape in De-spot, Pairpot develops
@@ -429,12 +650,22 @@ const Browser = () => {
                   }}>
                   {"Begin Tour >>>"}
                 </Button>
-                <LayerView id='LayerView' query={true} spfile={statusSP.data} setCompLoad={setComponentLoad} onRef={LayerRef} meta={locState} />
+                <LayerView
+                  id='LayerView'
+                  query={true}
+                  spfile={statusSP.data}
+                  setCompLoad={setComponentLoad}
+                  onRef={LayerRef}
+                  meta={locState}
+                  progress={(stProgress.current + scProgress.current) / 2}
+                />
               </Card>
+              {/* )} */}
             </Suspense>
-            <Divider />
+            <Divider style={{ display: !modelKey ? 'block' : 'none' }} />
             <Suspense fallback={<h1>Loading for PairView...</h1>}>
-              <Card>
+              {/* {selectedKey=="PairView" &&( */}
+              <Card style={{ display: selectedKey == "PairView" || !modelKey ? 'block' : 'none' }}>
                 <ToggleAccordion header={<h3 id="PairView" ref={PairAnchor}>Pair-View</h3>}>
                   {<div>
                     <b>Overview:</b> Pair-View is another heuristic analysis that aids users to quickly
@@ -444,18 +675,18 @@ const Browser = () => {
                     pre-analyzed by Pair-View, which uses the Mann-Whitney U
                     statistic to evaluate the related gene expression in single-cell
                     and SRT data.
-                    <br/>
+                    <br />
                     <b>Left Chart:</b> The embedding of single-cell data with pre-defined cell types.
-                    <br/>
+                    <br />
                     <b>Right Chart:</b> The embedding of SRT data with pre-defined spatial domains.
-                    <br/>
+                    <br />
                     <b>Usage:</b>
                     <ol>
                       <li>Click the Lasso Tools at TopRight, then select the cells of interests in the left chart.</li>
                       <li>Use Select modes and tools to zoom, draw, and erase the customized cells.</li>
                       <li>Click the `Deconv` buttons to infer cell proportions of spots using the user-selected cells. It would cost a few seconds. </li>
                       <li>Users can also refine the selected current cell types as same as the operations in LassoView.</li>
-                      <li>Drag the bar at the top of charts to adjust the thresholds.</li> 
+                      <li>Drag the bar at the top of charts to adjust the thresholds.</li>
                       <li>Explore cell proportions of different batches through `Batches` in `Settings` button.</li>
                       <li>Click `Save` to download the customized cell types and their proportions.</li>
                     </ol>
@@ -472,38 +703,64 @@ const Browser = () => {
                   }}>
                   {"Begin Tour >>>"}
                 </Button>
-                <PairView spfile={statusSP.data} scfile={statusSC.data} setCompLoad={setComponentLoad} location={location} onRef={PairRef} />
+                <PairView
+                  spfile={statusSP.data}
+                  scfile={statusSC.data}
+                  setCompLoad={setComponentLoad}
+                  meta={locState}
+                  onRef={PairRef}
+                  progress={(stProgress.current + scProgress.current) / 2}
+                />
               </Card>
             </Suspense>
-            <Divider />
-            <Card>
+            <Divider style={{ display: !modelKey ? 'block' : 'none' }} />
+            {/* { (selectedKey == "SpatialMarkers")&& ( */}
+            <Card style={{ display: selectedKey == "SpatialMarkers" || !modelKey ? 'block' : 'none' }}>
               <ToggleAccordion header={<h3 id="SpatialMarkers" ref={MarkerAnchor}>Spatial Markers</h3>}>
                 {<div>
                   <b>Top:</b> List of spatial markers in each cluster. The clusters are segmented by MENDER in SRT data, and are indentified by Leiden in single-cell data. Users can change the number of markers for each cluster.
-                  <br/>
-                  <b>Bottom:</b> Heatmap of spatial markers in each cluster. Rows are genes and columns are clusters. 
+                  <br />
+                  <b>Bottom:</b> Heatmap of spatial markers in each cluster. Rows are genes and columns are clusters.
                   <br />
                 </div>}
               </ToggleAccordion>
-              <MarkerTable file={statusSP.data} setCompLoad={setComponentLoad} onRef={MarkerRef} />
+              <MarkerTable
+                file={statusSP.data}
+                setCompLoad={setComponentLoad}
+                onRef={MarkerRef}
+                progress={(stProgress.current + scProgress.current) / 2}
+              />
             </Card>
-            <Divider />
-            <Card>
+            {/* )} */}
+            <Divider style={{ display: !modelKey ? 'block' : 'none' }} />
+            {/* { (selectedKey == "CellInteractions") && ( */}
+            <Card style={{ display: selectedKey == "CellInteractions" || !modelKey ? 'block' : 'none' }}>
               <ToggleAccordion header={<h3 id="CellInteractions" ref={CPDBAnchor}>Cell Interactions</h3>}>
                 {<div>
                   <b>Top:</b> Cell-Cell interaction networks. Click the switch to change the chart from single-cell to SRT data. Click the legends to rerender the chart.
                   <br />
-                  <b>Bottom:</b> Ligand-Receptor pairs. Click the switch to change the chart from single-cell to SRT data. Select the cluster ID to display its related L-R pairs. 
+                  <b>Bottom:</b> Ligand-Receptor pairs. Click the switch to change the chart from single-cell to SRT data. Select the cluster ID to display its related L-R pairs.
                 </div>}
               </ToggleAccordion>
               <Row>
-              <Col span={12} offset={5}>
-              <NetworkRelation spfile={statusSP.data} scfile={statusSC.data} setCompLoad={setComponentLoad} onRef={NetRef} />
-              </Col>
+                <Col span={12} offset={5}>
+                  <NetworkRelation
+                    spfile={statusSP.data}
+                    scfile={statusSC.data}
+                    setCompLoad={setComponentLoad}
+                    onRef={NetRef}
+                    progress={(stProgress.current + scProgress.current) / 2}
+                  />
+                </Col>
               </Row>
-              <RelHeat spfile={statusSP.data} scfile={statusSC.data} setCompLoad={setComponentLoad} onRef={CPDBRef} />
+              <RelHeat
+                spfile={statusSP.data}
+                scfile={statusSC.data}
+                setCompLoad={setComponentLoad}
+                onRef={CPDBRef}
+                progress={(stProgress.current + scProgress.current) / 2}
+              />
             </Card>
-            {/* <div style={{color: 'black'}}>{JSON.stringify(location.state)}</div> */}
           </Content>
           <Footer>
             <Row>
@@ -526,10 +783,10 @@ const Browser = () => {
               <Col offset={1}>
                 <p>
                   *Zhihan Ruan, Centre for Bioinformatics and Intelligent
-                  Medicine, Nankai University, rrrzhan@nankai.edu.cn
+                  Medicine, Nankai University, rrrzhan@mail.nankai.edu.cn
                 </p>
                 <p>
-                  *Jian Liu, State Key Laboratory of Medical Chemical Biology, College of Computer Science, Nankai University, jianliu@nankai.edu.cn
+                  *Jian Liu, State Key Laboratory of Medical Chemical Biology, College of Computer Science, Nankai University, jianliu@mail.nankai.edu.cn
                 </p>
               </Col>
             </Row>

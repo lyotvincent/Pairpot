@@ -1,4 +1,8 @@
 const Technologies = [
+  "10μm",
+  "25μm",
+  "50μm",
+  "cell-bin",
   "Stereo-Seq",
   "10x Visium",
   "Spatial Transcriptomics",
@@ -31,7 +35,7 @@ const Technologies = [
   "APEX-seq",
   "Proximity RNA-seq",
   "HDST",
-  "seqFish"
+  "seqFish",
 ]
 
 export default Technologies

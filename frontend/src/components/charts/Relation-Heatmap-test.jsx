@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useState, useImperativeHandle } from 'react'
 import * as echarts from 'echarts'
 import PropTypes from 'prop-types'
-import { Space, Spin, Switch } from 'antd'
+import strokeColor from '../theme/strokeColor'
+import { Space, Spin, Switch, Select, Progress } from 'antd'
 import {
   GraphicComponent,
   GridComponent,
@@ -29,7 +30,7 @@ echarts.use([
 
 const { enterLoading, quitLoading } = Loading
 
-const RelHeat = ({ spfile, scfile,setCompLoad, onRef, title, height, width, margin }) => {
+const RelHeat = ({ spfile, scfile, setCompLoad, onRef, title, height, width, margin, progress }) => {
   const chartRef = useRef(null) // get current DOM container
   const commandRef = useRef('')
   const [action, setAction] = useState(0)
@@ -39,7 +40,10 @@ const RelHeat = ({ spfile, scfile,setCompLoad, onRef, title, height, width, marg
   const [currentData, setCurrentData] = useState(null)
   const [currentInt, setCurrentInt] = useState(null)
   const [currentCell, setCurrentCell] = useState(null)
+  const [currMethod, setCurrMethod] = useState(null)
+  const [currCluster, setCurrCluster] = useState(null)
 
+  const [methods, setMethods] = useState([])
   const [myCells, setmyCells] = useState([])
   const [DataArray, setDataArray] = useState([])
   const [IntArray, setIntArray] = useState([])
@@ -55,14 +59,9 @@ const RelHeat = ({ spfile, scfile,setCompLoad, onRef, title, height, width, marg
       const reader = new FileReader()
       reader.onload = (event) => {
         try {
+          console.log("Call ScH5adLoader")
           let h5info = H5adLoader(file, event, ['cpdb'])
-          resolve({
-            dataArray: h5info.dataArray,
-            cellArray: h5info.cellArray,
-            intArray: h5info.intArray,
-            cellType: h5info.cellType,
-            dataKeys: h5info.dataKeys,
-          })
+          resolve(h5info)
         } catch (error) {
           reject(error)
         }
@@ -93,6 +92,9 @@ const RelHeat = ({ spfile, scfile,setCompLoad, onRef, title, height, width, marg
     if (Init) {
       var myChart = echarts.getInstanceByDom(chartRef.current)
 
+      console.log(currCluster)
+      console.log(myCells)
+
       if (commandRef.current === "Reload") {
         enterLoading(0, setLoadings)
         setCompLoad((compLoad) => {
@@ -106,6 +108,9 @@ const RelHeat = ({ spfile, scfile,setCompLoad, onRef, title, height, width, marg
         ScH5adLoader(spfile).then((h5info) => {
           console.log("All data reloaded in CPDB.")
           setSpHeatmap(h5info)
+          setMethods(h5info.methods)
+          setCurrMethod(h5info.methods[0])
+          setCurrCluster(h5info.cellType[0])
           setDataArray(h5info.dataArray)
           setCellArray(h5info.cellArray)
           setIntArray(h5info.intArray)
@@ -123,7 +128,8 @@ const RelHeat = ({ spfile, scfile,setCompLoad, onRef, title, height, width, marg
         enterLoading(0, setLoadings)
         const interactions = currentInt
         const celltypes = currentCell
-
+        console.log(currentInt)
+        console.log(currentCell)
         myChart.setOption({
           tooltip: {},
           title: [
@@ -325,7 +331,6 @@ const RelHeat = ({ spfile, scfile,setCompLoad, onRef, title, height, width, marg
       else if (commandRef.current === "Setting") {
         let interactions = currentInt
         let celltypes = currentCell
-
         myChart.setOption({
           dataset: [{
             dimensions: dataKeys,
@@ -504,43 +509,94 @@ const RelHeat = ({ spfile, scfile,setCompLoad, onRef, title, height, width, marg
   //   'Neurons3', 'Platelets', 'Pyramidal cells', 'Unknown']
   return (
     <Space>
-      <Spin spinning={loadings[0]} size="large" tip={currTip}>
+      <Spin
+        spinning={loadings[0]}
+        size="large"
+        tip={
+          <div>{currTip}
+            <Progress percent={progress} strokeColor={strokeColor} size={[300, 15]} />
+          </div>
+        }>
         <div
           ref={chartRef}
           className="chart"
           //the target DOM container needs height and width
           style={{ height: height, width: width, margin: margin }}></div>
       </Spin>
-      <div>
-        <Switch checkedChildren="Spatial"
-          unCheckedChildren="Single-cell"
-          value={key}
-          onChange={(value) => {
-            setKey(value)
-            let h5info = value ? spHeatmap : scHeatmap
-            setDataArray(h5info.dataArray)
-            setCellArray(h5info.cellArray)
-            setIntArray(h5info.intArray)
-            setmyCells(h5info.cellType)
-            setDataKeys(h5info.dataKeys)
-            setCurrentData(h5info.dataArray[h5info.cellType[0]])
-            setCurrentInt(h5info.intArray[h5info.cellType[0]])
-            setCurrentCell(h5info.cellArray[h5info.cellType[0]])
-            toggleAnno("Upload")
-          }} />
-        <select
-          style={{ width: '7rem' }}
-          onChange={(event) => {
-            const selectedIndex = event.target.selectedIndex
-            setCurrentData(DataArray[myCells[selectedIndex]])
-            setCurrentInt(IntArray[myCells[selectedIndex]])
-            setCurrentCell(CellArray[myCells[selectedIndex]])
-            toggleAnno("Setting")
-          }}>
-          {myCells.map((cell, index) => (
-            <option key={index} value={cell}>{cell}</option>
-          ))}
-        </select>
+      <div style={{ marginLeft: -50 }}>
+        <Space direction='vertical'>
+          <Switch checkedChildren="Spatial"
+            unCheckedChildren="Single-cell"
+            value={key}
+            onChange={(value) => {
+              setKey(value)
+              let h5info = value ? spHeatmap : scHeatmap
+              setMethods(h5info.methods)
+              setCurrMethod(h5info.methods[0])
+              setCurrCluster(h5info.cellType[0])
+              setDataArray(h5info.dataArray)
+              setCellArray(h5info.cellArray)
+              setIntArray(h5info.intArray)
+              setmyCells(h5info.cellType)
+              setDataKeys(h5info.dataKeys)
+              setCurrentData(h5info.dataArray[h5info.cellType[0]])
+              setCurrentInt(h5info.intArray[h5info.cellType[0]])
+              setCurrentCell(h5info.cellArray[h5info.cellType[0]])
+              toggleAnno("Upload")
+            }} />
+          <div>
+            <span>Cluster: </span>
+            <Select
+              labelInValue
+              placeholder={`(${myCells[0]})`}
+              style={{
+                width: '100%', margin: '2px'
+              }}
+              value={currCluster}
+              options={myCells.map((cell, index) => ({ value: index, label: cell }))}
+              onChange={(target) => {
+                let selectedIndex = target.value
+                setCurrentData(DataArray[myCells[selectedIndex]])
+                setCurrentInt(IntArray[myCells[selectedIndex]])
+                setCurrentCell(CellArray[myCells[selectedIndex]])
+                setCurrCluster(myCells[selectedIndex])
+                toggleAnno("Setting")
+              }}
+            />
+          </div>
+          <div>
+            <span>Method: </span>
+            <Select
+              labelInValue
+              placeholder={`(${methods[0]})`}
+              style={{
+                width: '100%', margin: '2px'
+              }}
+              value={currMethod}
+              options={methods.map((cell, index) => ({ value: index, label: cell }))}
+              onChange={(target) => {
+                let selectedIndex = target.value
+                let h5info = key ? spHeatmap : scHeatmap
+
+                let prefix = ''
+                if (methods[selectedIndex] !== 'CellphoneDB') {
+                  prefix = `${methods[selectedIndex]}_`
+                }
+                setCurrMethod(methods[selectedIndex])
+                setDataArray(h5info[`${prefix}dataArray`])
+                setCellArray(h5info[`${prefix}cellArray`])
+                setIntArray(h5info[`${prefix}intArray`])
+                setmyCells(h5info[`${prefix}cellType`])
+                setDataKeys(h5info[`dataKeys`])
+                setCurrentData(h5info[`${prefix}dataArray`][h5info[`${prefix}cellType`][0]])
+                setCurrentInt(h5info[`${prefix}intArray`][h5info[`${prefix}cellType`][0]])
+                setCurrentCell(h5info[`${prefix}cellArray`][h5info[`${prefix}cellType`][0]])
+                setCurrCluster(h5info[`${prefix}cellType`][0])
+                toggleAnno("Upload")
+              }}
+            />
+          </div>
+        </Space>
       </div>
     </Space>
   )
@@ -562,6 +618,7 @@ RelHeat.propTypes = {
   height: PropTypes.string,
   width: PropTypes.string,
   margin: PropTypes.string,
+  progress: PropTypes.number,
 }
 
 export default RelHeat

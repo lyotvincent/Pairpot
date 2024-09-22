@@ -38,6 +38,7 @@ import {
   Flex,
   Spin,
   Tour,
+  Progress,
 } from 'antd'
 import {
   CheckOutlined,
@@ -54,6 +55,7 @@ import {
   FileTextOutlined,
 } from '@ant-design/icons'
 import Loading from './Loading'
+import strokeColor from '../theme/strokeColor'
 echarts.use([
   GraphicComponent,
   TooltipComponent,
@@ -65,9 +67,9 @@ echarts.use([
 ])
 const { Dragger } = Upload
 const { useToken } = theme
-const {enterLoading, quitLoading} = Loading
+const { enterLoading, quitLoading } = Loading
 
-const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, margin }) => {
+const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, margin, progress }) => {
   const [api, contextHolder] = notification.useNotification()
   const [isInit, setInit] = useState(false) // whether echart object is inited
   const chartRef = useRef(null) // current DOM container
@@ -481,6 +483,7 @@ const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, ma
           defaultAnno = clusterOps[0]
         }
         setClusterCur(defaultAnno)
+        console.log(clusterCur)
         let annotations = setItemGroup(source, _dims.indexOf(defaultAnno.label))
 
         // set batches
@@ -1097,25 +1100,25 @@ const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, ma
           setClusterOps(h5info.clusters)
           if (h5info.clusters.map((item) => item.label).includes('batch'))
             setBatchName('batch')
-            let batches = [
-              ...new Set(
-                h5info.data.map((item) => {
-                  return item['batch']
-                })
-              ),
-            ]
-            let batchIdx = Object.fromEntries(batches.map((item, idx)=>([item, idx])))
-            let batch_row = Math.ceil(Math.sqrt(batches.length))
-            let _row = h5info.data.map(item=>item['array_row'])
-            let _col = h5info.data.map(item=>item['array_col'])
-            let array_row_dist = Math.max.apply(null, _row) - Math.min.apply(null, _row)
-            let array_col_dist = Math.max.apply(null, _col) - Math.min.apply(null, _col)
-            h5info.data.forEach(obj=>{
-              obj['array_0'] = obj['array_row']+ array_row_dist * (Math.floor(batchIdx[obj['batch']] / batch_row))
-              obj['array_1'] = obj['array_col']+ array_col_dist * (batchIdx[obj['batch']] % batch_row)
-            })
-            h5info.embdOps = [...h5info.embdOps, { value: h5info.embdOps.length, label: "array" }]
-            
+          let batches = [
+            ...new Set(
+              h5info.data.map((item) => {
+                return item['batch']
+              })
+            ),
+          ]
+          let batchIdx = Object.fromEntries(batches.map((item, idx) => ([item, idx])))
+          let batch_row = Math.ceil(Math.sqrt(batches.length))
+          let _row = h5info.data.map(item => item['array_row'])
+          let _col = h5info.data.map(item => item['array_col'])
+          let array_row_dist = Math.max.apply(null, _row) - Math.min.apply(null, _row)
+          let array_col_dist = Math.max.apply(null, _col) - Math.min.apply(null, _col)
+          h5info.data.forEach(obj => {
+            obj['array_0'] = obj['array_row'] + array_row_dist * (Math.floor(batchIdx[obj['batch']] / batch_row))
+            obj['array_1'] = obj['array_col'] + array_col_dist * (batchIdx[obj['batch']] % batch_row)
+          })
+          h5info.embdOps = [...h5info.embdOps, { value: h5info.embdOps.length, label: "array" }]
+
           setEmbedOps(h5info.embdOps)
           resolve({
             data: h5info.data,
@@ -1192,7 +1195,14 @@ const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, ma
     <div>
       {contextHolder}
       <Flex justify="center" gap='middle'>
-        <Spin spinning={loadings[0]} size="large" tip={currTip}>
+        <Spin
+          spinning={loadings[0]}
+          size="large"
+          tip={
+            <div>{currTip}
+              <Progress percent={progress} strokeColor={strokeColor} size={[300, 15]} />
+            </div>
+          }>
           <div
             ref={chartRef}
             className="chart"
@@ -1624,49 +1634,49 @@ const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, ma
                         <li>`Annotation` stores the annotation by users.</li>
                       </ul>
                     </Row>
-                  <Row>
-                  <Space size="small">
-                      <Button
-                        block
-                        size='small'
-                        icon={<CloseOutlined />}
-                        onClick={() => {
-                          setSaveOpen(false)
-                        }}>
-                        Cancel
-                      </Button>
-                      <Button
-                        block
-                        type='primary'
-                        size='small'
-                        icon={<FileZipOutlined />}
-                        onClick={() => {
-                          let blob = _datakey ? scfile : spfile
-                          let url = window.URL.createObjectURL(blob)
-                          let a = document.createElement('a')
-                          a.href = url
-                          a.download = _datakey ? `sc_meta_${meta?.sc.dataset_id}.h5ad` : `sp_meta_${meta?.st.dataset_id}.h5ad`
-                          document.body.appendChild(a)
-                          a.click()
-                          window.URL.revokeObjectURL(url)
-                          document.body.removeChild(a)
-                        }}>
-                        Meta
-                      </Button>
-                      <Button
-                        block
-                        type='primary'
-                        size='small'
-                        icon={<FileTextOutlined/>}
-                        onClick={() => {
-                          toggleAnno("Download")
-                        }}>
-                        Annotation
-                      </Button>
-                  </Space>
-                  </Row>
+                    <Row>
+                      <Space size="small">
+                        <Button
+                          block
+                          size='small'
+                          icon={<CloseOutlined />}
+                          onClick={() => {
+                            setSaveOpen(false)
+                          }}>
+                          Cancel
+                        </Button>
+                        <Button
+                          block
+                          type='primary'
+                          size='small'
+                          icon={<FileZipOutlined />}
+                          onClick={() => {
+                            let blob = _datakey ? scfile : spfile
+                            let url = window.URL.createObjectURL(blob)
+                            let a = document.createElement('a')
+                            a.href = url
+                            a.download = _datakey ? `sc_meta_${meta?.sc.dataset_id}.h5ad` : `sp_meta_${meta?.st.dataset_id}.h5ad`
+                            document.body.appendChild(a)
+                            a.click()
+                            window.URL.revokeObjectURL(url)
+                            document.body.removeChild(a)
+                          }}>
+                          Meta
+                        </Button>
+                        <Button
+                          block
+                          type='primary'
+                          size='small'
+                          icon={<FileTextOutlined />}
+                          onClick={() => {
+                            toggleAnno("Download")
+                          }}>
+                          Annotation
+                        </Button>
+                      </Space>
+                    </Row>
                   </div>
-                }                
+                }
                 open={saveOpen}
                 onOpenChange={(newOpen) => {
                   setSaveOpen(newOpen)
@@ -1714,6 +1724,7 @@ ScScatter.propTypes = {
   height: PropTypes.string,
   width: PropTypes.string,
   margin: PropTypes.string,
+  progress: PropTypes.number,
 }
 
 export default ScScatter

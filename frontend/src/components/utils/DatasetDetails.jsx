@@ -95,9 +95,15 @@ const Data = [
   },
 ]
 
-const DatasetDetails = ({onRef}) => {
+const DatasetDetails = ({ onRef }) => {
   const [title, setTitle] = useState()
   const [state, setState] = useState()
+  const [statistic, setStatistic] = useState({
+    Spots: 0,
+    Slices: 0,
+    Cells: 0,
+    Genes: 0,
+  })
   const [dataSource, setDataSource] = useState(Data)
   const { token } = theme.useToken()
   const formItemLayout = {
@@ -115,28 +121,33 @@ const DatasetDetails = ({onRef}) => {
 
   var dataIndex = ["dataset_id", "title", "contributors", "summary", "species", "tissues", "technologies", "contacts", "citation", "accessions"]
   useEffect(() => {
+    console.log(state)
     if (typeof state !== 'undefined') {
       let stateKeys = Object.keys(state)
       let set_sc = stateKeys.includes('sc')
       if (stateKeys.includes('st')) {
         let st_state = state.st
+        let _stat = {
+          Spots: st_state['spots'],
+          Slices: st_state['n_samples'],
+          Genes: st_state['genes'],
+        }
         let _dataSource = dataIndex.map((item, index) => {
           let _data = Data[index]
           _data.st = item === 'summary' ? <TextCollapse text={st_state[item]} /> : st_state[item]
           if (set_sc) {
             let sc_state = state.sc
+            _stat = {
+              ..._stat,
+              Cells: sc_state['cells'],
+            }
             _data.sc = item === 'summary' ? <TextCollapse text={sc_state[item]} /> : sc_state[item]
           }
           return _data
         })
+        setStatistic(_stat)
         setDataSource(_dataSource)
         setTitle(st_state['title'])
-        // setState({
-        //   Spots: st_state['spots'],
-        //   Samples: st_state['n_samples'],
-        //   Cells: st_state['cells'],
-        //   Genes: st_state['genes'],
-        // })
       }
     }
   }, [state])
@@ -165,20 +176,20 @@ const DatasetDetails = ({onRef}) => {
           },
         }}>
         <h3 style={{ color: 'black', marginBottom: 20 }}>{title}</h3>
-        {/* <Row style={{ marginBottom: 20 }} justify="space-evenly">
+        <Row style={{ marginBottom: 20 }} justify="space-evenly">
           <Col span={4} offset={1}>
-            <Statistic title="Samples" value={state.Samples} valueStyle={{ color: token.colorPrimaryActive }} />
+            <Statistic title="Slices" value={statistic.Slices} valueStyle={{ color: token.colorPrimaryActive }} />
           </Col>
           <Col span={4} offset={1}>
-            <Statistic title="Spots" value={state.Spots} valueStyle={{ color: token.colorPrimaryActive }} />
+            <Statistic title="Spots" value={statistic.Spots} valueStyle={{ color: token.colorPrimaryActive }} />
           </Col>
           <Col span={4} offset={1}>
-            <Statistic title="Genes" value={state.Genes} valueStyle={{ color: token.colorPrimaryActive }} />
+            <Statistic title="Genes" value={statistic.Genes} valueStyle={{ color: token.colorPrimaryActive }} />
           </Col>
           <Col span={4} offset={1}>
-            <Statistic title="Cells" value={state.Cells} valueStyle={{ color: token.colorPrimaryActive }} />
+            <Statistic title="Cells" value={statistic.Cells} valueStyle={{ color: token.colorPrimaryActive }} />
           </Col>
-        </Row> */}
+        </Row>
         <Table
           columns={Columns}
           dataSource={dataSource}

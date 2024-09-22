@@ -323,13 +323,21 @@ const Help = () => {
               <Card hoverable
                 style={{ width: '46%', margin: '2%', paddingLeft: '1rem', paddingRight: '1rem' }}
                 title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Layer View</h3>}
-                cover={<img src={layerImg} ></img>}>
+                cover={<img src={layerImg} ></img>}
+                onClick={()=>{
+                  const myVal = "Layer View"
+                  navigate('/browse', { state: { myVal } })
+                }}>
                 <Card.Meta classNames='header' description={"The users can explore spatial clusters, cell-type proportions, and gene expression of multiple slices from a study in 3D hierarchical layouts."}></Card.Meta>
               </Card>
               <Card hoverable
                 style={{ width: '46%', margin: '2%', paddingLeft: '1rem', paddingRight: '1rem' }}
                 title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Pair View</h3>}
-                cover={<img src={pairImg} ></img>}>
+                cover={<img src={pairImg} ></img>}
+                onClick={()=>{
+                  const myVal = "Pair View"
+                  navigate('/browse', { state: { myVal } })
+                }}>
                 <Card.Meta classNames='header' description={"The users can infer cell-type proportions of spots (right) online using the user-lassoed cells from single-cell data (left) in real time."}></Card.Meta>
               </Card>
             </Row>
@@ -338,19 +346,31 @@ const Help = () => {
               <Card hoverable
                 style={{ width: '40%', margin: '2%', marginLeft: '2%', marginRight: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
                 title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Lasso View</h3>}
-                cover={<img src={lassoImg} ></img>}>
+                cover={<img src={lassoImg} ></img>}
+                onClick={()=>{
+                  const myVal = "LassoView"
+                  navigate('/browse', { state: { myVal } })
+                }}>    
                 <Card.Meta classNames='header' description={"The users can select the customized domains/cells using lasso tools. These domains/cells can be precisely refined in millisecond-level response time."}></Card.Meta>
               </Card>
               <Card hoverable
                 style={{ width: '26%', margin: '2%', marginRight: '1%', marginLeft: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
                 title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Network</h3>}
-                cover={<img src={netImg} ></img>}>
+                cover={<img src={netImg} ></img>}
+                onClick={()=>{
+                  const myVal = "Cell Interactions"
+                  navigate('/browse', { state: { myVal } })
+                }}>
                 <Card.Meta classNames='header' description={"The users can explore the cell-cell communication network both in single-cell and spaital data."}></Card.Meta>
               </Card>
               <Card hoverable
                 style={{ width: '25%', margin: '2%', marginRight: '2%', marginLeft: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
                 title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Heatmap</h3>}
-                cover={<img src={heatImg} ></img>}>
+                cover={<img src={heatImg} ></img>}
+                onClick={()=>{
+                  const myVal = "Cell Interactions"
+                  navigate('/browse', { state: { myVal } })
+                }}>
                 <Card.Meta classNames='header' description={"The users can explore L-R pairs, single-cell marker genes and spatial variable genes via heatmap in versatile format."}></Card.Meta>
               </Card>
             </Row>

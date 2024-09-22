@@ -42,6 +42,8 @@ def input_adata_10X(sample):
 
 def input_adata_10Xh5(sample):
     adata = sc.read_10x_h5(sample)
+    adata.var_names = [s.upper() for s in adata.var_names]
+    adata.obs_names = [s.upper() for s in adata.obs_names]
     adata.obs_names_make_unique()
     adata.var_names_make_unique()
     return adata
@@ -49,6 +51,8 @@ def input_adata_10Xh5(sample):
 def input_adata_h5ad(sample):
 #   print(sample)
   adata = sc.read_h5ad(sample)
+  adata.var_names = [s.upper() for s in adata.var_names]
+  adata.obs_names = [s.upper() for s in adata.obs_names]
   adata.obs_names_make_unique()
   adata.var_names_make_unique()
   return adata
@@ -70,6 +74,8 @@ def concat_adata(samples, sampleNames, inputFunc=input_adata_10Xh5):
     adatas = []
     for i in range(len(sampleNames)):
         adata = inputFunc(samples[i])
+        sc.pp.filter_cells(adata, min_genes=5)
+        sc.pp.filter_cells(adata, min_counts=30)
         adatas.append(adata)
     if len(adatas) > 0:
         intersection_var = set(adatas[0].var_names)
@@ -85,11 +91,11 @@ def concat_adata(samples, sampleNames, inputFunc=input_adata_10Xh5):
 
 # 预处理
 def pp(adata:ad.AnnData):
-    mito_genes = adata.var_names.str.startswith('MT-')
+    mito_genes = adata.var_names.str.startswith('MT')
     # the `.A1` is only necessary as X is sparse (to transform to a dense array after summing)
-    adata.obs['mt_frac'] = np.sum(
+    mt_frac = np.sum(
         adata[:, mito_genes].X, axis=1) / np.sum(adata.X, axis=1)
-    
+    adata.obs['mt_frac'] = np.array(mt_frac)
     # 过滤低表达的基因
     sc.pp.filter_cells(adata, min_genes=5)  # 过滤一个细胞中表达少于五个基因的细胞样本 
     sc.pp.filter_genes(adata, min_cells=5)  # 过滤在少于五个细胞中表达的基因
@@ -97,22 +103,21 @@ def pp(adata:ad.AnnData):
 
     # 过滤线粒体核糖体基因
     rp_genes = adata.var_names.str.startswith('RP')
-    mt_genes = adata.var_names.str.startswith('MT-')
+    mt_genes = adata.var_names.str.startswith('MT')
     adata = adata[:, ~(rp_genes + mt_genes)]
     adata = adata[adata.obs['mt_frac'] < 0.2]
     adata.layers['Raw'] = adata.X
     sc.pp.normalize_total(adata)
     sc.pp.log1p(adata)
-    sc.pp.highly_variable_genes(adata, min_mean=0.0125, max_mean=3, min_disp=0.5, n_top_genes=2000)
+    sc.pp.highly_variable_genes(adata,min_disp=0.5, n_top_genes=2000)
     return adata
 
-# macro_Mye = scv.read('velo-Macro.h5ad')
 def clu(adata, key_added="leiden-1", n_neighbors=50, n_pcs=30, rep='X_pca_harmony', do_har=True, max_iter=20, resolution=1, do_scrublet=True, har_key='batch'):
     # Computing the neighborhood graph
     if do_scrublet:
         n0 = adata.shape[0]
         print("{0} Cell number: {1}".format(key_added, n0))
-        sc.external.pp.scrublet(adata, random_state=112)
+        sc.external.pp.scrublet(adata)
         adata = adata[adata.obs['predicted_doublet']==False,:].copy()
         print("{0} Cells retained after scrublet, {1} cells reomved.".format(adata.shape[0], n0-adata.shape[0]))
     else:

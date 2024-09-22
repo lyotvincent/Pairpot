@@ -9,6 +9,8 @@ import pandas as pd
 import anndata as ad
 import numpy as np
 from normalize import Cell2Location_run
+from commot_cci import LegRec_commot
+import os
 
 def get_network(ax):
     # 节点+边转格式
@@ -119,14 +121,98 @@ def add_heatmap(cpdb_res: dict, adata_in: ad.AnnData, groupby: str):
             _ct.remove(temp_cell1)
             print(f"{temp_cell1} has no L-R pairs.")
         cpdb_res['cellType'] = _ct
-
     return cpdb_res
-def write_heat(adata_out,cpdb_res):
+
+def scale_array(arr):
+  min_val = 0
+  max_val = np.max(arr)
+  denominator = max_val - min_val
+  scale_arr = (arr - min_val) / denominator
+  return scale_arr
+
+def add_heatmap_cellchat(cellchat_path:str, adata_in: ad.AnnData, groupby: str):
+    df_cellchat = pd.read_csv(cellchat_path, sep='\t')
+    df_cellchat['interaction_group'] = [s.replace("_", '-') for s in df_cellchat['interaction_name']]
+    df_cellchat['celltype_group'] = [f"{df_cellchat['source'][i]}-{df_cellchat['target'][i]}" for i in df_cellchat.index]
+    df_cellchat['scaled_means'] = scale_array(df_cellchat['prob'])
+    df_cellchat['pvals'] = df_cellchat['pval']
+    df_cellchat['neglog10p'] = -np.log10(df_cellchat['pval']+1e-3)
+    df_cellchat['significant'] = ['yes' if df_cellchat['pval'][i] < 0.05 else 'nan' for i in df_cellchat.index ]
+    # df_cellchat = df_cellchat[['interaction_group','celltype_group','scaled_means','pvals', 'neglog10p','significant']]
+
+    cc_res = {}
+    cc_res['dataArray'] = {}
+    cc_res['cellArray'] = {}
+    cc_res['intArray'] = {}
+
+    cell_types = adata_in.obs[groupby].cat.categories
+    _ct = list(cell_types)
+    for temp_cell1 in cell_types:
+        df_heat = df_cellchat.loc[np.array(df_cellchat['source'] == temp_cell1) + 
+                                np.array(df_cellchat['target'] == temp_cell1),: ]
+        df_heat = df_cellchat[['interaction_group',
+                                'celltype_group',
+                                'scaled_means',
+                                'pvals', 
+                                'neglog10p',
+                                'significant']]
+        if min(df_heat['pvals']) < 0.05:
+            cc_res['dataArray'][temp_cell1]=df_heat
+            y = df_heat['interaction_group'].unique()
+            cc_res['intArray'][temp_cell1] = y.T
+
+            x = df_heat['celltype_group'].unique()
+            cc_res['cellArray'][temp_cell1]=x.T
+            print(temp_cell1,"heatmap if OK")
+        else: 
+            _ct.remove(temp_cell1)
+            print(f"{temp_cell1} has no L-R pairs.")
+    cc_res['cellType'] = _ct
+    return cc_res
+
+
+def add_heatmap_iTALK(iTALK_path:str, adata_in: ad.AnnData, groupby: str):
+    df_iTALK = pd.read_csv(iTALK_path, sep='\t')
+    df_iTALK['interaction_group'] = [f"{df_iTALK['ligand'][i]}-{df_iTALK['receptor'][i]}" for i in df_iTALK.index]
+    df_iTALK['celltype_group'] = [f"{df_iTALK['cell_from'][i]}-{df_iTALK['cell_to'][i]}" for i in df_iTALK.index]
+    df_iTALK['scaled_means'] = scale_array(np.array([df_iTALK['cell_from_mean_exprs'][i]*df_iTALK['cell_to_mean_exprs'][i] for i in df_iTALK.index]))
+    df_iTALK['pvals'] = 1
+    df_iTALK['neglog10p'] = 0
+    df_iTALK['significant'] = 'nan'
+
+    cc_res = {}
+    cc_res['dataArray'] = {}
+    cc_res['cellArray'] = {}
+    cc_res['intArray'] = {}
+
+    cell_types = adata_in.obs[groupby].cat.categories
+    _ct = list(cell_types)
+    for temp_cell1 in cell_types:
+        df_heat = df_iTALK.iloc[np.array(df_iTALK['cell_from'] == temp_cell1) + 
+                                np.array(df_iTALK['cell_to'] == temp_cell1),: ]
+        df_heat = df_heat[['interaction_group',
+                                'celltype_group',
+                                'scaled_means',
+                                'pvals', 
+                                'neglog10p',
+                                'significant']]
+        cc_res['dataArray'][temp_cell1]=df_heat
+        y = df_heat['interaction_group'].unique()
+        cc_res['intArray'][temp_cell1] = y.T
+        x = df_heat['celltype_group'].unique()
+        cc_res['cellArray'][temp_cell1]=x.T
+        print(temp_cell1,"heatmap if OK")
+    cc_res['cellType'] = _ct
+    return cc_res
+
+
+
+def write_heat(adata_out,cpdb_res, method="CellphoneDB"):
     # del adata_sp.uns['dataArray']
-    adata_out.uns['dataArray'] = cpdb_res['dataArray']
-    adata_out.uns['intArray'] = cpdb_res['intArray']
-    adata_out.uns['cellArray'] = cpdb_res['cellArray']
-    adata_out.uns['cellType'] = cpdb_res['cellType']
+    adata_out.uns[f'{method}_dataArray'] = cpdb_res['dataArray']
+    adata_out.uns[f'{method}_intArray'] = cpdb_res['intArray']
+    adata_out.uns[f'{method}_cellArray'] = cpdb_res['cellArray']
+    adata_out.uns[f'{method}_cellType'] = cpdb_res['cellType']
     adata_out.uns['dataKeys'] = [
     "interaction_group",
     "celltype_group",
@@ -169,16 +255,17 @@ def save_delete(adata, loc, column):
     del adata.varm[column]
   print(f"deleted adta.{loc}['{column}']")
 
-def run_cpdb(adata_inFile, adata_outPath, type='sc'):
+def run_cpdb(adata_inFile, adata_outPath, type='sc', use_hvg=True, cpdbTime=None):
     if type == 'sp':
-        groupby = 'annotation'  # adata.obs['mender'] for sp data
+        groupby = 'leiden-1'  # adata.obs['mender'] for sp data
     else:
         groupby = 'annotation'  # adata.obs['annotation'] for sc data
     adata_in = sc.read_h5ad(adata_inFile) 
     # make obs unique, or error occurs in cpdb
     adata_in.obs_names_make_unique()
     adata_in.var_names= [s.upper() for s in adata_in.var_names]
-    adata_in = adata_in[:, adata_in.var['highly_variable']].copy() # use highly variable genes
+    if use_hvg:
+      adata_in = adata_in[:, adata_in.var['highly_variable']].copy() # use highly variable genes
     adata_in.write_h5ad(f"{adata_outPath}/{type}_sampled.h5ad")
     meta = pd.DataFrame(adata_in.obs[groupby].copy())
     meta = meta.reset_index()
@@ -186,14 +273,19 @@ def run_cpdb(adata_inFile, adata_outPath, type='sc'):
     meta.to_csv("../resources/meta.txt", sep='\t', index=False)
 
     # run cpdb
-    cpdb_res = cpdb_statistical_analysis_method.call(
-    cpdb_file_path="../resources/cellphonedb.zip",
-    meta_file_path="../resources/meta.txt",
-    counts_file_path=f"{adata_outPath}/{type}_sampled.h5ad",
-    counts_data='hgnc_symbol',
-    output_path="../resources/cpdb",
-    threads=16,
-    )
+    if cpdbTime is None:
+      cpdb_res = cpdb_statistical_analysis_method.call(
+      cpdb_file_path="../resources/cellphonedb.zip",
+      meta_file_path="../resources/meta.txt",
+      counts_file_path=f"{adata_outPath}/{type}_sampled.h5ad",
+      counts_data='hgnc_symbol',
+      output_path="../resources/cpdb",
+      threads=16,
+      )
+    else:
+      cpdb_res = {}
+      cpdb_res['pvalues'] = pd.read_csv(f"../resources/cpdb/statistical_analysis_pvalues_{cpdbTime}.txt", sep='\t')
+      cpdb_res['means'] = pd.read_csv(f"../resources/cpdb/statistical_analysis_means_{cpdbTime}.txt", sep='\t')
     print("calculating cpdb network...")
     ax = kpy.plot_cpdb_heatmap(pvals=cpdb_res['pvalues'],return_tables=True)
     network_data = get_network(ax)
@@ -223,7 +315,7 @@ def run_cpdb(adata_inFile, adata_outPath, type='sc'):
     expr_df = pd.DataFrame(columns=cell_types)
     for ct in cell_types:
         adata_cp = adata_out1[:, list(nameRank[ct])]
-        expr = adata_cp[adata_cp.obs[groupby]==ct].X.mean(axis=0).A1
+        expr = np.array(adata_cp[adata_cp.obs[groupby]==ct].X.mean(axis=0)).flatten()
         expr_df[ct] = expr
 
     frac_df = pd.DataFrame(columns=cell_types)
@@ -276,12 +368,120 @@ def run_deconv(adata_scFile, adata_spFile, adata_outPath):
     adata_sp.write_h5ad(f"{adata_outPath}/sp_deconv.h5ad")
     print(f"Write dcv results to {adata_outPath}/sp_deconv.h5ad")
 
+
+def append_cellchat(adata_inFile, adata_outPath, type='sc', species="Mouse"):
+    print("**Enter ./Rsrc")
+    os.chdir("./Rsrc")
+    os.system(f"Rscript _CellChat.R -p {adata_inFile} -o {adata_outPath} -s {species}")
+    os.chdir("../")
+    print("**Quit ./Rsrc")
+    if type == 'sc':
+        adata_outFile = f"{adata_outPath}/sc_meta.h5ad"
+    else:
+        adata_outFile = f"{adata_outPath}/sp_meta.h5ad"
+    adata_out = sc.read_h5ad(adata_outFile)
+    cc_res = add_heatmap_cellchat(f"{adata_outPath}/CellChat_heatmap.tsv", adata_out, groupby="annotation")
+    write_heat(adata_out, cc_res, "CellChat")
+    adata_out.write_h5ad(adata_outFile)
+    print(f"**Finished, CellChat is in {adata_outFile}")
+
+def append_iTALK(adata_inFile, adata_outPath, type='sc'):
+    print("**Enter ./Rsrc")
+    os.chdir("./Rsrc")
+    os.system(f"Rscript _iTALK.R -p {adata_inFile} -o {adata_outPath}")
+    os.chdir("../")
+    print("**Quit ./Rsrc")
+    if type == 'sc':
+        adata_outFile = f"{adata_outPath}/sc_meta.h5ad"
+    else:
+        adata_outFile = f"{adata_outPath}/sp_meta.h5ad"
+    adata_out = sc.read_h5ad(adata_outFile)
+    it_res = add_heatmap_iTALK(f"{adata_outPath}/iTALK_heatmap.tsv", adata_out, groupby="annotation")
+    write_heat(adata_out, it_res, "iTALK")
+    adata_out.write_h5ad(adata_outFile)
+    print(f"**Finished, iTALK is in {adata_outFile}")
+
+def append_commot(adata_inFile, adata_outPath):
+    adata_in = sc.read_h5ad(adata_inFile)
+    adata_outFile = f"{adata_outPath}/sp_meta.h5ad"
+    adata_out = sc.read_h5ad(adata_outFile)
+    cc_res = LegRec_commot(adata_in)
+    write_heat(adata_out, cc_res, "COMMOT")
+    adata_out.write_h5ad(adata_outFile)
+    print(f"**Finished, COMMOT is in {adata_outFile}")
+
+def append_cci(adata_scFile, adata_spFile, adata_outPath, species="Mouse", run_commot=True):
+    print("**Newly add CellChat, iTALK for single-cell data, and CellChat, COMMOT for SRT data.")
+    append_cellchat(adata_scFile, adata_outPath, type='sc', species=species)
+    append_cellchat(adata_spFile, adata_outPath, type='sp', species=species)
+    append_iTALK(adata_scFile, adata_outPath, type='sc')
+    if run_commot:
+        append_commot(adata_spFile, adata_outPath)  # commot is very slow
+    print("**New CCI methods added.")
+
+
+def append_deconv(adata_scFile, adata_spFile, adata_outPath, species="Mouse"):
+    print("**Newly add RCTD, CARD, Seurat, and SpaTalk-deconv.")
+    adata_outFile = f"{adata_outPath}/sp_meta.h5ad"
+    adata_out = sc.read_h5ad(adata_outFile)
+    try:
+        append_RCTD(adata_scFile, adata_spFile, adata_outPath)
+        append_CARD(adata_scFile, adata_spFile, adata_outPath)
+        if "Seurat" not in adata_out.obsm_keys():
+            append_Seurat(adata_scFile, adata_spFile, adata_outPath)
+        if "SpaTalk" not in adata_out.obsm_keys():
+            append_SpaTalk_deconv(adata_scFile, adata_spFile, adata_outPath, species=species)
+        print("**New Deconv methods added.")
+    except Exception as e:
+        print("**Add New deconvolution error, please check the log.")
+
+def append_RCTD(adata_scFile, adata_spFile, adata_outPath):
+    adata_outFile = f"{adata_outPath}/sp_meta.h5ad"
+    print(f"** append RCTD to {adata_outFile}")
+    print("**Enter ./Rsrc")
+    os.chdir("./Rsrc")
+    os.system(f"Rscript _spacexr.R -c {adata_scFile} -p {adata_spFile} -o {adata_outFile}")
+    os.chdir("../")
+    print("**Quit ./Rsrc")
+
+def append_CARD(adata_scFile, adata_spFile, adata_outPath):
+    adata_outFile = f"{adata_outPath}/sp_meta.h5ad"
+    print(f"** append CARD to {adata_outFile}")
+    print("**Enter ./Rsrc")
+    os.chdir("./Rsrc")
+    os.system(f"Rscript _CARD.R -c {adata_scFile} -p {adata_spFile} -o {adata_outFile}")
+    os.chdir("../")
+    print("**Quit ./Rsrc")
+
+def append_Seurat(adata_scFile, adata_spFile, adata_outPath):
+    adata_outFile = f"{adata_outPath}/sp_meta.h5ad"
+    print(f"** append Seurat to {adata_outFile}")
+    print("**Enter ./Rsrc")
+    os.chdir("./Rsrc")
+    os.system(f"Rscript _Seurat-deconv.R -c {adata_scFile} -p {adata_spFile} -o {adata_outFile}")
+    os.chdir("../")
+    print("**Quit ./Rsrc")
+
+def append_SpaTalk_deconv(adata_scFile, adata_spFile, adata_outPath, species="Mouse"):
+    adata_outFile = f"{adata_outPath}/sp_meta.h5ad"
+    print(f"** append SpaTalk-deconv to {adata_outFile}")
+    print("**Enter ./Rsrc")
+    os.chdir("./Rsrc")
+    os.system(f"Rscript _SpaTalk-deconv.R -c {adata_scFile} -p {adata_spFile} -o {adata_outFile} -s {species}")
+    os.chdir("../")
+    print("**Quit ./Rsrc")
+
 if __name__ == '__main__':
-    dataset_id = '153'
-    scdata_id = '153'
+    dataset_id = '223'
+    scdata_id = '012'
     adata_spFile = f"/data/rzh/RawUrls/{dataset_id}/STDS0000{dataset_id}/New_{dataset_id}.h5ad"
     adata_scFile = f"/data/rzh/RawUrls/{dataset_id}/SCDS0000{scdata_id}/New_{scdata_id}.h5ad"
     adata_outPath = f"/data/rzh/RawUrls/{dataset_id}"
-    run_deconv(adata_scFile, adata_spFile, adata_outPath)
-    run_cpdb(adata_scFile, adata_outPath, type="sc")
-    run_cpdb(f"{adata_outPath}/sp_deconv.h5ad", adata_outPath, type="sp")
+    print(f"running in {adata_outPath}")
+    # run_deconv(adata_scFile, adata_spFile, adata_outPath)
+    # run_cpdb(f"{adata_outPath}/sp_deconv.h5ad", adata_outPath, type="sp")
+    # run_cpdb(adata_scFile, adata_outPath, type="sc")
+    append_deconv(adata_scFile, adata_spFile, adata_outPath)
+    append_cci(adata_scFile, adata_spFile, adata_outPath, species="Human")
+    # append_commot(adata_spFile, adata_outPath)
+    
