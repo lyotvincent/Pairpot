@@ -1450,16 +1450,16 @@ const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, ma
                       </Form.Item>
                     </Form>
                     <Space size="small">
-                      <Button 
-                      icon={<ReloadOutlined />}
-                      onClick={() => {
-                        setItemSize(4)
-                        setItemOpacity(0.8)
-                        setBrushModeState('Select')
-                        setyInv(false)
-                        setxInv(false)
-                        toggleAnno("Setting")
-                      }}
+                      <Button
+                        icon={<ReloadOutlined />}
+                        onClick={() => {
+                          setItemSize(4)
+                          setItemOpacity(0.8)
+                          setBrushModeState('Select')
+                          setyInv(false)
+                          setxInv(false)
+                          toggleAnno("Setting")
+                        }}
                       >Reset</Button>
                       <Button
                         type="primary"
@@ -1729,7 +1729,7 @@ ScScatter.propTypes = {
   scfile: PropTypes.object,
   spfile: PropTypes.object,
   setCompLoad: PropTypes.func,
-  meta: PropTypes.object,
+  meta: PropTypes.any,
   onRef: PropTypes.any,
   height: PropTypes.string,
   width: PropTypes.string,

@@ -1,7 +1,7 @@
 const Tissues = [
   "Brain",
   "Skin",
-  "Eymbro",
+  "Embryo",
   "Heart",
   "Pancreas",
   "Prostate",

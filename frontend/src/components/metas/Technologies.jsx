@@ -2,7 +2,7 @@ const Technologies = [
   "10μm",
   "25μm",
   "50μm",
-  "cell-bin",
+  "single-cell SRT",
   "Stereo-Seq",
   "10x Visium",
   "Spatial Transcriptomics",

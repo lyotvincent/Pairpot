@@ -60,8 +60,8 @@ const options = [
 ]
 
 
-const Search = ({ }) => {
-  const [loadText, setLoadText] = useState("Search")
+const Search = ({ setLocState, setCompLoad, setSelectedKey }) => {
+  const [loadText, setLoadText] = useState("Browse")
   const navigate = useNavigate()
   const [loading, setLoading] = useState([])
   const [open, setOpen] = useState(false)
@@ -92,8 +92,17 @@ const Search = ({ }) => {
           state['sc'] = scvalues
         }
         quitLoading(0, setLoading)
-        setLoadText("Search")
-        navigate('/browse', { state: state })
+        setLoadText("Browse")
+        setLocState(state)
+        setCompLoad({  // reset ComponentLoad
+          "LassoView": false,
+          "LayerView": false,
+          "PairView": false,
+          "MarkerTable": false,
+          "NetWorkRelation": false,
+          "CPDBHeatmap": false,
+        })
+        setSelectedKey("MetaInfo")
       })
     }
   })
@@ -129,7 +138,7 @@ const Search = ({ }) => {
               setOpen(false)
               setStatus("Success")
               enterLoading(0, setLoading)
-              setLoadText("Searching...")
+              setLoadText("Fetching data...")
               fetch.mutate(e)
             } else {
               setStatus("error")

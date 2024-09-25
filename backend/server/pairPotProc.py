@@ -22,6 +22,7 @@ def proc_h5ad(filename, filepath, type='sp'):
     # samples=filepath
     # sampleNames=filename
     adata=concat_adata(filepath, filename, inputFunc=input_adata_h5ad)
+    print(adata)
     adata = pp(adata)
     if adata.shape[0]>100000 and type=='sc':
         sampleIdx = np.random.choice(len(adata), 50000)
@@ -250,28 +251,15 @@ def txtToH5ad(path):
 #           'HC7',]
 # }
 
-sample = {
-  "dict":"/data/rzh/RawUrls/209/STDS0000209",
-  "path":[
-          "GSM6281320_S1_A1_raw_feature_bc_matrix_matrix_processed.h5ad",
-          "GSM6281321_S1_B1_raw_feature_bc_matrix_matrix_processed.h5ad",
-          "GSM6281322_S1_C1_raw_feature_bc_matrix_matrix_processed.h5ad",
-          "GSM6281323_S1_D1_raw_feature_bc_matrix_matrix_processed.h5ad",
-          "GSM6281324_S2_A1_raw_feature_bc_matrix_matrix_processed.h5ad",
-          "GSM6281325_S2_B1_raw_feature_bc_matrix_matrix_processed.h5ad",
-          "GSM6281326_S2_C1_raw_feature_bc_matrix_matrix_processed.h5ad",
-          "GSM6281327_S2_D1_raw_feature_bc_matrix_matrix_processed.h5ad",
-         ],
-  "name":[
-          "S1A1",
-            "S1B1",
-            "S1C1",
-            "S1D1",
-            "S2A1",
-            "S2B1",
-            "S2C1",
-            "S2D1",]
-}
+sample={"dict": "/data/rzh/RawUrls/271/STDS0000271", 
+        "path": [
+            "square_008um.h5ad",
+            "square_016um.h5ad"
+            ], 
+        "name": [            
+            "008um",
+            "016um"
+]}
 json_data = json.dumps(sample)
  
 # 将JSON数据保存到文件

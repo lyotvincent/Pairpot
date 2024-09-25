@@ -57,7 +57,6 @@
     "jQuery": "^1.7.4",
     "js2wordcloud": "^1.1.12",
     "jsfive": "^0.3.14",
-    "jszip": "^3.10.1",
     "location": "0.0.1",
     "mini-css-extract-plugin": "^2.4.5",
     "navigator": "^1.0.1",
@@ -67,7 +66,6 @@
     "node-polyfill-webpack-plugin": "^2.0.1",
     "nodemailer": "^6.7.5",
     "os": "^0.1.2",
-    "pako": "^2.1.0",
     "path": "^0.12.7",
     "path-browserify": "^1.0.1",
     "postcss": "^8.4.4",
@@ -114,7 +112,6 @@
     "workbox-webpack-plugin": "^6.4.1",
     "xlsx": "^0.18.5",
     "xmlhttprequest": "^1.8.0",
-    "yarn": "^1.22.22",
     "yup": "^1.4.0"
   },
   "scripts": {

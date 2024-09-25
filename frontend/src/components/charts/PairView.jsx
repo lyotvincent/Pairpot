@@ -464,7 +464,7 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
     "Tour": setTourOpen, // Open the tutorial
     "Loading": setLoadings, // set Loading status
     "Tip": setCurrTip, // set Loading Tips
-  }))
+  }), [])
 
   useEffect(() => {
     if (isInit) {
@@ -525,7 +525,7 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
         let _spannotations = setItemGroup(_spsource, _spdims.indexOf(spdefaultAnno), 'categories', false)
         setAnnoCurSp(_spannotations)
         stAnnoLength.current = _spannotations.length
-        setPropCurSp(propOpsSp.find(item => item.label === "Cell2Location"))
+        setPropCurSp({ value: 0, label: "Cell2Location" })
 
         // set sp batches
         let batches = []
@@ -546,7 +546,7 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
         setEmbedCurSc('X_umap')
 
         // set sp embeddings
-        let _spaxis = setAxis(_spsource, _spdims, 'array_row', 'array_col', 1)
+        let _spaxis = setAxis(_spsource, _spdims, 'spatial_0', 'spatial_1', 1)
         setEmbedCurSp('spatial')
 
 
@@ -1995,7 +1995,7 @@ PairView.propTypes = {
   height: PropTypes.string,
   width: PropTypes.string,
   margin: PropTypes.string,
-  meta: PropTypes.object,
+  meta: PropTypes.any,
   progress: PropTypes.number,
 }
 

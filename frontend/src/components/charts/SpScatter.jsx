@@ -339,7 +339,12 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta, pr
 
   const onUpload = (info) => {
     const file = info.file
-    FileLoaderRef.current(file)
+    FileLoaderRef.current(file).then(() => {
+      console.log("All data reloaded in LayerView.")
+      toggleAnno("Upload")
+    }).catch(error => {
+      console.error('Error fetching blob in LayerView:', error)
+    })
   }
 
   const upLoadProps = {
@@ -1030,15 +1035,15 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta, pr
                     </Form.Item>
                   </Form>
                   <Space size="small">
-                    <Button 
-                    icon={<ReloadOutlined />}
-                    onClick={()=>{
-                      setItemSize(6)
-                      setItemOpacity(0.8)
-                      setyInv(false)
-                      setxInv(false)
-                      toggleAnno("Setting")
-                    }}
+                    <Button
+                      icon={<ReloadOutlined />}
+                      onClick={() => {
+                        setItemSize(6)
+                        setItemOpacity(0.8)
+                        setyInv(false)
+                        setxInv(false)
+                        toggleAnno("Setting")
+                      }}
                     >Reset</Button>
                     <Button
                       type="primary"
@@ -1113,7 +1118,7 @@ SpScatter.propTypes = {
   height: PropTypes.string,
   width: PropTypes.string,
   margin: PropTypes.string,
-  meta: PropTypes.object,
+  meta: PropTypes.any,
   process: PropTypes.number,
 }
 

@@ -55,8 +55,7 @@ const Browser = () => {
   const onClickSideMenu = (e) => {
 
   }
-  // const [myVal, setMyval] = useState()
-  const myVal = location.state != null ? location.state.myVal : 'null'
+  const [myVal, setMyval] = useState(location.state != null ? location.state.myVal : 'null')
   // const myVal = () => {
   //   if(location.state == null)
   //     return 'null'
@@ -147,6 +146,8 @@ const Browser = () => {
         id: "STDS0000235"
       },
     }).then((response) => {
+      console.log("get response")
+      console.log(response)
       let dataCol = response.data.attributes
       let spitem = response.data.data[0]
       let values = Object.fromEntries(
@@ -237,7 +238,7 @@ const Browser = () => {
     // console.log(location.state)
     console.log(example)
     if (example.status === 'success' && typeof example.data !== 'undefined' &&
-      (location.state === null || 'myVal' in location.state)) {
+      (location.state === null || myVal !== 'null')) {
       // console.log("setting example")
       setLocState(example.data)
       // console.log("example finished")
@@ -245,21 +246,28 @@ const Browser = () => {
   }, [example.data])
 
   useEffect(() => {
-    if (typeof locState !== 'undefined' &&
-      // location.state === null &&
-      (location.state === null || 'myVal' in location.state) &&
+    if (typeof locState !== 'undefined' && locState !== null &&
+      (location.state === null || myVal !== 'null') &&
       MetaRef.current !== null) {
-      MetaRef.current.Trigger(example.data)
+      MetaRef.current.Trigger(locState)
       statusSC.mutate(locState)
       statusSP.mutate(locState)
     }
   }, [locState, MetaRef.current])
 
   useEffect(() => {
-    if (Init && location.state !== null && !('myVal' in location.state)) {
-      // set MetaInfo
-      MetaRef.current.Trigger(location.state)
+    if (Init && location.state !== null) {
       setLocState(location.state)
+    }
+  }, [location])
+
+  useEffect(() => {
+    console.log("Init:", Init)
+    if (Init && locState !== null && myVal === 'null') {
+      // set MetaInfo
+      console.log("Setting MetaInfo")
+      MetaRef.current.Trigger(locState)
+      setLocState(locState)
       setComponentLoad({  // reset ComponentLoad
         "LassoView": false,
         "LayerView": false,
@@ -292,17 +300,21 @@ const Browser = () => {
       if (CPDBRef.current !== null)
         enterLoading(0, CPDBRef.current.Loading)
 
+      console.log("netref")
+      console.log(NetRef)
       NetRef.current?.Tip(loadingTips[3])
       if (NetRef.current !== null)
         enterLoading(0, NetRef.current.Loading)
 
       // mutation of datasets
-      statusSC.mutate(location.state)
-      statusSP.mutate(location.state)
+      console.log(locState)
+      statusSC.mutate(locState)
+      statusSP.mutate(locState)
     }
-  }, [location, Init])
+  }, [locState, Init])
 
   useEffect(() => {
+    console.log("Setting Init:", PairRef.current, LassoRef.current, LayerRef.current, MetaRef.current)
     if (PairRef.current !== null &&
       LassoRef.current !== null &&
       LayerRef.current !== null &&
@@ -561,7 +573,12 @@ const Browser = () => {
                 alignItems: "center"
               }} />
             </Col>
-            <Col span={18} offset={3}> <Search /> </Col>
+            <Col span={18} offset={3}>
+              <Search setLocState={setLocState}
+                setCompLoad={setComponentLoad}
+                setSelectedKey={setSelectedKey} />
+              <div>{JSON.stringify(componentLoad)}</div>
+            </Col>
             <Divider />
             {/* <div>compLoad:{JSON.stringify(componentLoad)}</div> */}
             <Suspense fallback={<h1>Loading for MetaInfo...</h1>}>

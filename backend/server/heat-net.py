@@ -336,7 +336,6 @@ def run_cpdb(adata_inFile, adata_outPath, type='sc', use_hvg=True, cpdbTime=None
     save_delete(adata_out2, 'obsm', 'X_pca')
     save_delete(adata_out2, 'obsm', 'X_pca_harmony')
     if type=='sp':
-        adata_out2.obs['annotation'] = adata_out2.obs['leiden-1']
         save_delete(adata_out2, 'obs', 'in_tissue')
         save_delete(adata_out2, 'var', 'feature_types')
         save_delete(adata_out2, 'var', 'n_cells')
@@ -472,8 +471,8 @@ def append_SpaTalk_deconv(adata_scFile, adata_spFile, adata_outPath, species="Mo
     print("**Quit ./Rsrc")
 
 if __name__ == '__main__':
-    dataset_id = '223'
-    scdata_id = '012'
+    dataset_id = '227'
+    scdata_id = '005'
     adata_spFile = f"/data/rzh/RawUrls/{dataset_id}/STDS0000{dataset_id}/New_{dataset_id}.h5ad"
     adata_scFile = f"/data/rzh/RawUrls/{dataset_id}/SCDS0000{scdata_id}/New_{scdata_id}.h5ad"
     adata_outPath = f"/data/rzh/RawUrls/{dataset_id}"

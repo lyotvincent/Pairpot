@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import contactImg from "../assets/img/contact.png"
-import layerImg from "../assets/img/LayerView.png"
-import pairImg from "../assets/img/pair.png"
-import lassoImg from "../assets/img/lasso.png"
-import netImg from "../assets/img/network.png"
-import heatImg from "../assets/img/heatmap.png"
+import layerImg from "../assets/img/browse/layer-view.png"
+import pairImg from "../assets/img/browse/pair-view.png"
+import lassoImg from "../assets/img/browse/lasso-view.png"
+import netImg from "../assets/img/browse/network.png"
+import heatImg from "../assets/img/browse/heatmap.png"
 import coverImg from "../assets/img/cover-figure.png"
 import axios from 'axios'
-import { Button, ConfigProvider, Layout, Space } from 'antd'
+import { Button, ConfigProvider, Layout, Space , Statistic} from 'antd'
 import { ArrowRightCircle } from 'react-bootstrap-icons'
 import 'animate.css'
 import TrackVisibility from 'react-on-screen'
@@ -15,6 +15,7 @@ import { Card, Row, Col } from 'antd'
 import { DeliveredProcedureOutlined, SyncOutlined } from '@ant-design/icons'
 import { useLocation, useNavigate } from 'react-router-dom'
 import Loading from './charts/Loading'
+import { useMutation, useQuery, QueryCache } from "react-query"
 const { enterLoading, quitLoading } = Loading
 const { Meta } = Card
 
@@ -31,6 +32,10 @@ const Help = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState([])
   const [loadText, setLoadText] = useState("Try an example >>>")
+  const [allData, setAllData] = useState([])
+  const [att, setAtt] = useState([])
+  const [countAttr, setCountAttr] = useState([])
+  const [countData, setCountData] = useState([])
   const contentStyle = {
     height: '160px',
     color: '#fff',
@@ -39,11 +44,88 @@ const Help = () => {
     background: '#364d79',
   }
 
+  const response = useQuery({
+    queryKey: ['db'],
+    queryFn: () => axios.get('/api/datasets').then((response) => {
+      return response.data
+    }).catch((error) => {
+      console.log(error)
+    }),
+    staleTime: Infinity,
+    retry: false,
+    refetchOnWindowFocus: false,
+  })
 
   useEffect(() => {
     let ticker = setInterval(() => {
       tick()
     }, delta)
+
+    if(response.status== 'success' && response.data!='undefined'){
+
+      console.log(response.data)
+      setAllData(response.data.data)
+      setAtt(response.data.attributes)
+
+      // spots num
+      let spots_index = att.indexOf("spots")
+      let spots_num = allData.reduce((accumulator, current) => {
+        return accumulator + (current[spots_index] || 0); 
+      }, 0);
+
+      // paired num
+      let paired_num = allData.filter(item => {
+        return item[1].startsWith("STDS") && item[26] !== "-1" && item[26] !== "0";
+      }).length;
+
+      // others
+      let species_index = att.indexOf("species")
+      const uniqueSpecies = new Set();
+      allData.forEach(item => {
+        const values = item[species_index]?.split(';') || []; // 拆分字符串，确保不为 undefined
+        values
+          .map(value => value.trim()) // 去除空格
+          .filter(value => value) // 过滤掉空字符串
+          .forEach(value => uniqueSpecies.add(value)); // 添加到 Set 中
+      });
+      const species_num = uniqueSpecies.size;
+
+      let tissues_index = att.indexOf("tissues")
+      const tissues_num = new Set(
+        allData
+          .map(item => item[tissues_index])
+          .filter(tissue => tissue && tissue.trim()) // 过滤掉空值
+      ).size;
+      console.log(tissues_num)
+
+      let disease_index = att.indexOf("disease")
+      const uniqueDisease = new Set();
+      allData.forEach(item => {
+        const values = item[disease_index]?.split('|') || []; // 拆分字符串，确保不为 undefined
+        values
+          .map(value => value.trim()) // 去除空格
+          .filter(value => value) // 过滤掉空字符串
+          .forEach(value => uniqueDisease.add(value)); // 添加到 Set 中
+      });
+      const disease_num = uniqueDisease.size;
+
+      let technologies_index = att.indexOf("technologies")
+      const uniqueTechnologies = new Set();
+      allData.forEach(item => {
+        const values = item[technologies_index]?.split(';') || []; // 拆分字符串，确保不为 undefined
+        values
+          .map(value => value.trim()) // 去除空格
+          .filter(value => value) // 过滤掉空字符串
+          .forEach(value => uniqueTechnologies.add(value)); // 添加到 Set 中
+      });
+      const technologies_num = uniqueTechnologies.size;
+      console.log(uniqueTechnologies)
+
+      var countAttr = ["spots","pairs","species","tissues","diseases","technologies"]
+      var countData = [1425656, 99, 17, tissues_num, disease_num, 25]
+      setCountAttr(countAttr)
+      setCountData(countData)
+  }
 
     return () => {
       clearInterval(ticker)
@@ -113,8 +195,16 @@ const Help = () => {
                         <h3>
                           {`A Database with Real-time Lasso-Based Analysis Tailored for Paired Single-cell and Spatial Transcriptomics`}
                         </h3>
+                        {/* <h5 style={{color:'green'}}>
+                        {countAttr.map((attr, i) => (
+                            <span key={i}>
+                              {`${attr}: ${countData[i]}`} 
+                              {i < countAttr.length - 1 && ' '}
+                            </span>
+                          ))}
+                        </h5> */}
                         <p>
-                          Paired single-cell and spatial resolved transcriptomics (SRT) data supplement and complement each other, yielding in-depth insights into biological processes and disease mechanisms.
+                          Paired single-cell and spatial resolved transcriptomics (SRT) data supplement each other, providing in-depth insights into biological processes and disease mechanisms.
                           Pairpot is a database tailored for paired single-cell and SRT data with real-time heuristic analysis.
                           Pairpot curates 99 high-quality pairs including 1,425,656 spots from 299 datasets, and creates the association networks.
                           Pairpot constructs the curated pairs by integrating multiple slices and establishing potential associations between single-cell and SRT data.
@@ -178,7 +268,35 @@ const Help = () => {
                         marginRight: '2rem',
                       }}
                     >
-                      <img src={coverImg} alt="Header Img" />
+                      <img src={coverImg} alt="Header Img" style={{width: '60%', marginLeft:'6rem'}}/>
+                      <Row style={{ marginBottom: '0rem',marginTop:'1rem'}} justify="space-evenly">
+                        <Col span={6}>
+                          <Statistic title="Cells" value={1180181} valueStyle={{color:'green'}} />
+                        </Col>
+                        <Col span={4} style={{ marginLeft: '20px' }}>
+                          <Statistic title="Studies" value={299} valueStyle={{color:'green'}}/>
+                        </Col>
+                        <Col span={4} >
+                          <Statistic title="Pairs" value={99} valueStyle={{color:'green'}}/>
+                        </Col>
+                        <Col span={4}>
+                          <Statistic title="Species" value={17} valueStyle={{color:'green'}}/>
+                        </Col>
+                      </Row>
+                      <Row justify="space-evenly">
+                        <Col span={6} >
+                            <Statistic title="Spots" value={1425656} valueStyle={{color:'green'}}/>
+                          </Col>
+                        <Col span={4} style={{ marginLeft: '20px' }}>
+                          <Statistic title="Tissues" value={55} valueStyle={{color:'green'}}/>
+                        </Col>
+                        <Col span={4}>
+                          <Statistic title="Diseases" value={149} valueStyle={{color:'green'}}/>
+                        </Col>
+                        <Col span={4}>
+                          <Statistic title="Technologies" value={25} valueStyle={{color:'green'}}/>
+                        </Col>
+                      </Row>
                     </div>
                   )}
                 </TrackVisibility>
@@ -321,57 +439,69 @@ const Help = () => {
             </Row>
             <Row>
               <Card hoverable
-                style={{ width: '46%', margin: '2%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                style={{ width: '17%', margin: '0.8%', paddingLeft: '1rem', paddingRight: '1rem' }}
                 title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Layer View</h3>}
-                cover={<img src={layerImg} ></img>}
-                onClick={()=>{
+                cover={<img src={layerImg}  style={{height:'10rem' }}></img>}
+                onClick={() => {
                   const myVal = "Layer View"
                   navigate('/browse', { state: { myVal } })
                 }}>
-                <Card.Meta classNames='header' description={"The users can explore spatial clusters, cell-type proportions, and gene expression of multiple slices from a study in 3D hierarchical layouts."}></Card.Meta>
+                <Card.Meta classnames='header' description={
+                  // "The users can explore spatial clusters, cell-type proportions, and gene expression of multiple slices from a study in 3D hierarchical layouts."
+                  "Explore spatial clusters, cell-type proportions, and gene expression of multiple slices in 3D hierarchical layouts."
+                  }></Card.Meta>
               </Card>
               <Card hoverable
-                style={{ width: '46%', margin: '2%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                style={{ width: '17%', margin: '0.8%', paddingLeft: '1rem', paddingRight: '1rem' }}
                 title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Pair View</h3>}
-                cover={<img src={pairImg} ></img>}
-                onClick={()=>{
+                cover={<img src={pairImg}  style={{ height:'10rem'}}></img>}
+                onClick={() => {
                   const myVal = "Pair View"
                   navigate('/browse', { state: { myVal } })
                 }}>
-                <Card.Meta classNames='header' description={"The users can infer cell-type proportions of spots (right) online using the user-lassoed cells from single-cell data (left) in real time."}></Card.Meta>
+                <Card.Meta classnames='header' description={
+                  // "The users can infer cell-type proportions of spots (right) online using the user-lassoed cells from single-cell data (left) in real time."
+                  "Infer cell-type proportions of spots online using the user-lassoed cells from single-cell data."
+                  }></Card.Meta>
               </Card>
-            </Row>
-
-            <Row>
               <Card hoverable
-                style={{ width: '40%', margin: '2%', marginLeft: '2%', marginRight: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                style={{ width: '17%', margin: '0.8%', marginLeft: '2%', marginRight: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
                 title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Lasso View</h3>}
-                cover={<img src={lassoImg} ></img>}
-                onClick={()=>{
+                cover={<img src={lassoImg}  style={{ height:'10rem' }}></img>}
+                onClick={() => {
                   const myVal = "LassoView"
                   navigate('/browse', { state: { myVal } })
-                }}>    
-                <Card.Meta classNames='header' description={"The users can select the customized domains/cells using lasso tools. These domains/cells can be precisely refined in millisecond-level response time."}></Card.Meta>
+                }}>
+                <Card.Meta classnames='header' description={
+                  // "The users can select the customized domains/cells using lasso tools. These domains/cells can be precisely refined in millisecond-level response time."
+                  "Select the customized domains/cells using lasso tools."
+                  }></Card.Meta>
               </Card>
               <Card hoverable
-                style={{ width: '26%', margin: '2%', marginRight: '1%', marginLeft: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                style={{ width: '17%', margin: '0.8%', marginRight: '1%', marginLeft: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
                 title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Network</h3>}
-                cover={<img src={netImg} ></img>}
-                onClick={()=>{
+                cover={<img src={netImg}  style={{height:'10rem' }}></img>}
+                onClick={() => {
                   const myVal = "Cell Interactions"
                   navigate('/browse', { state: { myVal } })
                 }}>
-                <Card.Meta classNames='header' description={"The users can explore the cell-cell communication network both in single-cell and spaital data."}></Card.Meta>
+                <Card.Meta classnames='header' description={
+                  "Explore the cell-cell communication network both in single-cell and spaital data."
+                  }></Card.Meta>
               </Card>
               <Card hoverable
-                style={{ width: '25%', margin: '2%', marginRight: '2%', marginLeft: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                style={{ width: '17%', margin: '0.8%', marginRight: '2%', marginLeft: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
                 title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Heatmap</h3>}
-                cover={<img src={heatImg} ></img>}
-                onClick={()=>{
+                cover={<img src={heatImg}  style={{height:'10rem' }}></img>}
+                onClick={() => {
                   const myVal = "Cell Interactions"
                   navigate('/browse', { state: { myVal } })
                 }}>
-                <Card.Meta classNames='header' description={"The users can explore L-R pairs, single-cell marker genes and spatial variable genes via heatmap in versatile format."}></Card.Meta>
+                <Card.Meta classnames='header' description=
+                {
+                  // "The users can explore L-R pairs, single-cell marker genes and spatial variable genes via heatmap in versatile format."
+                  "Explore L-R pairs, single-cell marker genes and spatial variable genes via heatmap in versatile format."
+                }></Card.Meta>
               </Card>
             </Row>
 

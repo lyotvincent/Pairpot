@@ -57,7 +57,7 @@ export const Database = () => {
     "10μm": ["Seq-Scope","HDST","Stereo-Seq" ],
     "25μm": ["Slide-seqV2","Slide-seq","DBiT-seq"],
     "50μm": ["10x Visium","Spatial Transcriptomics","sciMAP-ATAC-seq"],
-    "cell-bin": [],
+    "single-cell SRT": [],
   }
 
   const cellBinTech = [
@@ -150,7 +150,7 @@ export const Database = () => {
         //   existTechs = existTechs.flat() // dimension: 2->1
         //   speciesArray = spArray.filter(item => !existTechs.includes(item));
         // }
-        if(String(species) == "cell-bin"){
+        if(String(species) == "single-cell SRT"){
           speciesArray = cellBinTech
         }
         else
@@ -172,6 +172,7 @@ export const Database = () => {
 
   useEffect(() => {
     if (response.status === 'success' && typeof response.data !== 'undefined') {
+      console.log(response.data)
       setSrc(response)
     }
   }, [response.data])
@@ -210,7 +211,6 @@ export const Database = () => {
       TabRef.current?.GraphConfig(`{species: \"${item}\"}`)
     }
     else if (label === "technologies") {
-      console.log(item)
       let binFlag = item in techBin? true : false
       newSrcData = filterTechs(item, binFlag)
       TabRef.current?.GraphConfig(`{technologies: \"${item}\"}`)
