@@ -36,7 +36,7 @@ const { enterLoading, quitLoading } = Loading
 
 
 
-const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, title, height, width, margin, progress }) => {
+const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, progress }) => {
   const chartRef = useRef(null)
   const chartRef1 = useRef(null) // layer view + lasso view
   const commandRef = useRef('')
@@ -44,6 +44,7 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, title, height, wi
   const [key, setKey] = useState(true)
   const [Init, setInit] = useState(false)
   const [loadings, setLoadings] = useState([false]) // loadings for [network]
+  const [title, setTitle] = useState("Spatial Domain Interaction Network")
   const [graph, setGraph] = useState(null)
   const [scgraph, setSCGraph] = useState(null)
   const [spgraph, setSPGraph] = useState(null)
@@ -1419,7 +1420,7 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, title, height, wi
         </div>
       }>
       <div>
-          <h2 style={{ fontSize: '24px', marginLeft: '15rem' }}>{"Cell-Cell Interaction Network"}</h2>
+          <h2 style={{ fontSize: '24px', marginLeft: '15rem' }}>{title}</h2>
       </div>
       <div style={{ display: 'flex', width: '80rem'}}>
         <div
@@ -1470,6 +1471,7 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, title, height, wi
 
               // exchange
               setKey(value)
+              setTitle(value ? "Spatial Domain Interaction Network" : "Cell Interaction Network")
               setGraph(value ? spgraph : scgraph)
               toggleAnno("Upload")
             }} />
@@ -1526,7 +1528,6 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, title, height, wi
 
 // some settings
 NetworkRelation.defaultProps = {
-  title: 'Cell-Cell Interaction Network',
   height: '45rem',
   width: '40rem',
   margin: '0rem',
@@ -1537,7 +1538,6 @@ NetworkRelation.propTypes = {
   scfile: PropTypes.object,
   setCompLoad: PropTypes.func,
   onRef: PropTypes.any,
-  title: PropTypes.string,
   height: PropTypes.string,
   width: PropTypes.string,
   margin: PropTypes.string,
