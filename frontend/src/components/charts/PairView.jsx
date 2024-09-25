@@ -592,8 +592,8 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
             symbolSize: symbolSizeRef.current + 2,
             name: anno,
             encode: {
-              x: 'array_row',
-              y: 'array_col',
+              x: 'spatial_0',
+              y: 'spatial_1',
               itemName: anno,
             },
             emphasis: {

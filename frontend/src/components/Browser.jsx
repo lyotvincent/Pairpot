@@ -1,6 +1,5 @@
 import { DotChartOutlined, FileDoneOutlined, FileSearchOutlined, FileTextOutlined, HeatMapOutlined, LinkOutlined, OneToOneOutlined, SelectOutlined, SlidersOutlined, UnorderedListOutlined } from '@ant-design/icons'
 import React, { useState, useEffect, lazy, Suspense, useRef, memo } from 'react'
-import JSZip from 'jszip'
 import { ZipReader, BlobReader, BlobWriter } from "@zip.js/zip.js"
 import logoFig from "../assets/img/mylogo.png"
 import {
@@ -146,8 +145,8 @@ const Browser = () => {
         id: "STDS0000235"
       },
     }).then((response) => {
-      console.log("get response")
-      console.log(response)
+      // console.log("get response")
+      // console.log(response)
       let dataCol = response.data.attributes
       let spitem = response.data.data[0]
       let values = Object.fromEntries(
@@ -236,7 +235,7 @@ const Browser = () => {
 
   useEffect(() => {
     // console.log(location.state)
-    console.log(example)
+    // console.log(example)
     if (example.status === 'success' && typeof example.data !== 'undefined' &&
       (location.state === null || myVal !== 'null')) {
       // console.log("setting example")
@@ -262,10 +261,10 @@ const Browser = () => {
   }, [location])
 
   useEffect(() => {
-    console.log("Init:", Init)
+    // console.log("Init:", Init)
     if (Init && locState !== null && myVal === 'null') {
       // set MetaInfo
-      console.log("Setting MetaInfo")
+      // console.log("Setting MetaInfo")
       MetaRef.current.Trigger(locState)
       setLocState(locState)
       setComponentLoad({  // reset ComponentLoad
@@ -300,21 +299,20 @@ const Browser = () => {
       if (CPDBRef.current !== null)
         enterLoading(0, CPDBRef.current.Loading)
 
-      console.log("netref")
+      // console.log("netref")
       console.log(NetRef)
       NetRef.current?.Tip(loadingTips[3])
       if (NetRef.current !== null)
         enterLoading(0, NetRef.current.Loading)
 
       // mutation of datasets
-      console.log(locState)
+      // console.log(locState)
       statusSC.mutate(locState)
       statusSP.mutate(locState)
     }
   }, [locState, Init])
 
   useEffect(() => {
-    console.log("Setting Init:", PairRef.current, LassoRef.current, LayerRef.current, MetaRef.current)
     if (PairRef.current !== null &&
       LassoRef.current !== null &&
       LayerRef.current !== null &&
@@ -403,7 +401,7 @@ const Browser = () => {
       SearchAnchor.current != null
       || true // only need true
     ) {
-      console.log(myVal)
+      // console.log(myVal)
       if (myVal != 'null' && myVal != 'undefined') {
         switch (myVal) {
           case 'Lasso-View':
@@ -577,7 +575,7 @@ const Browser = () => {
               <Search setLocState={setLocState}
                 setCompLoad={setComponentLoad}
                 setSelectedKey={setSelectedKey} />
-              <div>{JSON.stringify(componentLoad)}</div>
+              {/* <div>{JSON.stringify(componentLoad)}</div> */}
             </Col>
             <Divider />
             {/* <div>compLoad:{JSON.stringify(componentLoad)}</div> */}
