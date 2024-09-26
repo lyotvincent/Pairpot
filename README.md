@@ -8,7 +8,7 @@ It constructs the curated pairs by integrating multiple slices and establishing 
 On this basis, Pairpot adopts semi-supervised learning that enables  real-time heuristic analysis for SC-SP pairs where Lasso-View refines the user-selected SRT domains within milliseconds, Pair-View infers cell proportions of spots based on user-selected cell types in real-time, and Layer-View displays SRT slices using a 3D hierarchical layout. 
 Experiments demonstrated Pairpot's efficiency in identifying heterogeneous domains and cell proportions. 
 
-<img src="./frontend/src/assets/img/cover-figure1.png" width="60%">
+<img src="./cover figure.png" width="60%">
 
 ## Offline Deployment
 ### FrontEnd
