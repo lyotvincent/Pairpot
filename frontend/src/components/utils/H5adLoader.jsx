@@ -83,7 +83,7 @@ const CpdbLoader = (f) => {
     let cellArray = {}
     let dataArray = {}
     let cellType = f.get(`uns/CellChat_cellType`).value
-    console.log(cellType)
+    // console.log(cellType)
     for (let i = 0; i < cellType.length; i++) {
       // find temp cell
       let tempCell = cellType[i]
@@ -119,7 +119,7 @@ const CpdbLoader = (f) => {
     let cellArray = {}
     let dataArray = {}
     let cellType = f.get(`uns/${method}_cellType`).value
-    console.log(cellType)
+    // console.log(cellType)
     for (let i = 0; i < cellType.length; i++) {
       // find temp cell
       let tempCell = cellType[i]
@@ -155,7 +155,7 @@ const CpdbLoader = (f) => {
     let cellArray = {}
     let dataArray = {}
     let cellType = f.get(`uns/${method}_cellType`).value
-    console.log(cellType)
+    // console.log(cellType)
     for (let i = 0; i < cellType.length; i++) {
       // find temp cell
       let tempCell = cellType[i]

@@ -67,7 +67,7 @@ const Search = ({ onSearchComplete, onChange, value }) => { // 增加输入框�
   const fetch = useMutation({
     mutationKey: ['search_key'],
     mutationFn: (e) => {
-      console.log(e)
+      // console.log(e)
       axios({
         method: 'GET',
         url: '/api/search_key',
@@ -78,7 +78,7 @@ const Search = ({ onSearchComplete, onChange, value }) => { // 增加输入框�
       }).then((response) => {
         // let datas = response.data.data
         let datas = response.data
-        console.log(datas)
+        // console.log(datas)
         onSearchComplete(datas, e)  // to parent
         quitLoading(0, setLoading)
         setLoadText("Search")

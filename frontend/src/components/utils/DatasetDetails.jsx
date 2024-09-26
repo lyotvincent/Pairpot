@@ -143,7 +143,7 @@ const DatasetDetails = ({ onRef }) => {
 
   var dataIndex = ["dataset_id", "title", "contributors", "summary", "species", "tissues", "technologies", "contacts", "citation", "accessions"]
   useEffect(() => {
-    console.log(state)
+    // console.log(state)
     if (typeof state !== 'undefined') {
 
       let stateKeys = Object.keys(state)

@@ -77,10 +77,15 @@ def LPARefine(selected,  file, use_model=LabelPropagation, do_correct=True):
 
     with h5py.File(file, 'r') as h5file:
         obs_group = h5file['obs']
-        if "codes" in obs_group['annotation']:
-            mat = obs_group['annotation']['codes'][:]
+        obs_col = 'annotation'
+        if obs_col not in obs_group:
+            obs_col = 'leiden-1'
+
+        if "codes" in obs_group[obs_col]:
+            mat = obs_group[obs_col]['codes'][:]
         else:
-            mat = obs_group['annotation'][:]
+            mat = obs_group[obs_col][:]
+
     val={}
 
     for i in np.unique(mat):

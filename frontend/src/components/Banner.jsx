@@ -7,7 +7,7 @@ import netImg from "../assets/img/browse/network.png"
 import heatImg from "../assets/img/browse/heatmap.png"
 import coverImg from "../assets/img/cover-figure.png"
 import axios from 'axios'
-import { Button, ConfigProvider, Layout, Space , Statistic} from 'antd'
+import { Button, ConfigProvider, Layout, Space, Statistic } from 'antd'
 import { ArrowRightCircle } from 'react-bootstrap-icons'
 import 'animate.css'
 import TrackVisibility from 'react-on-screen'
@@ -57,80 +57,80 @@ const Help = () => {
   })
 
   useEffect(() => {
-    let ticker = setInterval(() => {
-      tick()
-    }, delta)
+    // let ticker = setInterval(() => {
+    //   tick()
+    // }, delta)
 
-    if(response.status== 'success' && response.data!='undefined'){
+    if (response.status == 'success' && response.data != 'undefined') {
 
-      console.log(response.data)
+      // console.log(response.data)
       setAllData(response.data.data)
       setAtt(response.data.attributes)
 
       // spots num
       let spots_index = att.indexOf("spots")
       let spots_num = allData.reduce((accumulator, current) => {
-        return accumulator + (current[spots_index] || 0); 
-      }, 0);
+        return accumulator + (current[spots_index] || 0)
+      }, 0)
 
       // paired num
       let paired_num = allData.filter(item => {
-        return item[1].startsWith("STDS") && item[26] !== "-1" && item[26] !== "0";
-      }).length;
+        return item[1].startsWith("STDS") && item[26] !== "-1" && item[26] !== "0"
+      }).length
 
       // others
       let species_index = att.indexOf("species")
-      const uniqueSpecies = new Set();
+      const uniqueSpecies = new Set()
       allData.forEach(item => {
-        const values = item[species_index]?.split(';') || []; // 拆分字符串，确保不为 undefined
+        const values = item[species_index]?.split(';') || [] // 拆分字符串，确保不为 undefined
         values
           .map(value => value.trim()) // 去除空格
           .filter(value => value) // 过滤掉空字符串
-          .forEach(value => uniqueSpecies.add(value)); // 添加到 Set 中
-      });
-      const species_num = uniqueSpecies.size;
+          .forEach(value => uniqueSpecies.add(value)) // 添加到 Set 中
+      })
+      const species_num = uniqueSpecies.size
 
       let tissues_index = att.indexOf("tissues")
       const tissues_num = new Set(
         allData
           .map(item => item[tissues_index])
           .filter(tissue => tissue && tissue.trim()) // 过滤掉空值
-      ).size;
-      console.log(tissues_num)
+      ).size
+      // console.log(tissues_num)
 
       let disease_index = att.indexOf("disease")
-      const uniqueDisease = new Set();
+      const uniqueDisease = new Set()
       allData.forEach(item => {
-        const values = item[disease_index]?.split('|') || []; // 拆分字符串，确保不为 undefined
+        const values = item[disease_index]?.split('|') || [] // 拆分字符串，确保不为 undefined
         values
           .map(value => value.trim()) // 去除空格
           .filter(value => value) // 过滤掉空字符串
-          .forEach(value => uniqueDisease.add(value)); // 添加到 Set 中
-      });
-      const disease_num = uniqueDisease.size;
+          .forEach(value => uniqueDisease.add(value)) // 添加到 Set 中
+      })
+      const disease_num = uniqueDisease.size
 
       let technologies_index = att.indexOf("technologies")
-      const uniqueTechnologies = new Set();
+      const uniqueTechnologies = new Set()
       allData.forEach(item => {
-        const values = item[technologies_index]?.split(';') || []; // 拆分字符串，确保不为 undefined
+        const values = item[technologies_index]?.split(';') || [] // 拆分字符串，确保不为 undefined
         values
           .map(value => value.trim()) // 去除空格
           .filter(value => value) // 过滤掉空字符串
-          .forEach(value => uniqueTechnologies.add(value)); // 添加到 Set 中
-      });
-      const technologies_num = uniqueTechnologies.size;
-      console.log(uniqueTechnologies)
+          .forEach(value => uniqueTechnologies.add(value)) // 添加到 Set 中
+      })
+      const technologies_num = uniqueTechnologies.size
+      // console.log(uniqueTechnologies)
 
-      var countAttr = ["spots","pairs","species","tissues","diseases","technologies"]
+      var countAttr = ["spots", "pairs", "species", "tissues", "diseases", "technologies"]
       var countData = [1425656, 99, 17, tissues_num, disease_num, 25]
       setCountAttr(countAttr)
       setCountData(countData)
-  }
-
-    return () => {
-      clearInterval(ticker)
     }
-  }, [text])
+
+    // return () => {
+    //   clearInterval(ticker)
+    // }
+  }, [response.data])
 
   const tick = () => {
     let i = loopNum % toRotate.length
@@ -268,33 +268,33 @@ const Help = () => {
                         marginRight: '2rem',
                       }}
                     >
-                      <img src={coverImg} alt="Header Img" style={{width: '60%', marginLeft:'6rem'}}/>
-                      <Row style={{ marginBottom: '0rem',marginTop:'1rem'}} justify="space-evenly">
+                      <img src={coverImg} alt="Header Img" style={{ width: '60%', marginLeft: '6rem' }} />
+                      <Row style={{ marginBottom: '0rem', marginTop: '1rem' }} justify="space-evenly">
                         <Col span={6}>
-                          <Statistic title="Cells" value={1180181} valueStyle={{color:'green'}} />
+                          <Statistic title="Cells" value={1180181} valueStyle={{ color: 'green' }} />
                         </Col>
                         <Col span={4} style={{ marginLeft: '20px' }}>
-                          <Statistic title="Studies" value={299} valueStyle={{color:'green'}}/>
+                          <Statistic title="Studies" value={299} valueStyle={{ color: 'green' }} />
                         </Col>
                         <Col span={4} >
-                          <Statistic title="Pairs" value={99} valueStyle={{color:'green'}}/>
+                          <Statistic title="Pairs" value={99} valueStyle={{ color: 'green' }} />
                         </Col>
                         <Col span={4}>
-                          <Statistic title="Species" value={17} valueStyle={{color:'green'}}/>
+                          <Statistic title="Species" value={17} valueStyle={{ color: 'green' }} />
                         </Col>
                       </Row>
                       <Row justify="space-evenly">
                         <Col span={6} >
-                            <Statistic title="Spots" value={1425656} valueStyle={{color:'green'}}/>
-                          </Col>
+                          <Statistic title="Spots" value={1425656} valueStyle={{ color: 'green' }} />
+                        </Col>
                         <Col span={4} style={{ marginLeft: '20px' }}>
-                          <Statistic title="Tissues" value={55} valueStyle={{color:'green'}}/>
+                          <Statistic title="Tissues" value={55} valueStyle={{ color: 'green' }} />
                         </Col>
                         <Col span={4}>
-                          <Statistic title="Diseases" value={149} valueStyle={{color:'green'}}/>
+                          <Statistic title="Diseases" value={149} valueStyle={{ color: 'green' }} />
                         </Col>
                         <Col span={4}>
-                          <Statistic title="Technologies" value={25} valueStyle={{color:'green'}}/>
+                          <Statistic title="Technologies" value={25} valueStyle={{ color: 'green' }} />
                         </Col>
                       </Row>
                     </div>
@@ -440,68 +440,68 @@ const Help = () => {
             <Row>
               <Card hoverable
                 style={{ width: '17%', margin: '0.8%', paddingLeft: '1rem', paddingRight: '1rem' }}
-                title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Layer View</h3>}
-                cover={<img src={layerImg}  style={{height:'10rem' }}></img>}
+                title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Layer-View</h3>}
+                cover={<img src={layerImg} style={{ height: '10rem' }}></img>}
                 onClick={() => {
-                  const myVal = "Layer View"
+                  const myVal = "Layer-View"
                   navigate('/browse', { state: { myVal } })
                 }}>
                 <Card.Meta classnames='header' description={
                   // "The users can explore spatial clusters, cell-type proportions, and gene expression of multiple slices from a study in 3D hierarchical layouts."
                   "Explore spatial clusters, cell-type proportions, and gene expression of multiple slices in 3D hierarchical layouts."
-                  }></Card.Meta>
+                }></Card.Meta>
               </Card>
               <Card hoverable
                 style={{ width: '17%', margin: '0.8%', paddingLeft: '1rem', paddingRight: '1rem' }}
-                title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Pair View</h3>}
-                cover={<img src={pairImg}  style={{ height:'10rem'}}></img>}
+                title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Pair-View</h3>}
+                cover={<img src={pairImg} style={{ height: '10rem' }}></img>}
                 onClick={() => {
-                  const myVal = "Pair View"
+                  const myVal = "Pair-View"
                   navigate('/browse', { state: { myVal } })
                 }}>
                 <Card.Meta classnames='header' description={
                   // "The users can infer cell-type proportions of spots (right) online using the user-lassoed cells from single-cell data (left) in real time."
                   "Infer cell-type proportions of spots online using the user-lassoed cells from single-cell data."
-                  }></Card.Meta>
+                }></Card.Meta>
               </Card>
               <Card hoverable
                 style={{ width: '17%', margin: '0.8%', marginLeft: '2%', marginRight: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
-                title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Lasso View</h3>}
-                cover={<img src={lassoImg}  style={{ height:'10rem' }}></img>}
+                title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Lasso-View</h3>}
+                cover={<img src={lassoImg} style={{ height: '10rem' }}></img>}
                 onClick={() => {
-                  const myVal = "LassoView"
+                  const myVal = "Lasso-View"
                   navigate('/browse', { state: { myVal } })
                 }}>
                 <Card.Meta classnames='header' description={
                   // "The users can select the customized domains/cells using lasso tools. These domains/cells can be precisely refined in millisecond-level response time."
                   "Select the customized domains/cells using lasso tools."
-                  }></Card.Meta>
+                }></Card.Meta>
               </Card>
               <Card hoverable
                 style={{ width: '17%', margin: '0.8%', marginRight: '1%', marginLeft: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
                 title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Network</h3>}
-                cover={<img src={netImg}  style={{height:'10rem' }}></img>}
+                cover={<img src={netImg} style={{ height: '10rem' }}></img>}
                 onClick={() => {
-                  const myVal = "Cell Interactions"
+                  const myVal = "Interactions"
                   navigate('/browse', { state: { myVal } })
                 }}>
                 <Card.Meta classnames='header' description={
                   "Explore the cell-cell communication network both in single-cell and spaital data."
-                  }></Card.Meta>
+                }></Card.Meta>
               </Card>
               <Card hoverable
                 style={{ width: '17%', margin: '0.8%', marginRight: '2%', marginLeft: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
                 title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Heatmap</h3>}
-                cover={<img src={heatImg}  style={{height:'10rem' }}></img>}
+                cover={<img src={heatImg} style={{ height: '10rem' }}></img>}
                 onClick={() => {
-                  const myVal = "Cell Interactions"
+                  const myVal = "Spatial Markers"
                   navigate('/browse', { state: { myVal } })
                 }}>
                 <Card.Meta classnames='header' description=
-                {
-                  // "The users can explore L-R pairs, single-cell marker genes and spatial variable genes via heatmap in versatile format."
-                  "Explore L-R pairs, single-cell marker genes and spatial variable genes via heatmap in versatile format."
-                }></Card.Meta>
+                  {
+                    // "The users can explore L-R pairs, single-cell marker genes and spatial variable genes via heatmap in versatile format."
+                    "Explore L-R pairs, single-cell marker genes and spatial variable genes via heatmap in versatile format."
+                  }></Card.Meta>
               </Card>
             </Row>
 
@@ -533,10 +533,10 @@ const Help = () => {
             <Col offset={1}>
               <p>
                 *Zhihan Ruan, Centre for Bioinformatics and Intelligent
-                Medicine, Nankai University, rrrzhan@nankai.edu.cn
+                Medicine, Nankai University, rrrzhan@mail.nankai.edu.cn
               </p>
               <p>
-                *Jian Liu, State Key Laboratory of Medical Chemical Biology, College of Computer Science, Nankai University, jianliu@nankai.edu.cn
+                *Jian Liu, State Key Laboratory of Medical Chemical Biology, College of Computer Science, Nankai University, jianliu@mail.nankai.edu.cn
               </p>
             </Col>
           </Row>

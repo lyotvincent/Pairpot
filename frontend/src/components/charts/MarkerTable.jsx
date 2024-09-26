@@ -346,7 +346,7 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin, p
         setDyColumns(_columns)
         quitLoading(0, setLoadings)
 
-        console.log(_data)
+        // console.log(_data)
 
         // set dendrogram
         let den_data = []
@@ -376,13 +376,13 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin, p
         genes = genes.reverse()
         _data = _data.sort((a, b) => cells.indexOf(a.clu) - cells.indexOf(b.clu))
         _data = _data.sort((a, b) => genes.indexOf(a.name) - genes.indexOf(b.name))
-        console.log(_data)
-        console.log(genes)
+        // console.log(_data)
+        // console.log(genes)
         let source_test = _data.map((item) => {
           return [item.clu, item.name, item.expr, item.frac]
         })
-        console.log(source_test)
-        console.log(cells)
+        // console.log(source_test)
+        // console.log(cells)
 
         setGenes(genes)
         setCells(cells)
@@ -394,9 +394,9 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin, p
 
         var isXTooLong = xData.length > standardLen
 
-        console.log(key)
-        console.log(isXTooLong)
-        console.log(xData)
+        // console.log(key)
+        // console.log(isXTooLong)
+        // console.log(xData)
         myChart.setOption({
           grid: [
             {
@@ -535,7 +535,7 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin, p
             },
           ],
         })
-        console.log(myChart.dataZoom)
+        // console.log(myChart.dataZoom)
         quitLoading(1, setLoadings)
       }
     }
@@ -793,7 +793,7 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin, p
               const currentOption = mychart.getOption()
 
               // dataste : [x, y, value1, value2] -> [y, x, value1, value2]
-              console.log(currentOption)
+              // console.log(currentOption)
               var source = currentOption.dataset[0].source
               var dimensions = currentOption.dataset[0].dimensions
 
@@ -806,8 +806,8 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin, p
                 source[i] = [temp_data[1], temp_data[0], temp_data[3], temp_data[2]]
               }
 
-              console.log(source)
-              console.log(dimensions)
+              // console.log(source)
+              // console.log(dimensions)
 
               const newXAxis = currentOption.yAxis.map(yAxisItem => ({
                 ...yAxisItem,
@@ -846,7 +846,7 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin, p
                   tooltip: [0, 1, 2, 3],
                 },
               }))
-              console.log(newSeries)
+              // console.log(newSeries)
 
               if (key) {
                 setXData(Genes)
@@ -867,7 +867,7 @@ const MarkerTable = ({ file, setCompLoad, onRef, title, height, width, margin, p
                 newDataZoom = []
 
 
-              console.log(xData)
+              // console.log(xData)
 
               const newOption = {
                 ...currentOption,

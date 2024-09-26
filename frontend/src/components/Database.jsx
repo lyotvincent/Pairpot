@@ -155,7 +155,7 @@ export const Database = () => {
         }
         else
           speciesArray = techBin[species]
-        console.log(speciesArray)
+        // console.log(speciesArray)
         return speciesArray.some((species) => splitArray.includes(species));
       })
       return filteredData
@@ -172,7 +172,7 @@ export const Database = () => {
 
   useEffect(() => {
     if (response.status === 'success' && typeof response.data !== 'undefined') {
-      console.log(response.data)
+      // console.log(response.data)
       setSrc(response)
     }
   }, [response.data])

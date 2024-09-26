@@ -80,8 +80,8 @@ const DatasetList = ({ src, col }) => {
       attrStack[colname] = i
     }
     setAttr(attrStack)
-    console.log(attrStack)
-    console.log(attr)
+    // console.log(attrStack)
+    // console.log(attr)
     // console.log(col)
     // console.log(OriginResponse.data)
   }, [src, col])

@@ -303,7 +303,7 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta, pr
           _setData(h5info.data)
           setTitle(meta?.st.dataset_id)
           setClusterOps(h5info.clusters)
-          console.log(h5info.clusters)
+          // console.log(h5info.clusters)
           if (h5info.clusters.map((item) => item.label).includes('batch'))
             setBatchName('batch')
           setEmbedOps(h5info.embdOps)
@@ -369,7 +369,7 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta, pr
 
   useEffect(() => {
 
-    console.log(commandRef.current)
+    // console.log(commandRef.current)
     if (isInit) {
       var myChart = echarts.getInstanceByDom(chartRef.current)
       if (commandRef.current === "Reload") {
@@ -403,7 +403,7 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta, pr
         setClusterCur({ value: 0, label: defaultAnno, attr: 'categories' })
         prevCluster.current = { value: 0, label: defaultAnno, attr: 'categories' }
         let annotations = setItemGroup(source, _dims.indexOf(defaultAnno))
-        console.log(annotations)
+        // console.log(annotations)
 
         let batches = []
         let _batchName = batchName
@@ -433,7 +433,7 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta, pr
 
         // 4.set datasets
         let _datasets = setBatchDataset(source, _dims, defaultAnno, annotations, batches[0], _batchName)
-        console.log(_datasets)
+        // console.log(_datasets)
         // 5.set 3D series
         let _series = []
         let _snum = 0
@@ -525,9 +525,9 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta, pr
         //   seriesIndex: [...Array(annotations).keys()],
         // }
 
-        console.log(axis)
-        console.log(_datasets)
-        console.log(_series)
+        // console.log(axis)
+        // console.log(_datasets)
+        // console.log(_series)
 
         // 9.render charts
         myChart.setOption({

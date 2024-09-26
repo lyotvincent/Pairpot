@@ -92,8 +92,8 @@ const RelHeat = ({ spfile, scfile, setCompLoad, onRef, title, height, width, mar
     if (Init) {
       var myChart = echarts.getInstanceByDom(chartRef.current)
 
-      console.log(currCluster)
-      console.log(myCells)
+      // console.log(currCluster)
+      // console.log(myCells)
 
       if (commandRef.current === "Reload") {
         enterLoading(0, setLoadings)
@@ -128,8 +128,8 @@ const RelHeat = ({ spfile, scfile, setCompLoad, onRef, title, height, width, mar
         enterLoading(0, setLoadings)
         const interactions = currentInt
         const celltypes = currentCell
-        console.log(currentInt)
-        console.log(currentCell)
+        // console.log(currentInt)
+        // console.log(currentCell)
         myChart.setOption({
           tooltip: {},
           title: [

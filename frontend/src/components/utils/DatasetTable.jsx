@@ -332,7 +332,7 @@ const DatasetTable = ({ src, col, oriSrc }) => {
                     )
                     state['sc'] = scvalues
                   }
-                  console.log(state)
+                  // console.log(state)
                   navigate('/browse', { state: state })
                 }}
               />

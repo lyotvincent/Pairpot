@@ -209,9 +209,9 @@ const Browser = () => {
       icon: <SlidersOutlined />,
     },
     {
-      label: 'Cell Interactions',
+      label: 'Interactions',
       ref: CPDBAnchor,
-      key: 'CellInteractions',
+      key: 'Interactions',
       icon: <HeatMapOutlined />,
     },
   ]
@@ -420,7 +420,7 @@ const Browser = () => {
             setSelectedKey(sideMenuItems[3].key)
             // sideMenuItems[4].ref.current.scrollIntoView({ behavior: "smooth", block: 'start' })
             break
-          case 'Cell Interactions':
+          case 'Interactions':
             // setMyValItem(sideMenuItems[6]);
             setSelectedKey(sideMenuItems[5].key)
             // sideMenuItems[6].ref.current.scrollIntoView({ behavior: "smooth", block: 'start' })
@@ -575,7 +575,7 @@ const Browser = () => {
               <Search setLocState={setLocState}
                 setCompLoad={setComponentLoad}
                 setSelectedKey={setSelectedKey} />
-              {/* <div>{JSON.stringify(componentLoad)}</div> */}
+              {/* <div>{JSON.stringify(myVal)}</div> */}
             </Col>
             <Divider />
             {/* <div>compLoad:{JSON.stringify(componentLoad)}</div> */}
@@ -749,8 +749,8 @@ const Browser = () => {
             {/* )} */}
             <Divider style={{ display: !modelKey ? 'block' : 'none' }} />
             {/* { (selectedKey == "CellInteractions") && ( */}
-            <Card style={{ display: selectedKey == "CellInteractions" || !modelKey ? 'block' : 'none' }}>
-              <ToggleAccordion header={<h3 id="CellInteractions" ref={CPDBAnchor}>Cell Interactions</h3>}>
+            <Card style={{ display: selectedKey == "Interactions" || !modelKey ? 'block' : 'none' }}>
+              <ToggleAccordion header={<h3 id="Interactions" ref={CPDBAnchor}>Cell/Domain Interactions</h3>}>
                 {<div>
                   <b>Top:</b> Cell-Cell interaction networks. Click the switch to change the chart from single-cell to SRT data. Click the legends to rerender the chart.
                   <br />

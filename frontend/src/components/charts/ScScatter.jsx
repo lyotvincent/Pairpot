@@ -483,7 +483,7 @@ const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, ma
           defaultAnno = clusterOps[0]
         }
         setClusterCur(defaultAnno)
-        console.log(clusterCur)
+        // console.log(clusterCur)
         let annotations = setItemGroup(source, _dims.indexOf(defaultAnno.label))
 
         // set batches
