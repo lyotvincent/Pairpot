@@ -42,6 +42,8 @@ const options = [
   {
     label: renderTitle('Spatial Transcriptomics Studies'),
     options: [renderItem('Spatial transcriptomics map of the embryonic mouse brain – a tool to explore neurogenesis', 'STDS0000235'),
+    renderItem("SAW: An efficient and accurate data analysis workflow for Stereo-seq spatial transcriptomics]", 'STDS0000234'),
+    renderItem("Integration of spatial and single-cell transcriptomics localizes epithelial cell-immune cross-talk in kidney injury", 'STDS0000007'),
     renderItem('Spatial transcriptomics combined with single-cell RNA-sequencing unravels the complex inflammatory cell network in atopic dermatitis [ST]', 'STDS0000212'),
     renderItem("Spatial transcriptomics of de novo NEPC and ARPC", 'STDS0000227'),
     renderItem("Tertiary lymphoid structures generate and propagate anti-tumor antibody-producing plasma cells in renal cell cancer", 'STDS0000223'),
@@ -54,7 +56,7 @@ const options = [
     renderItem("Cancer cell states recur across tumor types and form specific interactions with the tumor microenvironment", 'STDS0000153'),
     renderItem("Intratumor heterogeneity and T cell exhaustion in primary CNS lymphoma", 'STDS0000152'),
     renderItem("Spatially resolved transcriptomics revised human distal lung epithelial hierarchy [spatial transcriptomics]", 'STDS0000114'),
-    renderItem("SAW: An efficient and accurate data analysis workflow for Stereo-seq spatial transcriptomics]", 'STDS0000234')
+    renderItem("Spatial detection of fetal marker genes expressed at low level in adult human heart tissue", 'STDS0000014'),
     ],
   },
 ]

@@ -274,7 +274,7 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
           let h5info = H5adLoader(file, event, ['net'])
           let h5info1 = H5adLoader(file, event, ['meta'])
           let h5info2 = H5adLoader(file, event, ['marker', 'den'])
-          console.log(h5info2)
+          // console.log(h5info2)
           if (sp) {
             _setData(h5info1.data)
             // top markers
@@ -318,7 +318,7 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
             h5info.categories.sort((a, b) => Number(a.name) - Number(b.name))
           }
 
-          console.log(h5info)
+          // console.log(h5info)
 
           h5info['links'].forEach(function (link) {
             link['lineStyle'] = {
@@ -526,12 +526,12 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
           return newCompLoad
         })
         ScH5adLoader(scfile, false).then((res) => {
-          console.log(res)
+          // console.log(res)
           setSCGraph(res)
           setCellArray(res.categories)
         })
         ScH5adLoader(spfile, true).then((res) => {
-          console.log("All data reloaded in Network.")
+          // console.log("All data reloaded in Network.")
           setSPGraph(res)
           setGraph(res)
           toggleAnno("Upload")
@@ -549,7 +549,7 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
       if (commandRef.current === "Upload") {
         enterLoading(0, setLoadings)
 
-        console.log(graph)
+        // console.log(graph)
 
         myChart.setOption({
           legend: [
@@ -607,7 +607,7 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
         }
         )
 
-        console.log(cellArray)
+        // console.log(cellArray)
 
 
         // pair view
@@ -621,8 +621,8 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
           setItemSize(symbolSizeRef.current)
           setCellNum(source.length)
 
-          console.log(_dims)
-          console.log(graph)
+          // console.log(_dims)
+          // console.log(graph)
 
           // 2.0 set annotations and batches
           let defaultAnno = 'annotation' // 'annotation' as annotation
@@ -630,8 +630,8 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
           prevCluster.current = { value: 0, label: defaultAnno, attr: 'categories' }
           // the result saved in itemGroupRef.current
           let annotations = setItemGroup(source, _dims.indexOf(defaultAnno))
-          console.log(annotations)
-          console.log(itemGroupRef.current)
+          // console.log(annotations)
+          // console.log(itemGroupRef.current)
           let clusterGroups = itemGroupRef.current
 
           // let batches = ['batch 1']
@@ -655,8 +655,8 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
             setBatchOps(batches.map((item, id) => ({ value: id, label: item, attr: 'categories' })))
           }
 
-          console.log(batchCur)
-          console.log(batches)
+          // console.log(batchCur)
+          // console.log(batches)
 
           // 3. set embeddings
           let _embd = embedOps.map((item) => item.label).includes('spatial')
@@ -699,9 +699,9 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
             })
           }
 
-          console.log(axis)
-          console.log(_datasets)
-          console.log(_series)
+          // console.log(axis)
+          // console.log(_datasets)
+          // console.log(_series)
 
           // 6.calculate top3 celltypes
           var celltypeIndexDic = {}
@@ -724,14 +724,14 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
               cellScores[clusterNum][cellType] = score
             }
           }
-          console.log(cellScores)
+          // console.log(cellScores)
           var topCells = cellScores.map(scores => {
             return Object.entries(scores)
               .sort(([, valueA], [, valueB]) => valueB - valueA)  // sort
               .slice(0, 3)  // top 3
               .map(([key]) => key);  // cell name
           });
-          console.log(topCells);
+          // console.log(topCells);
 
 
 
@@ -751,14 +751,14 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
             _data2 = [..._data2, ..._obj]
           }
           var topMarkers = []
-          console.log(annotations)
+          // console.log(annotations)
           for(let i=0;i<annotations.length;i++){
             topMarkers[i] = []
           }
           for(let i = 0; i < _data2.length; i++){
             topMarkers[Math.floor(i/5)][i%5] = _data2[i].name
           }
-          console.log(topMarkers)
+          // console.log(topMarkers)
 
           var newToolTip = {
             formatter: function (params) {
@@ -804,7 +804,7 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
           // hover function
           myChart.on('click', (params) => {
             let _seriesName = params.name
-            console.log(_seriesName)
+            // console.log(_seriesName)
             let option = myChart1.getOption()
             option.series.forEach(seriesItem => {
               if (seriesItem.name === _seriesName) {
@@ -855,11 +855,11 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
 
           // mychart1 hover
           myChart1.on('click', (params) => {
-            console.log(graph.nodes)
-            console.log(params)
+            // console.log(graph.nodes)
+            // console.log(params)
             let option = myChart.getOption()
             let selectedNodes = option.series[0].data.filter(node => node.category === params.seriesName)
-            console.log(selectedNodes)
+            // console.log(selectedNodes)
             // selectedNodes.forEach(node => {
             //   node.itemStyle = {
 
@@ -1023,16 +1023,16 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
             }))
             _data2 = [..._data2, ..._obj]
           }
-          console.log(_data2)
+          // console.log(_data2)
           var topMarkers = []
-          console.log(annotations)
+          // console.log(annotations)
           for(let i=0;i<annotations.length;i++){
             topMarkers[i] = []
           }
           for(let i = 0; i < _data2.length; i++){
             topMarkers[Math.floor(i/showTop)][i%showTop] = _data2[i].name
           }
-          console.log(topMarkers)
+          // console.log(topMarkers)
 
           var newToolTip = {
             formatter: function (params) {
@@ -1111,11 +1111,11 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
 
           // mychart2 hover
           myChart2.on('click', (params) => {
-            console.log("mychart2", params)
+            // console.log("mychart2", params)
             // console.log(graph.nodes)
             let option = myChart.getOption()
             let selectedNodes = option.series[0].data.filter(node => node.category === params.seriesName)
-            console.log(selectedNodes)
+            // console.log(selectedNodes)
             // selectedNodes.forEach(node => {
             //   node.itemStyle = {
 
@@ -1169,7 +1169,7 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
       else if (commandRef.current == "Setting") {
         if (key) {
           let option = myChart1.getOption()
-          console.log(option)
+          // console.log(option)
           let _source = option.dataset[0].source
           let _dims = option.dataset[0].dimensions
           let bat = batchCur.label

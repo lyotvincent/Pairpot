@@ -887,9 +887,17 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
         // use cell proportions from current dcv method.
         if (annoCurSc.includes(clu)) {
           let _clu = clusterOpsSp.find(item => item.label === `${propCurSp.label}_${annoCurSc.indexOf(clu)}`)
-          setClusterCurSp(_clu)
-          clu = _clu.label
-          attr = _clu.attr
+          if(typeof _clu !=='undefined'){
+            setClusterCurSp(_clu)
+            clu = _clu.label
+            attr = _clu.attr
+          } else{
+            console.log(`no dcv methods additionally for ${clu}. Using default props`)
+            _clu = clusterOpsSp.find(item => item.label === clu)
+            setClusterCurSp(_clu)
+            clu = _clu.label
+            attr = _clu.attr
+          }
         }
         let cluIdx = _spdims.indexOf(clu)
         let prevAnnoLen = stAnnoLength.current + _sclen + 1
