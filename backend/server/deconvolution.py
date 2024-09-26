@@ -11,7 +11,9 @@ def NNLSDeconvolution(selected, scfile, spfile):
   idx = adata_sc.obs.columns.get_loc('annotation')
   adata_sc.obs.iloc[selected, idx]  = "Selected"
   # generate A
-  ucells = [s for s in adata_sc.obs.columns if s.startswith('UCell_')]
+  ucells_sc = [s for s in adata_sc.obs.columns if s.startswith('UCell_')]
+  ucells_sp = [s for s in adata_sp.obs.columns if s.startswith('UCell_')]
+  ucells = list(set(ucells_sc).intersection(ucells_sp))
   df_sc = adata_sc.obs[ucells].astype("float")
   df_sc['annotation'] = adata_sc.obs['annotation']
   g = df_sc.groupby(by='annotation')
@@ -19,7 +21,7 @@ def NNLSDeconvolution(selected, scfile, spfile):
   A = g.mean().T
 
   # generate b
-  df_sp = adata_sp.obs[[s for s in adata_sc.obs.columns if s.startswith('UCell_')]]
+  df_sp = adata_sp.obs[ucells]
   B = df_sp.T
 
   # NNLS model
