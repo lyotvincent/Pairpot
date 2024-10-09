@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 523.65 566.62">
+  <defs>
+    <style>
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7, .cls-8 {
+        stroke: #000;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-5, .cls-6, .cls-7, .cls-8 {
+        stroke-width: 4px;
+      }
+
+      .cls-1, .cls-4 {
+        fill: none;
+      }
+
+      .cls-2 {
+        fill: #f5ae99;
+      }
+
+      .cls-3 {
+        fill: #fdff99;
+      }
+
+      .cls-4 {
+        stroke-width: 6px;
+      }
+
+      .cls-5 {
+        fill: #f18566;
+      }
+
+      .cls-6 {
+        fill: #fbff00;
+      }
+
+      .cls-7 {
+        fill: #ec5d33;
+      }
+
+      .cls-8 {
+        fill: #ad2700;
+      }
+    </style>
+  </defs>
+  <g>
+    <g>
+      <line class="cls-4" x1="17.13" y1="21.73" x2="16.65" y2="549.5"/>
+      <path d="M17.15,0C13.35,10.22,6.86,22.9,0,30.75l17.13-6.18,17.11,6.21C27.39,22.92,20.93,10.23,17.15,0Z"/>
+    </g>
+    <line x1="17.15" x2="16.65" y2="549.5"/>
+  </g>
+  <g>
+    <line class="cls-4" x1="16.65" y1="549.5" x2="501.92" y2="549.5"/>
+    <path d="M523.65,549.5c-10.22,3.79-22.91,10.27-30.77,17.12l6.19-17.12-6.19-17.12c7.86,6.86,20.55,13.33,30.77,17.12Z"/>
+  </g>
+  <circle class="cls-2" cx="417.65" cy="476.5" r="42.5"/>
+  <circle class="cls-3" cx="417.65" cy="205.5" r="25.5"/>
+  <circle class="cls-1" cx="417.15" cy="330.5" r="14"/>
+  <circle class="cls-5" cx="259.15" cy="337" r="38"/>
+  <circle class="cls-8" cx="106.15" cy="205" r="34"/>
+  <circle class="cls-1" cx="107.15" cy="330.5" r="48.5"/>
+  <circle class="cls-1" cx="258.65" cy="481.5" r="25.5"/>
+  <circle class="cls-6" cx="259.15" cy="205" r="14"/>
+  <circle class="cls-1" cx="106.65" cy="476.5" r="39.5"/>
+  <circle class="cls-7" cx="106.15" cy="107" r="14"/>
+  <ellipse class="cls-1" cx="417.15" cy="93.06" rx="34" ry="34.06"/>
+  <circle class="cls-3" cx="258.65" cy="99.5" r="25.5"/>
+</svg>

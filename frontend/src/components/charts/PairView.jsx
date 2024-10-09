@@ -14,6 +14,7 @@ import {
 import { LineChart } from 'echarts/charts'
 import { UniversalTransition } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
+import CopyToClipboard from 'react-copy-to-clipboard'
 import axios from 'axios'
 import saveAs from 'file-saver'
 import H5adLoader from '../utils/H5adLoader'
@@ -41,6 +42,7 @@ import {
   Flex,
   Spin,
   Tour,
+  Modal,
   Progress
 } from 'antd'
 import {
@@ -55,6 +57,7 @@ import {
   UploadOutlined,
   InboxOutlined,
   ContactsOutlined,
+  CodeOutlined,
 } from '@ant-design/icons'
 import loadingTips from './LoadingTip'
 echarts.use([
@@ -127,17 +130,24 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
   const [propOpsSp, setPropOpsSp] = useState([])
   const [propCurSp, setPropCurSp] = useState([])
 
+  // code and tour
+  const [currCode, setCurrCode] = useState("")
+  const CodeHeader = `# Perform Pair-View using Python\n# Run in console: pip install pairpot\nimport pairpot as pt\n`
+  const [totalCode, setTotalCode] = useState(CodeHeader)
   const [tourOpen, setTourOpen] = useState(false)
+  const [codeModalOpen, setCodeModalOpen] = useState(false)
   const [currTip, setCurrTip] = useState(loadingTips[0])
 
   // ref for tours
   const scConfigsRef = useRef(null)
   const spConfigsRef = useRef(null)
+  const toolsRef = useRef(null)
   const RenameRef = useRef(null)
   const RefineRef = useRef(null)
   const DeconvRef = useRef(null)
   const DeleteRef = useRef(null)
   const SaveRef = useRef(null)
+  const CodeRef = useRef(null)
   const StatusRef = useRef(null)
   const steps = [
     {
@@ -150,6 +160,62 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
       description: 'Setting the appearance of LassoView.',
       target: () => spConfigsRef.current,
     },
+    {
+      title: 'tools',
+      description: 'Using alternative bioinformatics tools',
+      // target: () => toolsRef.current,
+      target: () => {
+        spConfigsRef.current.click()
+        return toolsRef.current
+        // setTimeout(() => {
+        //   return toolsRef.current;
+        // }, 500);  // 延迟 500 毫秒
+        // if (!toolsRef.current) {
+        //   // 如果元素不存在，可以尝试点击按钮或等待它渲染
+        //   spConfigsRef.current.click(); // 模拟点击 spConfigs 按钮
+        //   // return null;  // 暂时返回 null
+        // }
+        // return toolsRef.current;
+      },
+    },
+    // {
+    //   title: 'test',
+    //   description: 'hhh',
+    //   target: ()=>{
+    //     // 使用 setTimeout 来确保表单渲染完成再执行下一步
+    //     setTimeout(() => {
+    //       const selectElement = document.querySelector('.ant-select-selector');
+    //       if (selectElement) {
+    //         selectElement.classList.add('highlighted-element');  // 添加红框
+    //       }
+    //     }, 500);  // 延迟 500 毫秒
+    //     return toolsRef.current;  // 返回 toolsRef.current
+    //       }
+    // },
+    // {
+    //   title: 'tools',
+    //   target: () => {
+    //     if (!toolsRef.current) {
+    //       // 如果元素不存在，可以尝试点击按钮或等待它渲染
+    //       spConfigsRef.current.click(); // 模拟点击 spConfigs 按钮
+    //     }
+    //     const selectElement = toolsRef.current?.querySelector('.ant-select');
+    //     if (selectElement) {
+    //       selectElement.classList.add('highlighted-element'); // 添加自定义样式类
+    //     }
+    //     else{
+    //       console.log("not find")
+    //       console.log(toolsRef.current)
+    //     }
+    //     return selectElement;
+    //   },
+    //   beforeExit: () => {
+    //     const selectElement = toolsRef.current?.querySelector('.ant-select');
+    //     if (selectElement) {
+    //       selectElement.classList.remove('highlighted-element'); // 移除自定义样式类
+    //     }
+    //   }
+    // },
     {
       title: 'Rename',
       description: 'Rename the activated lasso regions. The lasso button is at the topRight of the Charts. You can lasso spots or cells in the left chart, and the results would display in the right chart.',
@@ -193,6 +259,43 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
     { value: 3, label: 'LabelSpreading' },
   ])
   const { token } = useToken()
+
+  const setDownloadCode = (dataset_id) => (
+    `
+# Corresponding adata can be downloaded in MetaInfo or use the code as following.
+scdata = pt.download("${dataset_id}", type='sc', file='complete')
+spdata = pt.download("${dataset_id}", type='sp', file='complete')
+    `
+  )
+
+  const setLassoedCode = (refScatter, annoName) => (
+    `
+# Code for generating refined results for \"${annoName}\" offline
+lassoed_index = ${JSON.stringify(refScatter)}
+refined_index = pt.lassoView(lassoed_index, adata)
+`
+  )
+
+  const setRefinedCode = (refScatter, annoName) => (
+    `
+# Using online refined results for \"${annoName}\" directly
+refined_index = ${JSON.stringify(refScatter)}
+adata.obs['annotation'] = list(adata.obs['annotation'])
+adata.obs['annotation'].iloc[refined_index] = \"${annoName}\"
+adata.obs['annotation'] = adata.obs['annotation'].astype("category")
+`
+  )
+
+  const setDeconvCode = (refScatter, annoName) => (
+    `
+# Code for generating cell proportions for \"${annoName}\" in SRT data offline
+lassoed_index = ${JSON.stringify(refScatter)}
+props = pt.pairView(lassoed_index, scdata, spdata)
+
+# the cell proportions inferred online can be found through 'Save' -> 'JSON'.
+spdata.obs[\"${annoName}_props\"] = props
+    `
+  )
 
   const setItemGroup = (source, annoIdx, type = 'categories', doSet = true) => {
     let itemGroup = []
@@ -683,6 +786,9 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
             hoverClu(params.seriesName)
           }
         })
+        // set code
+        setTotalCode(CodeHeader + setDownloadCode(meta?.st.dataset_id))
+
         quitLoading(1, setLoadings)
       }
       if (commandRef.current === 'scConfigs') {
@@ -887,11 +993,11 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
         // use cell proportions from current dcv method.
         if (annoCurSc.includes(clu)) {
           let _clu = clusterOpsSp.find(item => item.label === `${propCurSp.label}_${annoCurSc.indexOf(clu)}`)
-          if(typeof _clu !=='undefined'){
+          if (typeof _clu !== 'undefined') {
             setClusterCurSp(_clu)
             clu = _clu.label
             attr = _clu.attr
-          } else{
+          } else {
             console.log(`no dcv methods additionally for ${clu}. Using default props`)
             _clu = clusterOpsSp.find(item => item.label === clu)
             setClusterCurSp(_clu)
@@ -1129,6 +1235,9 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
                 description: response.data.message,
                 placement: 'topRight',
               })
+
+              // set code
+              setCurrCode(currCode + setDeconvCode(brushRef.current, nameRef.current))
               toggleAnno("spConfigs")
             } else {
               let endtime = response.data.endtime
@@ -1155,6 +1264,7 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
           series: _series,
         })
         setInputValue('')
+        setCurrCode(currCode.replaceAll(prevName, inputValue))
         api.info({
           message: 'Annotation Renamed',
           description: `Previous Annotation \'${prevName}\' is changed to \'${nameRef.current}\'.`,
@@ -1186,6 +1296,7 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
             if (response.data.success) {
               let endtime = response.data.endtime
               let refScatter = response.data.refined
+              setCurrCode(currCode + setLassoedCode(brushRef.current, nameRef.current) + setRefinedCode(refScatter, nameRef.current))
               let option = myChart.getOption()  // set options
               let newOption = setBrushedMap(option, refScatter, true, 'Select')
               myChart.setOption(newOption)
@@ -1605,7 +1716,8 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
                 placement="topLeft"
                 style={{ width: 800 }}
                 content={
-                  <Space size="small" direction="vertical">
+                  <Space size="small" direction="vertical"
+                  >
                     <Form
                       name="Settings"
                       size="large"
@@ -1682,7 +1794,9 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
                         label="Props"
                         labelCol={{
                           span: 6,
-                        }}>
+                        }}
+                        ref={toolsRef}
+                      >
                         <Select
                           labelInValue
                           placeholder="Methods"
@@ -1698,6 +1812,7 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
                               label: target.label,
                             })
                           }}
+                        // ref={toolsRef}
                         />
                       </Form.Item>
                       <Form.Item
@@ -1967,6 +2082,44 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
                   Save
                 </Button>
               </Popconfirm>
+              <Button type="primary" block icon={<CodeOutlined />} ref={CodeRef} onClick={() => { setCodeModalOpen(true) }}>
+                Code
+              </Button>
+              <Modal
+                title="Code for user operations"
+                open={codeModalOpen}
+                onOk={() => { setCodeModalOpen(false) }}
+                okText="Copy"
+                style={{ top: '15%' }}
+                width={1000}
+                cancelText="Close"
+                onCancel={() => { setCodeModalOpen(false) }}
+                onClose={() => { setCodeModalOpen(false) }}
+                footer={(_, { OkBtn, CancelBtn }) => (
+                  <>
+                    <CancelBtn />
+                    <CopyToClipboard
+                      text={totalCode + currCode}
+                      onCopy={() => {
+                        api['success']({
+                          message: 'Code copied!',
+                          description: `Your code of Lasso-View operations is copied.`,
+                          placement: 'topRight',
+                        })
+                      }}>
+                      <Button type='primary'>Copy</Button>
+                    </CopyToClipboard>
+                  </>)}
+              >
+                <Input.TextArea
+                  placeholder='Code for Lasso-View operations'
+                  value={totalCode + currCode}
+                  autoSize={{
+                    minRows: 10,
+                    maxRows: 20,
+                  }}>
+                </Input.TextArea>
+              </Modal>
             </Space>
             <div ref={StatusRef}>
               <div>

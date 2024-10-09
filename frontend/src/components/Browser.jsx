@@ -177,6 +177,7 @@ const Browser = () => {
   const PairAnchor = React.createRef() // location of LassoView
   const MarkerAnchor = React.createRef() // location of LassoView
   const CPDBAnchor = React.createRef() // location of LassoView
+  const heatAnchor = React.createRef() // location of heat-net
   const sideMenuItems = [
     {
       label: 'MetaInfo',
@@ -401,7 +402,6 @@ const Browser = () => {
       SearchAnchor.current != null
       || true // only need true
     ) {
-      // console.log(myVal)
       if (myVal != 'null' && myVal != 'undefined') {
         switch (myVal) {
           case 'Lasso-View':
@@ -425,6 +425,9 @@ const Browser = () => {
             setSelectedKey(sideMenuItems[5].key)
             // sideMenuItems[6].ref.current.scrollIntoView({ behavior: "smooth", block: 'start' })
             break
+          case 'Spatial Markers':
+            setSelectedKey(sideMenuItems[4].key)
+            break;
           default:
             // setMyValItem(sideMenuItems[0]);
             setSelectedKey(sideMenuItems[0].key)
@@ -758,6 +761,19 @@ const Browser = () => {
                 </div>}
               </ToggleAccordion>
               <Row>
+              <Button
+                  type="primary"
+                  size='middle'
+                  onClick={() => {
+                    CPDBAnchor.current.scrollIntoView({ behavior: "smooth", block: 'start' })
+                    setTimeout(() => {
+                      NetRef.current.Tour(true)
+                    }, 600)
+                  }}>
+                  {"Begin Tour >>>"}
+                </Button>
+              </Row>
+              <Row>
                 <Col span={12} offset={5}>
                   <NetworkRelation
                     spfile={statusSP.data}
@@ -767,6 +783,20 @@ const Browser = () => {
                     progress={(stProgress.current + scProgress.current) / 2}
                   />
                 </Col>
+              </Row>
+              <Row>
+              <Button
+                  ref={heatAnchor}
+                  type="primary"
+                  size='middle'
+                  onClick={() => {
+                    heatAnchor.current.scrollIntoView({ behavior: "smooth", block: 'start' })
+                    setTimeout(() => {
+                      CPDBRef.current.Tour(true)
+                    }, 600)
+                  }}>
+                  {"Begin Tour >>>"}
+                </Button>
               </Row>
               <RelHeat
                 spfile={statusSP.data}

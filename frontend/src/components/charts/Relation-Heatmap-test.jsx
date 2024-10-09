@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState, useImperativeHandle } from 'react'
 import * as echarts from 'echarts'
 import PropTypes from 'prop-types'
 import strokeColor from '../theme/strokeColor'
-import { Space, Spin, Switch, Select, Progress } from 'antd'
+import { Space, Spin, Switch, Select, Progress, Tour } from 'antd'
 import {
   GraphicComponent,
   GridComponent,
@@ -54,6 +54,29 @@ const RelHeat = ({ spfile, scfile, setCompLoad, onRef, title, height, width, mar
   const [spHeatmap, setSpHeatmap] = useState({})
   const [key, setKey] = useState(true)
   const [currTip, setCurrTip] = useState(loadingTips[0])
+
+  const [tourOpen, setTourOpen] = useState(false)
+  const switchRef = useRef(null)
+  const clusterRef = useRef(null)
+  const methodRef = useRef(null)
+  const steps = [
+    {
+      title: 'data species',
+      description: "Switch sc/sp dataset.",
+      target: () => switchRef.current,
+    },
+    {
+      title: 'cluster',
+      description: "Choose a cluster of dataset",
+      target: () => clusterRef.current,
+    },
+    {
+      title: 'method',
+      description: "Using alternative bioinformatics tools",
+      target: () => methodRef.current,
+    },
+  ]
+
   const ScH5adLoader = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
@@ -86,6 +109,7 @@ const RelHeat = ({ spfile, scfile, setCompLoad, onRef, title, height, width, mar
     "Trigger": toggleAnno, // Trigger for useEffect
     "Loading": setLoadings, // set Loading status
     "Tip": setCurrTip, // set Loading Tips
+    "Tour": setTourOpen, // Open the tutorial
   }))
 
   useEffect(() => {
@@ -543,8 +567,12 @@ const RelHeat = ({ spfile, scfile, setCompLoad, onRef, title, height, width, mar
               setCurrentInt(h5info.intArray[h5info.cellType[0]])
               setCurrentCell(h5info.cellArray[h5info.cellType[0]])
               toggleAnno("Upload")
-            }} />
-          <div>
+            }} 
+            ref = {switchRef}
+            />
+          <div
+            ref = {clusterRef}
+          >
             <span>Cluster: </span>
             <Select
               labelInValue
@@ -564,7 +592,9 @@ const RelHeat = ({ spfile, scfile, setCompLoad, onRef, title, height, width, mar
               }}
             />
           </div>
-          <div>
+          <div
+            ref = {methodRef}
+          >
             <span>Method: </span>
             <Select
               labelInValue
@@ -598,6 +628,7 @@ const RelHeat = ({ spfile, scfile, setCompLoad, onRef, title, height, width, mar
           </div>
         </Space>
       </div>
+      <Tour open={tourOpen} onClose={() => setTourOpen(false)} steps={steps} />
     </Space>
   )
 }

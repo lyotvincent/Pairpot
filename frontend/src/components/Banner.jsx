@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import contactImg from "../assets/img/contact.png"
 import layerImg from "../assets/img/browse/layer-view.png"
-import pairImg from "../assets/img/browse/pair-view.png"
+import pairImg from "../assets/img/browse/pair-view.svg"
 import lassoImg from "../assets/img/browse/lasso-view.png"
-import netImg from "../assets/img/browse/network.png"
-import heatImg from "../assets/img/browse/heatmap.png"
+import netImg from "../assets/img/browse/network.svg"
+import heatImg from "../assets/img/browse/heatmap.svg"
 import coverImg from "../assets/img/cover-figure.png"
 import axios from 'axios'
 import { Button, ConfigProvider, Layout, Space, Statistic } from 'antd'

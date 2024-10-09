@@ -1,8 +1,8 @@
 // our SearchEngine
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { UserOutlined } from '@ant-design/icons'
 import { AutoComplete, Input, Col, Row, Popover, ConfigProvider, Button } from 'antd'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import Loading from '../charts/Loading'
 import axios from 'axios'
 import TextCollapse from './TextCollapse'
@@ -63,6 +63,11 @@ const Search = ({ onSearchComplete, onChange, value }) => { // 增加输入框�
   const [open, setOpen] = useState(false)
   const [status, setStatus] = useState("Success")
   const [options, setOptions] = useState(initialOptions)
+  const location = useLocation()
+  const [myKey, setMyKey] = useState(location.state != null ? location.state.searchText:'null')
+
+  // console.log(location.state)
+  // console.log(myKey)
 
   const fetch = useMutation({
     mutationKey: ['search_key'],
@@ -78,7 +83,7 @@ const Search = ({ onSearchComplete, onChange, value }) => { // 增加输入框�
       }).then((response) => {
         // let datas = response.data.data
         let datas = response.data
-        // console.log(datas)
+        console.log(datas)
         onSearchComplete(datas, e)  // to parent
         quitLoading(0, setLoading)
         setLoadText("Search")
@@ -108,6 +113,49 @@ const Search = ({ onSearchComplete, onChange, value }) => { // 增加输入框�
   const isNumeric = (str) => {
     return str.split('').every(char => char >= '0' && char <= '9');
   }
+
+  const onSearch = (e) => {
+    if (e.length > 0) {
+      // status settings
+      setOpen(false);
+      setStatus("Success");
+      setLoadText("Searching...");
+      enterLoading(0, setLoading);
+
+      // query type
+      let res;
+      if (e.startsWith("STDS") || e.startsWith("SCDS")) {
+        res = {
+          type: 'id',
+          content: e,
+        };
+      } else if (isNumeric(e)) {
+        res = {
+          type: 'num',
+          content: e,
+        };
+      } else {
+        res = {
+          type: 'key',
+          content: e,
+        };
+      }
+
+      // Fetch search results
+      fetch.mutate(res);
+    } else {
+      setStatus("error");
+    }
+  };
+
+  useEffect(()=>{
+    console.log(myKey)
+    if(myKey != 'null' && myKey.length > 0){
+      // onChange(myKey)
+      // onSearch(myKey)
+      setMyKey("null")
+    }
+  },[myKey])
 
 
   return (
@@ -147,48 +195,7 @@ const Search = ({ onSearchComplete, onChange, value }) => { // 增加输入框�
               status={status}
               loading={loading[0]}
               onClick={() => { setOpen(!open) }}
-              onSearch={(e) => {
-                if (e.length > 0) {
-                  // status settings
-                  setOpen(false)
-                  setStatus("Success")
-                  enterLoading(0, setLoading)
-                  setLoadText("Searching...")
-
-                  // query type
-                  var res
-                  // case1: id
-                  if (e.startsWith("STDS") || e.startsWith("SCDS")) {
-                    res = {
-                      type: 'id',
-                      content: e
-                    }
-                  }
-                  else if(isNumeric(e)){
-                    // case2: num
-                    // 包装成id
-                    res = {
-                      type: 'num',
-                      content: e
-                    }
-                  }
-                  else { 
-                    // case3: keyword
-                    res = {
-                      type: 'key',
-                      content: e
-                    }
-                  }
-
-
-
-                  fetch.mutate(res)
-                }
-                else {
-                  setStatus("error")
-                }
-
-              }} />
+              onSearch={onSearch} />
 
           </AutoComplete>
         </Col>

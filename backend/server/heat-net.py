@@ -412,7 +412,7 @@ def append_commot(adata_inFile, adata_outPath):
 def append_cci(adata_scFile, adata_spFile, adata_outPath, species="Mouse", run_commot=True):
     print("**Newly add CellChat, iTALK for single-cell data, and CellChat, COMMOT for SRT data.")
     append_cellchat(adata_scFile, adata_outPath, type='sc', species=species)
-    append_cellchat(adata_spFile, adata_outPath, type='sp', species=species)
+    # append_cellchat(adata_spFile, adata_outPath, type='sp', species=species)
     append_iTALK(adata_scFile, adata_outPath, type='sc')
     if run_commot:
         append_commot(adata_spFile, adata_outPath)  # commot is very slow
@@ -471,8 +471,8 @@ def append_SpaTalk_deconv(adata_scFile, adata_spFile, adata_outPath, species="Mo
     print("**Quit ./Rsrc")
 
 if __name__ == '__main__':
-    dataset_id = '227'
-    scdata_id = '005'
+    dataset_id = '121'
+    scdata_id = '039'
     adata_spFile = f"/data/rzh/RawUrls/{dataset_id}/STDS0000{dataset_id}/New_{dataset_id}.h5ad"
     adata_scFile = f"/data/rzh/RawUrls/{dataset_id}/SCDS0000{scdata_id}/New_{scdata_id}.h5ad"
     adata_outPath = f"/data/rzh/RawUrls/{dataset_id}"
@@ -481,6 +481,7 @@ if __name__ == '__main__':
     # run_cpdb(f"{adata_outPath}/sp_deconv.h5ad", adata_outPath, type="sp")
     # run_cpdb(adata_scFile, adata_outPath, type="sc")
     append_deconv(adata_scFile, adata_spFile, adata_outPath)
-    append_cci(adata_scFile, adata_spFile, adata_outPath, species="Human")
-    # append_commot(adata_spFile, adata_outPath)
+    append_cci(adata_scFile, adata_spFile, adata_outPath, species="Mouse", run_commot=False)
+    append_commot(adata_spFile, adata_outPath)
     
+    # rzh run 221 219 212 204(lack COMMOT) 

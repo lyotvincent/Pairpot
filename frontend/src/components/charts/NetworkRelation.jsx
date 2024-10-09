@@ -14,7 +14,7 @@ import { LineChart, LinesChart } from 'echarts/charts'
 import { UniversalTransition } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
 import Loading from './Loading'
-import { Col, Spin, Switch, Select, Button, Progress, Space } from 'antd'
+import { Col, Spin, Switch, Select, Button, Progress, Space,Tour, Flex } from 'antd'
 import loadingTips from './LoadingTip'
 import Axis from './Axis'
 import { color } from 'echarts'
@@ -84,6 +84,38 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
   const [me1, setME1] = useState([]) // mean expression
   const [fr1, setFR1] = useState([]) // fracments
   const [cluLen1, setCluLen1] = useState(0) // Length of clusters, arrLen / genes
+
+  const [tourOpen, setTourOpen] = useState(false)
+  // ref for tours
+  const switchRef = useRef(null)
+  const recoveryRef = useRef(null)
+  const batchRef = useRef(null)
+  const steps = [
+    {
+      title: 'data species',
+      description: "Switch sc/sp dataset.",
+      target: () => {
+        console.log(switchRef.current)
+        return switchRef.current
+      }
+    },
+    {
+      title: 'recovery',
+      description: "Recovery.",
+      target: () => {
+        console.log(recoveryRef.current)
+        return recoveryRef.current
+      }
+    },
+    {
+      title: 'batch',
+      description: "Select the batch of the dataset",
+      target: () => {
+        console.log(batchRef.current)
+        return batchRef.current
+      }
+    },
+  ]
 
 
 
@@ -509,6 +541,7 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
     "Trigger": toggleAnno, // Trigger for useEffect
     "Loading": setLoadings, // set Loading status
     "Tip": setCurrTip, // set Loading Tips
+    "Tour": setTourOpen, // Open the tutorial
   }))
 
   useEffect(() => {
@@ -1411,6 +1444,7 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
 
 
   return (
+<div>
     <Spin
       spinning={loadings[0]}
       size="large"
@@ -1443,6 +1477,7 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
         <Space direction='vertical'>
           <Switch checkedChildren="Spatial"
             unCheckedChildren="Single-cell"
+            ref = {switchRef}
             style={{
               // marginRight:'5rem',
               marginTop: '20rem'
@@ -1476,6 +1511,7 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
               toggleAnno("Upload")
             }} />
           <Button
+            ref={recoveryRef}
             type="primary"
             style={{ marginTop: '1rem' }}
             onClick={() => {
@@ -1501,6 +1537,9 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
           >
             {"recovery"}
           </Button>
+          <div             
+          ref={batchRef}
+          >
           <div style={{ marginTop: '0.5rem'}}
           >Batch:</div>
           <Select
@@ -1515,11 +1554,15 @@ const NetworkRelation = ({ spfile, scfile, setCompLoad, onRef, height, width, ma
               toggleAnno("Setting")
             }}
           ></Select>
+          </div>
       </Space>
       </div>
       </div>
-      
+      {/* <Tour open={tourOpen} onClose={() => setTourOpen(false)} steps={steps}/> */}
+
     </Spin>
+      <Tour open={tourOpen} onClose={() => setTourOpen(false)} steps={steps} />
+    </div>
   )
 
   // return <div ref={chartRef} style={{ width: '100%', height: '400px' }} />;

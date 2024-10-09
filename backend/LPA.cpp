@@ -396,7 +396,8 @@ void labelPropagation(matCoo& X, mat& y_label,mat& y_pred, mat& y_res, double al
 //     std::cout << elapsed << std::endl;
 //     getchar();
 // }
-PYBIND11_MODULE(label_propagation, m) {
+// PYBIND11_MODULE(label_propagation, m) {
+PYBIND11_MODULE(pairpotlpa, m) {
     py::class_<matCoo>(m, "matCoo")
         .def(py::init<int, int>())
         .def("createMat", &matCoo::createMat)

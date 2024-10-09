@@ -5,12 +5,17 @@ import 'animate.css'
 import { Card, Row, Col } from 'antd'
 // import { useLocation, useNavigate } from 'react-router-dom'
 // import Loading from './charts/Loading'
+import HelpTab from "./utils/HelpTab"
+import HelpTab1 from "./utils/HelpTab1"
+import HelpTab0 from "./utils/HelpTab0"
 
 // steps:
 import browser1Img from "../assets/img/steps/browser1.png"
 import browser2Img from "../assets/img/steps/browser2.png"
 import browser3Img from "../assets/img/steps/browser3.png"
 import browser4Img from "../assets/img/steps/browser4.png"
+import browser5Img from "../assets/img/steps/browser5.png"
+import browser6Img from "../assets/img/steps/browser6-1.png"
 
 import pair1Img from "../assets/img/steps/pair1.png"
 import pair2Img from "../assets/img/steps/pair2.png"
@@ -22,6 +27,19 @@ import lasso3Img from "../assets/img/steps/lasso3.png"
 import lasso4Img from "../assets/img/steps/lasso4.png"
 import lasso5Img from "../assets/img/steps/lasso5.png"
 import lasso6Img from "../assets/img/steps/lasso6.png"
+
+import tool11 from "../assets/img/tool1/1.jpg"
+import tool12 from "../assets/img/tool1/2.jpg"
+import tool13 from "../assets/img/tool1/3.jpg"
+import tool14 from "../assets/img/tool1/4.jpg"
+import tool15 from "../assets/img/tool1/5.jpg"
+import tool16 from "../assets/img/tool1/6.jpg"
+
+import tool21 from "../assets/img/tool2/0.jpg"
+import tool22 from "../assets/img/tool2/1.jpg"
+import tool23 from "../assets/img/tool2/2.jpg"
+import tool24 from "../assets/img/tool2/3.jpg"
+
 
 
 
@@ -150,6 +168,20 @@ const Help = () => {
                   <Card.Meta classNames='header' description={"Each node denotes a dataset and its color denotes the dataset’s species. Click ‘Display All’ to display all SC-SP pairs. Click ‘Display SRT Rings’ display nodes with self-loops in the network. Click ‘Display SC-SP pairs’ to display no-loops networks."}></Card.Meta>
                 </Card>
               </Row>
+              <Row>
+                <Card hoverable
+                  style={{ width: '50%', margin: '2%', marginLeft: '2%', marginRight: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                  title={<h3 style={{ marginTop: "1rem" }}> Usage5</h3>}
+                  cover={<img src={browser5Img} alt="Browse-step5" />}>
+                  <Card.Meta classNames='header' description={"Users can choose dataset in the search engine to analyse."}></Card.Meta>
+                </Card>
+                <Card hoverable
+                  style={{ width: '44%', margin: '2%', marginLeft: '1%', marginRight: '2%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                  title={<h3 style={{ marginTop: "1rem" }}> Usage6</h3>}
+                  cover={<img src={browser6Img} alt="Browse-step6" />}>
+                  <Card.Meta classNames='header' description={"Click the button of 'Try an example' to analyse data in browse page.Click the interactive graphs and plots with hyperlinks in home page to the Browse section"}></Card.Meta>
+                </Card>
+              </Row>
             </Col>
             <Divider />
             <Row>
@@ -257,11 +289,130 @@ const Help = () => {
             </Col>
 
 
+            <Divider />
+            <Row>
+              <Col span={20} offset={1}>
+                <div className='headline'>
+                  <h2>
+                    {"Alternative Bioinformatics Tools"}
+                  </h2>
+                  <h3>
+                    Selecting alternative bioinformatics tools by users
+                  </h3>
+                  <p>
+                    Users can browse and select these tools on the website.  Operation steps are as following:
+                  </p>
+                </div>
+              </Col>
+            </Row>
+
+            <Row>
+              <div style={{ marginLeft: '7rem' }}>
+                <h4>In Pair-View</h4>
+              </div>
+            </Row>
+            <Col span={22} offset={1}>
+              <Row>
+                <Card hoverable
+                  style={{ width: '36%', margin: '2%', marginLeft: '2%', marginRight: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                  title={<h3 style={{ marginTop: "1rem" }}> Step1</h3>}
+                  cover={<img src={tool11} alt="tool11" />}>
+                  <Card.Meta classNames='header' description={"Click the 'spConfigs' button to see the options for Spatial View. "}></Card.Meta>
+                </Card>
+                <Card hoverable
+                  style={{ width: '28%', margin: '2%', marginLeft: '1%', marginRight: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                  title={<h3 style={{ marginTop: "1rem" }}>Step2</h3>}
+                  cover={<img src={tool12} alt="tool12"></img>}>
+                  <Card.Meta classNames='header' description={"There's some alternative tools in the 'Props', including Cell2Location, Card, RCTD, Seurat, SpaTalk..."}></Card.Meta>
+                </Card>
+                <Card hoverable
+                  style={{ width: '28%', margin: '2%', marginLeft: '1%', marginRight: '2%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                  title={<h3 style={{ marginTop: "1rem" }}>Step3</h3>}
+                  cover={<img src={tool13} alt="tool13"></img>}>
+                  <Card.Meta classNames='header' description={"The default deconvolution tool is Cell2Location, users can select other alternative tools."}></Card.Meta>
+                </Card>
+              </Row>
+              <Row>
+                <Card hoverable
+                  style={{ width: '26%', margin: '2%', marginLeft: '2%', marginRight: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                  title={<h3 style={{ marginTop: "1rem", padding: 0 }}>Step4</h3>}
+                  cover={<img src={tool14} alt="tool14"></img>}>
+                  <Card.Meta classNames='header' description={"Click the 'apply' button to apply for your settings and wait for the change of the Spatial View on the right."}></Card.Meta>
+                </Card>
+
+                <Card hoverable
+                  style={{ width: '33%', margin: '2%', marginLeft: '1%', marginRight: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                  title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Step5</h3>}
+                  cover={<img src={tool15} alt="tool15"></img>}>
+                  <Card.Meta classNames='header' description={"Select a cell-type on the Single-cell Data chart."}></Card.Meta>
+                </Card>
+
+                <Card hoverable
+                  style={{ width: '33%', margin: '2%', marginLeft: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                  title={<h3 style={{ marginTop: "1rem", padding: 0 }}>Step6</h3>}
+                  cover={<img src={tool16} alt="tool16"></img>}>
+                  <Card.Meta classNames='header' description={"The corresponding proportions will be shown on the Spatial Omics Data chart."}></Card.Meta>
+                </Card>
+              </Row>
+            </Col>
+
+            <Row>
+              <div style={{ marginLeft: '7rem' }}>
+                <h4>In Heatmap</h4>
+              </div>
+            </Row>
+            <Col span={22} offset={1}>
+              <Row>
+                <Card hoverable
+                  style={{ width: '31%', margin: '2%', marginLeft: '2%', marginRight: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                  title={<h3 style={{ marginTop: "1rem", padding: 0 }}>Step1</h3>}
+                  cover={<img src={tool21} alt="heatmap1"></img>}>
+                  <Card.Meta classNames='header' description={"Click this button to switch spatial or single-cell dataset for displaying L-R pairs heatmap."}></Card.Meta>
+                </Card>
+                <Card hoverable
+                  style={{ width: '30%', margin: '2%', marginLeft: '1%', marginRight: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                  title={<h3 style={{ marginTop: "1rem", padding: 0 }}> Step2</h3>}
+                  cover={<img src={tool22} alt="heatmap2"></img>}>
+                  <Card.Meta classNames='header' description={"Users can select the alternative tools curresponding to current single-cell or SRT data."}></Card.Meta>
+                </Card>
+
+                <Card hoverable
+                  style={{ width: '30%', margin: '2%', marginLeft: '1%', paddingLeft: '1rem', paddingRight: '1rem' }}
+                  title={<h3 style={{ marginTop: "1rem", padding: 0 }}>Step3</h3>}
+                  cover={<img src={tool23} alt="heatmap3"></img>}>
+                  <Card.Meta classNames='header' description={"Select a tool and wait for the result."}></Card.Meta>
+                </Card>
+              </Row>
+            </Col>
 
 
-
-
-
+            <Divider style={{ marginTop: 14, marginBottom: 18 }} />
+            <Col span={22} offset={1}>
+              <div className="headline">
+                <h2>How to deploy bioinformatics tools offline?</h2>
+              </div>
+            </Col>
+            <Col span={22} offset={1}>
+              <Row style={{ marginTop: "1rem" }}>
+                <Card style={{ width: '47%' }} title={"Cell/domain Interaction"}>
+                  <HelpTab />
+                </Card>
+                <Card style={{ width: '47%', marginLeft: '1%' }} title={"Deconvolution"}>
+                  <HelpTab0 />
+                </Card>
+              </Row>
+            </Col>
+            <Divider style={{ marginTop: 14, marginBottom: 18 }} />
+            <Col span={22} offset={1}>
+              <div className="headline">
+                <h2>How to convert anndata to R environment?</h2>
+              </div>
+            </Col>
+            <Col span={22} offset={1}>
+              <Card style={{ marginTop: "1rem" }}>
+                <HelpTab1 />
+              </Card>
+            </Col>
           </section>
         </Content>
 

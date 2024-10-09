@@ -333,27 +333,3 @@ def CellphoneDB_run(adata_path, cpdb_file_path="resources/cellphonedb.zip", outp
         output_path=output_path
     )
     return cpdb_res
-
-# 空转数据
-# -表达矩阵
-# --原始in_tissue细胞数
-# --2000个与空转交集的高变基因
-# -低维表示
-# --PCA前两维表示
-# --UMAP2维和3维表示
-# --TSNE2维表示
-# --空间位置2维表示
-# -细胞类型解卷积
-# --CARD解卷积
-# --cell2location解卷积
-# --空间区域marker基因
-# --KEGG结果
-# --GSEA结果
-# --GO结果
-# -邻接矩阵
-# --k近邻矩阵
-
-# 联合嵌入数据
-# 单细胞和多个空转样本联合嵌入UMAP2维、3维表示(降采样到5k)
-# 联合嵌入邻接矩阵（降采样到5k）两次标签传播算法
-

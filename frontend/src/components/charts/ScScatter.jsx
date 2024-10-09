@@ -10,6 +10,7 @@ import {
   LegendComponent,
   TooltipComponent,
 } from 'echarts/components'
+import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { LineChart } from 'echarts/charts'
 import { UniversalTransition } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
@@ -38,6 +39,7 @@ import {
   Flex,
   Spin,
   Tour,
+  Modal,
   Progress,
 } from 'antd'
 import {
@@ -53,6 +55,7 @@ import {
   InboxOutlined,
   FileZipOutlined,
   FileTextOutlined,
+  CodeOutlined,
 } from '@ant-design/icons'
 import Loading from './Loading'
 import strokeColor from '../theme/strokeColor'
@@ -119,6 +122,10 @@ const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, ma
   const [yInv, setyInv] = useState(false)
   const [cellNum, setCellNum] = useState(0)
   const [tourOpen, setTourOpen] = useState(false)
+  const [currCode, setCurrCode] = useState("")
+  const CodeHeader = `# Perform Lasso-View using Python\n# Run in console: pip install pairpot\nimport pairpot as pt\n`
+  const [totalCode, setTotalCode] = useState(CodeHeader)
+  const [codeModalOpen, setCodeModalOpen] = useState(false)
   const [refineOption, setRefineOption] = useState([
     { value: 2, label: 'LabelPropagation' },
   ])
@@ -133,6 +140,7 @@ const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, ma
   const ConfirmRef = useRef(null)
   const DeleteRef = useRef(null)
   const SaveRef = useRef(null)
+  const CodeRef = useRef(null)
   const StatusRef = useRef(null)
   const steps = [
     {
@@ -214,6 +222,31 @@ const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, ma
     }
     return annotations
   }
+
+  const setDownloadCode = (dataset_id, type) => (
+    `
+# Corresponding adata can be downloaded in MetaInfo or use the code as following.
+adata = pt.download("${dataset_id}", type='${type}', file='complete')
+    `
+  )
+
+  const setRefinedCode = (refScatter, annoName) => (
+    `
+# Using online refined results for \"${annoName}\" directly
+refined_index = ${JSON.stringify(refScatter)}
+adata.obs['annotation'] = list(adata.obs['annotation'])
+adata.obs['annotation'].iloc[refined_index] = \"${annoName}\"
+adata.obs['annotation'] = adata.obs['annotation'].astype("category")
+`
+  )
+
+  const setLassoedCode = (refScatter, annoName) => (
+    `
+# Code for generating refined results for \"${annoName}\" offline
+lassoed_index = ${JSON.stringify(refScatter)}
+refined_index = pt.lassoView(lassoed_index, adata)
+`
+  )
 
   const setBrushedMap = (option, brushed, doPop = true, mode) => {
     let __datasets = option.dataset
@@ -586,6 +619,10 @@ const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, ma
             replaceMerge: ['dataset', 'series'],
           }
         )
+
+        // set offline download code
+        setTotalCode(CodeHeader + setDownloadCode(meta?.st.dataset_id, _datakey ? "sc" : "sp"))
+
         setSeriesArray(_series)
         setBrushArray([])
         setAllowConfirm(false)
@@ -812,6 +849,12 @@ const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, ma
           },
         ])
         setAllowConfirm(false)
+
+        // append currCode to totalCode
+        setTotalCode(totalCode + currCode)
+        setCurrCode("")
+
+        // tips for successfully confirm
         api['success']({
           message: 'Annotation Confirmed',
           description: `Your Annotation \'${nameRef.current}\' is confirmed.`,
@@ -830,6 +873,7 @@ const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, ma
         seriesRef.current.name = inputValue
         let prevName = nameRef.current
         nameRef.current = inputValue
+        setCurrCode(currCode.replaceAll(prevName, inputValue))
         seriesRef.current = __series[__series.length - 1]
         _series.push(seriesRef.current)
         myChart.setOption({
@@ -863,6 +907,7 @@ const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, ma
               let endtime = response.data.endtime
               let refScatter = response.data.refined
               let option = myChart.getOption()
+              setCurrCode(setLassoedCode(brushRef.current, nameRef.current) + setRefinedCode(refScatter, nameRef.current))
               let newOption = setBrushedMap(option, refScatter, true, 'Select')
               myChart.setOption(newOption)
               api.success({
@@ -1225,7 +1270,7 @@ const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, ma
               },
             },
           }}>
-          <Space direction="vertical" size="small">
+          <Space direction="vertical" size="small" style={{ marginTop: -10 }}>
             <Space direction="vertical" size="small">
               <div ref={UploadRef}>
                 <Dragger {...upLoadProps}>
@@ -1248,6 +1293,8 @@ const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, ma
                   setDatakey(value)
                   let h5info = value ? _scdata : _spdata
                   _setData(h5info.data)
+                  setTotalCode(CodeHeader + setDownloadCode(meta?.st.dataset_id, value ? _scdata : _spdata))
+                  setCurrCode("")
                   setTitle(value ? meta?.sc.dataset_id : meta?.st.dataset_id)
                   setClusterOps(h5info.clusters)
                   setEmbedOps(h5info.embdOps)
@@ -1696,6 +1743,49 @@ const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, ma
                   Save
                 </Button>
               </Popover>
+              <Button
+                type="primary"
+                block
+                icon={<CodeOutlined />}
+                ref={CodeRef}
+                onClick={() => {
+                  setCodeModalOpen(true)
+                }}>
+                Code
+              </Button>
+              <Modal
+                title="Code for user operations"
+                open={codeModalOpen}
+                onOk={() => { setCodeModalOpen(false) }}
+                okText="Copy"
+                style={{ top: '15%' }}
+                width={1000}
+                cancelText="Close"
+                onCancel={() => { setCodeModalOpen(false) }}
+                onClose={() => { setCodeModalOpen(false) }}
+                footer={(_, { OkBtn, CancelBtn }) => (
+                  <>
+                    <CancelBtn />
+                    <CopyToClipboard text={totalCode + currCode} onCopy={() => {
+                      api['success']({
+                        message: 'Code copied!',
+                        description: `Your code of Lasso-View operations is copied.`,
+                        placement: 'topRight',
+                      })
+                    }}>
+                      <Button type='primary'>Copy</Button>
+                    </CopyToClipboard>
+                  </>)}
+              >
+                <Input.TextArea
+                  placeholder='Code for Lasso-View operations'
+                  value={totalCode + currCode}
+                  autoSize={{
+                    minRows: 10,
+                    maxRows: 20,
+                  }}>
+                </Input.TextArea>
+              </Modal>
             </Space>
             <div ref={StatusRef}>
               <b>Current Status</b>
@@ -1706,7 +1796,7 @@ const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, ma
               <div>Annotated Clusters: {snumRef.current}</div>
               <div>Cell number: {cellNum}</div>
             </div>
-            <div>{JSON.stringify(_spdata[0])}</div>
+            {/* <div>{JSON.stringify(_spdata[0])}</div> */}
           </Space>
         </ConfigProvider>
         <Tour

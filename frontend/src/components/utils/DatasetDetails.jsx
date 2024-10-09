@@ -262,8 +262,8 @@ const DatasetDetails = ({ onRef }) => {
           placeholder='Bulk download commands'
           value={bulkText}
           autoSize={{
-            minRows: 2,
-            maxRows: 6,
+            minRows: 6,
+            maxRows: 8,
           }}
         />
       </ConfigProvider>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_图层_1" data-name="图层 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 632 556">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #ffcfc4;
+        stroke: #ffdec9;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6 {
+        stroke-miterlimit: 10;
+        stroke-width: 6px;
+      }
+
+      .cls-2 {
+        fill: none;
+        stroke: #000;
+      }
+
+      .cls-3 {
+        fill: #fdf14d;
+        stroke: #fcee21;
+      }
+
+      .cls-4 {
+        fill: #abf9ff;
+        stroke: #94fff1;
+      }
+
+      .cls-5 {
+        fill: #ffa033;
+        stroke: #ffb63f;
+      }
+
+      .cls-6 {
+        fill: #a5e366;
+        stroke: #a5e366;
+      }
+    </style>
+  </defs>
+  <ellipse class="cls-3" cx="266.78" cy="42" rx="36.6" ry="39"/>
+  <ellipse class="cls-5" cx="60.43" cy="154.96" rx="57.43" ry="57.82"/>
+  <ellipse class="cls-1" cx="189.16" cy="501.23" rx="52.38" ry="51.77"/>
+  <ellipse class="cls-6" cx="374.69" cy="290.1" rx="96.55" ry="97.49"/>
+  <ellipse class="cls-4" cx="586.09" cy="108.56" rx="42.91" ry="46.39"/>
+  <line class="cls-2" x1="459.88" y1="238.33" x2="555.8" y2="142.85"/>
+  <line class="cls-2" x1="113.39" y1="183.26" x2="277.55" y2="269.19"/>
+  <line class="cls-2" x1="232.07" y1="66.88" x2="110.28" y2="125.37"/>
+  <line class="cls-2" x1="289.5" y1="347.25" x2="217.56" y2="457.52"/>
+</svg>

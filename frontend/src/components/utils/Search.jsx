@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { UserOutlined } from '@ant-design/icons'
-import { AutoComplete, Input, Col, Row, Popover, ConfigProvider } from 'antd'
+import { UserOutlined, DownOutlined } from '@ant-design/icons'
+import { AutoComplete, Input, Col, Row, Popover, ConfigProvider, Button } from 'antd'
 import { useNavigate, Link } from 'react-router-dom'
 import Loading from '../charts/Loading'
 import axios from 'axios'
@@ -57,7 +57,7 @@ const options = [
     renderItem("Intratumor heterogeneity and T cell exhaustion in primary CNS lymphoma", 'STDS0000152'),
     renderItem("Spatially resolved transcriptomics revised human distal lung epithelial hierarchy [spatial transcriptomics]", 'STDS0000114'),
     renderItem("Spatial detection of fetal marker genes expressed at low level in adult human heart tissue", 'STDS0000014'),
-    renderItem("A spatially resolved brain region- and cell type-specific isoform atlas of the postnatal mouse brain","STDS0000004"),
+    renderItem("A spatially resolved brain region- and cell type-specific isoform atlas of the postnatal mouse brain", "STDS0000004"),
     renderItem("A Spatiotemporal Organ-Wide Gene Expression and Cell Atlas of the Developing Human Heart", 'STDS0000015'),
     renderItem("Mouse Brain Serial Section 1 (Sagittal-Anterior)", 'STDS0000018'),
     renderItem("Mouse Brain Serial Section 2 (Sagittal-Anterior)", 'STDS0000019'),
@@ -91,20 +91,19 @@ const options = [
     renderItem("Interleukin-17 governs hypoxic adaptation of injured epithelium [spatial transcriptomics]", 'STDS0000089'),
     renderItem("Spatial transcriptome analysis of gastric cancer which GAN-KP transplanted C57BL/6J mouse", 'STDS0000093'),
 
-    renderItem("The spatial landscape of gene expression isoforms in tissue sections",'STDS0000107'),
-    renderItem("Human Cervical Cancer (FFPE)",'STDS0000113'),
+    renderItem("The spatial landscape of gene expression isoforms in tissue sections", 'STDS0000107'),
+    renderItem("Human Cervical Cancer (FFPE)", 'STDS0000113'),
 
-    renderItem("Dietary palmitic acid promotes a prometastatic memory based on Schwann Cell activation",'STDS0000120'),
-    renderItem("Spatially resolved transcriptomic analysis of acute kidney injury in a female murine model",'STDS0000121'),
-    renderItem("Characterizing Neonatal Heart Maturation, Regeneration, and Scar Resolution Using Spatial Transcriptomics [spatial]",'STDS0000124'),
-    renderItem("Human Prostate Cancer, Acinar Cell Carcinoma (FFPE)",'STDS0000131'),
+    renderItem("Dietary palmitic acid promotes a prometastatic memory based on Schwann Cell activation", 'STDS0000120'),
+    renderItem("Spatially resolved transcriptomic analysis of acute kidney injury in a female murine model", 'STDS0000121'),
+    renderItem("Characterizing Neonatal Heart Maturation, Regeneration, and Scar Resolution Using Spatial Transcriptomics [spatial]", 'STDS0000124'),
+    renderItem("Human Prostate Cancer, Acinar Cell Carcinoma (FFPE)", 'STDS0000131'),
 
-    renderItem("Spatial transcriptomics: The effect of consecutive slices data integration on accurate cell type annotation and clustering",'STDS0000224')
+    renderItem("Spatial transcriptomics: The effect of consecutive slices data integration on accurate cell type annotation and clustering", 'STDS0000224')
 
     ],
   },
 ]
-
 
 const Search = ({ setLocState, setCompLoad, setSelectedKey }) => {
   const [loadText, setLoadText] = useState("Browse")
@@ -112,6 +111,24 @@ const Search = ({ setLocState, setCompLoad, setSelectedKey }) => {
   const [loading, setLoading] = useState([])
   const [open, setOpen] = useState(false)
   const [status, setStatus] = useState("Success")
+  const [searchText, setSearchText] = useState("")
+  const [MyOptions, setOptions] = useState(options)
+
+
+  // 下拉框根据输入来动态更新
+  const handleSearch = (value) => {
+    setSearchText(value) // 更新搜索框状态
+    if (value.length > 0) {
+      const filteredOptions = options.map(optionGroup => ({
+        ...optionGroup,
+        options: optionGroup.options.filter(item => item.label.props.children[0].props.children.toLowerCase().includes(value.toLowerCase()))
+      }))
+      setOptions(filteredOptions)
+    } else {
+      setOptions(options)  // 如果没有输入内容，则重置为初始的选项
+    }
+  }
+
   const fetch = useMutation({
     mutationKey: ['example'],
     mutationFn: (e) => {
@@ -160,38 +177,83 @@ const Search = ({ setLocState, setCompLoad, setSelectedKey }) => {
         }
       }
     }}>
-      <AutoComplete
-        popupClassName="certain-category-search-dropdown"
-        popupMatchSelectWidth="80%"
-        style={{
-          width: "100%"
-        }}
-        options={options}
-        open={open}
-        onBlur={() => { setOpen(false) }}
-        onSelect={() => { setOpen(false) }}
-        size="large"
-      >
-        <Input.Search
-          size="large"
-          placeholder="Search for a Study to Browse."
-          enterButton={loadText}
-          status={status}
-          loading={loading[0]}
-          onClick={() => { setOpen(!open) }}
-          onSearch={(e) => {
-            if (e.length > 0) {
+      <Row gutter={8}>
+        <Col flex="auto">
+          <AutoComplete
+            popupClassName="certain-category-search-dropdown"
+            popupMatchSelectWidth={800}
+            style={{
+              width: "100%"
+            }}
+            options={MyOptions}
+            open={open}
+            onBlur={() => { setOpen(false) }}
+            onSelect={(value) => {
+              setOpen(false)
+              setSearchText(value)
+              // fetch
+              let e = value
+              setSearchText(e)
               setOpen(false)
               setStatus("Success")
               enterLoading(0, setLoading)
               setLoadText("Fetching data...")
               fetch.mutate(e)
-            } else {
-              setStatus("error")
-            }
+            }}
+            onSearch={handleSearch}
+            size="large"
+          >
+            {/* <Input.Search */}
+            <Input
+              size="large"
+              placeholder="Select a Study to Browse."
+              // enterButton={loadText}
+              status={status}
+              loading={loading[0]}
+              onClick={() => { setOpen(!open) }}
+              onChange={(e) => setSearchText(e.target.value)} // input on time
+              suffix={<DownOutlined style={{ cursor: 'pointer' }} onClick={() => { setOpen(!open) }} />}
+            // onSearch={(e) => {
+            //   // setSearchText(e)
+            //   if (e.length > 0) {
+            //     if(!e.startsWith("STDS00")){
+            //       // setLoadText("Browse")
+            //       // setStatus("error")
+            //       let text = MyOptions[0].options.length == 0 ? "STDS0000235" : MyOptions[0].options[0].value
+            //       setSearchText(text)
+            //       setOpen(false)
+            //       setStatus("Success")
+            //       enterLoading(0, setLoading)
+            //       setLoadText("Fetching data...")
+            //       fetch.mutate(text)
+            //     }
+            //     else{
+            //       setSearchText(e)
+            //       setOpen(false)
+            //       setStatus("Success")
+            //       enterLoading(0, setLoading)
+            //       setLoadText("Fetching data...")
+            //       fetch.mutate(e)
+            //     }
+            //   } else {
+            //     setStatus("error")
+            //   }
+            // }} 
+            />
+          </AutoComplete>
+        </Col>
 
-          }} />
-      </AutoComplete>
+        <Col>
+          <Button
+            onClick={() => {
+              // const myKey = searchText
+              navigate('/database', { state: { searchText } })
+            }}
+          >
+            {"Browse in Database >>>"}
+          </Button>
+        </Col>
+      </Row>
     </ConfigProvider>
   )
 }

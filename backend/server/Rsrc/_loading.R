@@ -122,7 +122,16 @@ Load_h5adsc_to_SCE <- function(scpath, raw = TRUE) {
       }
     }
   }
+  # some datasets uses barcodes instead of `_index`
+  if (!("_index" %in% attr(h5ad.obs, "names"))) {
+    obs$`_index` <- obs$`barcodes`
+  }
   obs$`_index` <- Make_unique(obs$`_index`)
+  obs_use <- data.frame(
+    annotation = obs$annotation,
+    batch = obs$batch,
+    row.names = as.character(obs$`_index`)
+  )
   cat("**Obs loaded...\n")
   dims <- c(length(h5ad.var[["_index"]]), length(obs$`_index`))
   dat@Dim <- dims
@@ -131,11 +140,6 @@ Load_h5adsc_to_SCE <- function(scpath, raw = TRUE) {
     as.character(obs$`_index`)
   )
   cat("**Dims loaded...\n")
-  obs_use <- data.frame(
-    annotation = obs$annotation,
-    batch = obs$batch,
-    row.names = obs$`_index`
-  )
   sce <- SingleCellExperiment(
     assays = list(counts = dat),
     rowData = DataFrame(data.frame(var[['_index']])),
@@ -226,13 +230,9 @@ Load_h5adsp_to_SCE <- function(sppath, raw = TRUE) {
   obs[["spatial_X"]] <- coord[[1]]
   obs[["spatial_Y"]] <- coord[[2]]
   obs$`_index` <- Make_unique(obs$`_index`)
-  cat("**Obsm loaded...\n")
-
-  dims <- c(length(h5ad.var[["_index"]]), length(obs$`_index`))
-  dat@Dim <- dims
-  dat@Dimnames <- list(as.character(h5ad.var[["_index"]]), as.character(obs$`_index`))
-  cat("**Dims loaded...\n")
-  
+  print(length(obs$`_index`))
+  print(length(obs$annotation))
+  print(length(obs$batch))
   obs_use <- data.frame(
     annotation = obs$annotation,
     batch = obs$batch,
@@ -240,6 +240,12 @@ Load_h5adsp_to_SCE <- function(sppath, raw = TRUE) {
     spatial_Y = as.numeric(coord[[2]]),
     row.names = obs$`_index`
   )
+  cat("**Obsm loaded...\n")
+
+  dims <- c(length(h5ad.var[["_index"]]), length(obs$`_index`))
+  dat@Dim <- dims
+  dat@Dimnames <- list(as.character(h5ad.var[["_index"]]), as.character(obs$`_index`))
+  cat("**Dims loaded...\n")
 
   spe <- SingleCellExperiment(assays = list(counts = dat),
                               rowData = DataFrame(data.frame(var[['_index']])),
