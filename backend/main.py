@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify, send_file
-from gevent import pywsgi
 import sqlite3
 import time
 import re
@@ -515,6 +514,5 @@ def query_scgz():
     return send_file(f'./resources/{id}/sc_meta.h5ad.zip')
 
 if __name__ == '__main__':
-    server = pywsgi.WSGIServer(('127.0.0.1', 5522), app)
-    server.serve_forever()
+    app.run(host='0.0.0.0', port=5522)
     # get_global_wordcloud()

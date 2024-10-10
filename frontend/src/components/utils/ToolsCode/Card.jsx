@@ -1,17 +1,16 @@
-import React from 'react';
-import Markdown from 'react-markdown';
-import ReactMarkdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import React from 'react'
+import Markdown from 'react-markdown'
+import ReactMarkdown from 'react-markdown'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
-var Rcode = 
-`
+var Rcode =
+  `
 ### Card
-Card (Cellular Annotation for RNA-seq Data) is a tool used for cell type annotation in single-cell RNA sequencing (scRNA-seq) data, utilizing reference datasets for accurate classification.
+CARD (conditional autoregressive-based deconvolution) is a tool used for spatially informed cell-type deconvolution for spatial transcriptomics.
 
-### Key features and functions of Card include:
-- Cell Type Annotation
-- Reference-based Annotation
+### Key features and functions of CARD include:
+- Cell-type Deconvolution
 ### Rcode
 **********
 \`\`\`r 
@@ -114,33 +113,33 @@ cat("#### CARD Finished ####\\n")
 `
 
 const Card = () => {
-    return (
-        <div style={{height:'25rem',overflow: 'auto'}}>
-            {/* <ReactMarkdown>{Rcode}</ReactMarkdown> */}
-            <ReactMarkdown
-                children={Rcode}
-                components={{
-                code({ node, inline, className, children, ...props }) {
-                    return inline ? (
-                    <code className={className} {...props}>
-                        {children}
-                    </code>
-                    ) : (
-                    <SyntaxHighlighter
-                        customStyle={{ backgroundColor: 'white' }}
-                        style={solarizedlight}
-                        language="r"
-                        PreTag="div"
-                        {...props}
-                    >
-                        {String(children)}
-                    </SyntaxHighlighter>
-                    );
-                },
-                }}
-            />
-        </div>
-  );
-};
+  return (
+    <div style={{ height: '25rem', overflow: 'auto' }}>
+      {/* <ReactMarkdown>{Rcode}</ReactMarkdown> */}
+      <ReactMarkdown
+        children={Rcode}
+        components={{
+          code ({ node, inline, className, children, ...props }) {
+            return inline ? (
+              <code className={className} {...props}>
+                {children}
+              </code>
+            ) : (
+              <SyntaxHighlighter
+                customStyle={{ backgroundColor: 'white' }}
+                style={solarizedlight}
+                language="r"
+                PreTag="div"
+                {...props}
+              >
+                {String(children)}
+              </SyntaxHighlighter>
+            )
+          },
+        }}
+      />
+    </div>
+  )
+}
 
-export default Card;
+export default Card
