@@ -29,6 +29,8 @@ And use this code to import.
 ```python
 import pairpot as pt
 ```
+
+You can also find our library code in https://github.com/lyotvincent/Pairpot/tree/master/backend/pairpot.
 <!-- import pairpotlpa as LPA -->
 ## Download Dataset from Pairpot
 
@@ -52,6 +54,13 @@ adata = pt.download("235", type='sc', file='complete')
 
 Following code shows the usage of `pt.lassoView`. 
 ```python
+# Perform Pair-View using Python
+# Run in console: pip install pairpot
+import pairpot as pt
+
+# Corresponding adata can be downloaded in MetaInfo or use the code as following.
+adata = ad.read_h5ad("sample.h5ad")
+
 lassoed_index = # Which can be generated in the pairpot website.
 [70,153,166,290,343,423,513,537,
 863,957,963,1111,1207,1252,1308,
@@ -73,9 +82,29 @@ In default, `format` is set to `'anndata'`. `pt.pairView` return a list of propo
 
 Following code shows the usage of `pt.pairView`. 
 ```python
-#大概得补点代码
+# Perform Pair-View using Python
+# Run in console: pip install pairpot
+import pairpot as pt
+
+# Corresponding adata can be downloaded in MetaInfo or use the code as following.
+scdata = pt.download("STDS0000235", type='sc', file='complete')
+spdata = pt.download("STDS0000235", type='sp', file='complete')
+    
+# Code for generating cell proportions for "your annotation" in SRT data offline
+lassoed_index = 
+[993,1991,2136,2685,2731,70,112,
+153,166,290,343,423,513,537,863,
+957,963,1111,1132,1207,1252,1308,
+1337,1354,1547,1750,1908,1928,
+1962,1984,2043,2131,2178,2211,
+2292,2305,2343,2346,2350,2382,
+2427,2486,2715,2866,2932,2969,2992]
+props = pt.pairView(lassoed_index, scdata, spdata)
+
+# the cell proportions inferred online can be found through 'Save' -> 'JSON'.
+spdata.obs["your_annotation"] = props
 ```
-## Using Online Refined Results for "Annotation 1" Directly
+## Using Online Refined Results Directly
 As follow, pairpot website also provides refined_index in Lasso-View tool. which can be used directly to conducted further research.
 
 ```python
@@ -92,9 +121,9 @@ adata.obs['annotation'] = list(adata.obs['annotation'])
 adata.obs['annotation'].iloc[refined_index] = "annotation 1"
 adata.obs['annotation'] = adata.obs['annotation'].astype("category")
 ```
-## Offline Data Curation
+## Offline Data Processing
 Pairpot library also provides some functions to curate data before conducting analysis.
-### Offline Data Preprocessing
+### Preprocessing, Data Integration and Neighbor Graph Construction
 `pt.lassoProc` function conducts data preprocess as follows:
 - Removing minority of cells 
 - Performing PCA
@@ -109,11 +138,10 @@ Following code shows the usage of `pt.pairView`.
 pt.lassoProc('./download')
 ```
 
-### Offline Clustering, Cell Annotation and UCell Assignment
-`pt.pairProc` function conducts offline clustering and cell annotation as follows:
+### UCell Scores Evaluation
+`pt.pairProc` function conducts offline clustering as follows:
 - Segmenting the spatial domains in multiple slices using MENDER based on the multi-scale celluar context representations
 - For scRNA-seq data, clusting cells using Leiden algorithm with the default resolution
-- Replicating annotations for single-cell data
 - Using UCell to assign signature scores and evaluate cell types for datasets lacking original annotations
 
 `pt.pairProc` accepts parameters: `adata`, `organs`, `top`, `alpha`, `n_jobs` and `clu_key`. `adata` denotes an anndata format data to be processed, `organs` denotes the organs and species from existing cell marker databases(like _PanglaoDB_ and _CellMarker_ ), `top` denotes the topK ratio, `alpha` denotes the resolution level, `n_jobs` denotes the number of threads for parallel processing and `clu_key` denotes the cluster approach.

@@ -62,6 +62,24 @@ The, in the ./backend you can run:
 Runs the back-end in the development mode.\
 Open [http://localhost:5522](http://localhost:5522) to access the api for the browser.
 
+## Usage of Pairpot Library
+`pairpot` library provides some powerful tools to analyze single-cell data and spatial transcriptomics data.
+
+`pairpotlpa` library provides support of `lassoView` function of `pairpot`.
+
+Run in console to install `pairpot` and `pairpotlpa`.
+
+```bash
+pip install pairpot
+```
+
+And use this code to import.
+```python
+import pairpot as pt
+```
+
+You can also find our library code in https://github.com/lyotvincent/Pairpot/tree/master/backend/pairpot.
+
 ## Dataset collection
 Spatial transcriptomics and single-cell datasets were acquired and downloaded from databases such as the National Center for Biotechnology Information (NCBI), European Bioinformatics Institute (EBI), China National Center for Bio-information (CNCB), and 10X Genomics([https://www.10xgenomics.com](https://www.10xgenomics.com)).
 

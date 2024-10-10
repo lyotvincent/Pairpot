@@ -18,7 +18,17 @@ setup(
         '':['pairpot/resources/Cell_marker_Seq.xlsx'],
         '':['pairpot/resources/PanglaoDB_markers_27_Mar_2020.tsv'],
     },
-    install_requires=[],
+    install_requires=[
+        'pairpotlpa',
+        'h5py',
+        'numpy',
+        'pandas',
+        'anndata',
+        'scanpy',
+        'pkg_resources',
+        'os',
+        'scipy',
+        ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

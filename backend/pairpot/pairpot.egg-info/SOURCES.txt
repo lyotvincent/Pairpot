@@ -13,6 +13,7 @@ pairpot/pairview.py
 pairpot.egg-info/PKG-INFO
 pairpot.egg-info/SOURCES.txt
 pairpot.egg-info/dependency_links.txt
+pairpot.egg-info/requires.txt
 pairpot.egg-info/top_level.txt
 pairpot/resources/Cell_marker_Seq.xlsx
 pairpot/resources/PanglaoDB_markers_27_Mar_2020.tsv

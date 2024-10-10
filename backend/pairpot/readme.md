@@ -13,6 +13,8 @@ And use this code to import.
 ```python
 import pairpot as pt
 ```
+
+You can also find our library code in https://github.com/lyotvincent/Pairpot/tree/master/backend/pairpot.
 <!-- import pairpotlpa as LPA -->
 ## Download Dataset from Pairpot
 
