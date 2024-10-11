@@ -2103,7 +2103,7 @@ spdata.obs[\"${annoName}_props\"] = props
                       onCopy={() => {
                         api['success']({
                           message: 'Code copied!',
-                          description: `Your code of Lasso-View operations is copied.`,
+                          description: `Your code of Pair-View operations is copied.`,
                           placement: 'topRight',
                         })
                       }}>
@@ -2112,7 +2112,7 @@ spdata.obs[\"${annoName}_props\"] = props
                   </>)}
               >
                 <Input.TextArea
-                  placeholder='Code for Lasso-View operations'
+                  placeholder='Code for Pair-View operations'
                   value={totalCode + currCode}
                   autoSize={{
                     minRows: 10,

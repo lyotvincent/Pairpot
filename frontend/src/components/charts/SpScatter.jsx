@@ -3,6 +3,7 @@ import * as echarts from 'echarts'
 import PropTypes from 'prop-types'
 import '../theme/dark'
 import '../theme/vintage'
+import CopyToClipboard from 'react-copy-to-clipboard'
 import strokeColor from '../theme/strokeColor'
 import { TooltipComponent, VisualMapComponent } from 'echarts/components'
 import Axis from './Axis'
@@ -29,6 +30,7 @@ import {
   Form,
   Flex,
   Progress,
+  Modal,
   Tour
 } from 'antd'
 import {
@@ -41,7 +43,7 @@ import { UniversalTransition } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
 import H5adLoader from '../utils/H5adLoader'
 import Loading from './Loading'
-import { CloudDownloadOutlined, FileAddOutlined, FileOutlined, InboxOutlined, SettingOutlined, ReloadOutlined } from '@ant-design/icons'
+import { CloudDownloadOutlined, CodeOutlined, InboxOutlined, SettingOutlined, ReloadOutlined } from '@ant-design/icons'
 echarts.use([
   GraphicComponent,
   TooltipComponent,
@@ -84,6 +86,10 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta, pr
   const [title, setTitle] = useState('Mouse-Brain')
   const [_data, _setData] = useState([])
   const { token } = useToken()
+  const [codeModalOpen, setCodeModalOpen] = useState(false)
+  const [currCode, setCurrCode] = useState("")
+  const CodeHeader = `# Perform Layer-View using Python\n# Run in console: pip install pairpot\nimport pairpot as pt\n`
+  const [totalCode, setTotalCode] = useState(CodeHeader)
   const [tourOpen, setTourOpen] = useState(false)
 
   // loading tips
@@ -94,6 +100,7 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta, pr
   const SettingsRef = useRef(null)
   const SaveRef = useRef(null)
   const StatusRef = useRef(null)
+  const CodeRef = useRef(null)
   const steps = [
     {
       title: 'Upload File',
@@ -116,6 +123,20 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta, pr
       target: () => StatusRef.current,
     },
   ]
+
+  const setDownloadCode = (dataset_id, type) => (
+    `
+# Corresponding adata can be downloaded in MetaInfo or use the code as following.
+adata = pt.download("${dataset_id}", type='${type}', file='complete')
+    `
+  )
+
+  const setLayerCode = (batch, cluster) => (
+    `
+# Using Layer-View in Python offline. (The appearance of charts may be different with the online ones)
+adata = pt.layerView(adata, batch="${batch}", cluster="${cluster}")
+`
+  )
 
   const setAxis = (source, dims, xName0, yName0) => {
     // the axis of left chart
@@ -575,6 +596,9 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta, pr
             })
           }
         })
+
+        setTotalCode(CodeHeader + setDownloadCode(meta?.st.dataset_id, "sp"))
+        setCurrCode(setLayerCode(batchName, clusterCur.label))
         quitLoading(0, setLoading)
       }
       else if (commandRef.current === "Setting") {
@@ -750,6 +774,9 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta, pr
           {
             replaceMerge: ['series', 'dataset', 'visualMap'],
           })
+
+        // set code
+        setCurrCode(setLayerCode('batch', clu))
         //console.log(myChart.getOption())
       }
     } else {
@@ -830,6 +857,7 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta, pr
 
   return (
     <Flex justify="center" gap='middle'>
+      {contextHolder}
       <Spin
         spinning={loading[0]}
         size="large"
@@ -1081,6 +1109,49 @@ const SpScatter = ({ spfile, setCompLoad, onRef, height, width, margin, meta, pr
                 Save
               </Button>
             </Popover>
+            <Button
+              type="primary"
+              block
+              icon={<CodeOutlined />}
+              ref={CodeRef}
+              onClick={() => {
+                setCodeModalOpen(true)
+              }}>
+              Code
+            </Button>
+            <Modal
+              title="Code for user operations"
+              open={codeModalOpen}
+              onOk={() => { setCodeModalOpen(false) }}
+              okText="Copy"
+              style={{ top: '15%' }}
+              width={1000}
+              cancelText="Close"
+              onCancel={() => { setCodeModalOpen(false) }}
+              onClose={() => { setCodeModalOpen(false) }}
+              footer={(_, { OkBtn, CancelBtn }) => (
+                <>
+                  <CancelBtn />
+                  <CopyToClipboard text={totalCode + currCode} onCopy={() => {
+                    api['success']({
+                      message: 'Code copied!',
+                      description: `Your code of Layer-View operations is copied.`,
+                      placement: 'topRight',
+                    })
+                  }}>
+                    <Button type='primary'>Copy</Button>
+                  </CopyToClipboard>
+                </>)}
+            >
+              <Input.TextArea
+                placeholder='Code for Layer-View operations'
+                value={totalCode + currCode}
+                autoSize={{
+                  minRows: 10,
+                  maxRows: 20,
+                }}>
+              </Input.TextArea>
+            </Modal>
           </Space>
           <div ref={StatusRef}>
             <div>

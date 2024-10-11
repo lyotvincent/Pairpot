@@ -394,10 +394,10 @@ const Help = () => {
             </Col>
             <Col span={22} offset={1}>
               <Row style={{ marginTop: "1rem" }}>
-                <Card style={{ width: '47%' }} title={"Cell/domain Interaction"}>
+                <Card style={{ width: '49%' }} title={"Cell/domain Interaction"}>
                   <HelpTab />
                 </Card>
-                <Card style={{ width: '47%', marginLeft: '1%' }} title={"Deconvolution"}>
+                <Card style={{ width: '49%', marginLeft: '2%' }} title={"Deconvolution"}>
                   <HelpTab0 />
                 </Card>
               </Row>
