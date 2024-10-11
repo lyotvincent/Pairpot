@@ -6,7 +6,7 @@ import os
 
 ext_modules = [
 
-    Extension('pairpotlpa',
+    Extension('label_propagation',
               sources=['LPA.cpp'],
               language='c++',
               extra_compile_args=['-std=c++11'],
@@ -14,7 +14,7 @@ ext_modules = [
               extra_link_args=[]),
 ]
 
-setup(name='pairpotlpa',
+setup(name='label_propagation',
       version='0.1',
       author="rzh, zzj",
       author_email="rrrzhan@mail.nankai.edu.cn",
