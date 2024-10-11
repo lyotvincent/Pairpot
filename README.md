@@ -1,5 +1,7 @@
 # Pairpot: A Database with Real-time Lasso-based Analysis Tailored for Paired Single-cell and Spatial Transcriptomics
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13919102.svg)](https://doi.org/10.5281/zenodo.13919102)
+
 Paired single-cell and spatial resolved transcriptomics (SRT) data supplement each other, providing in-depth insights into biological processes and disease mechanisms.
 Previous SRT databases have limitations in curating sufficient single-cell and SRT pairs (SC-SP pairs) and providing real-time heuristic analysis, which hinder the effort to uncover potential biological insights.
 Here, we developed Pairpot (http://pairpot.bioxai.cn), a database tailored for paired single-cell and SRT data with real-time heuristic analysis. 
