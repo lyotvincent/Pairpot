@@ -126,7 +126,7 @@ const Help = () => {
               <Col span={20} offset={1}>
                 <div className="headline">
                   <h2>
-                    Data Search and Browse
+                    1. Data Search and Browse
                   </h2>
                   <h3>
                     Enables efficient navigation through the collection of datasets.
@@ -188,7 +188,7 @@ const Help = () => {
               <Col span={20} offset={1}>
                 <div className='headline'>
                   <h2>
-                    {"Lasso View"}
+                    {"2. Lasso View"}
                   </h2>
                   <h3>
                     Refining the customized cells and domains lassoed by users
@@ -252,7 +252,7 @@ const Help = () => {
               <Col span={20} offset={1}>
                 <div className='headline'>
                   <h2>
-                    {"Pair View"}
+                    {"3. Pair View"}
                   </h2>
                   <h3>{"Inferring cell proportions of spots using the user-selected cells"}</h3>
                   <p>
@@ -294,7 +294,7 @@ const Help = () => {
               <Col span={20} offset={1}>
                 <div className='headline'>
                   <h2>
-                    {"Alternative Bioinformatics Tools"}
+                    {"4. Alternative Bioinformatics Tools"}
                   </h2>
                   <h3>
                     Selecting alternative bioinformatics tools by users
@@ -308,7 +308,7 @@ const Help = () => {
 
             <Row>
               <div style={{ marginLeft: '7rem' }}>
-                <h4>In Pair-View</h4>
+                <h4>Selections of deconvolution tools in Pair-View</h4>
               </div>
             </Row>
             <Col span={22} offset={1}>
@@ -358,7 +358,7 @@ const Help = () => {
 
             <Row>
               <div style={{ marginLeft: '7rem' }}>
-                <h4>In Heatmap</h4>
+                <h4>Selections of cell/domain interaction tools in Heatmap</h4>
               </div>
             </Row>
             <Col span={22} offset={1}>
@@ -389,7 +389,7 @@ const Help = () => {
             <Divider style={{ marginTop: 14, marginBottom: 18 }} />
             <Col span={22} offset={1}>
               <div className="headline">
-                <h2>How to deploy bioinformatics tools offline?</h2>
+                <h2>5. How to deploy bioinformatics tools offline?</h2>
               </div>
             </Col>
             <Col span={22} offset={1}>
@@ -405,7 +405,7 @@ const Help = () => {
             <Divider style={{ marginTop: 14, marginBottom: 18 }} />
             <Col span={22} offset={1}>
               <div className="headline">
-                <h2>How to convert anndata to R environment?</h2>
+                <h2>6. How to convert anndata to R environment?</h2>
               </div>
             </Col>
             <Col span={22} offset={1}>

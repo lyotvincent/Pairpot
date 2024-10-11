@@ -7,8 +7,8 @@ import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 var Rcode = 
 `
 ### SpaTalk
-SpaTalk is a computational framework for analyzing cell-cell communication within the spatial context of tissues, integrating spatial and single-cell transcriptomics data.
-
+**Source:** https://github.com/ZJUFanLab/SpaTalk\n
+**Citation:** Shao, X., Li, C., Yang, H., Lu, X., Liao, J., Qian, J., Wang, K., Cheng, J., Yang, P., Chen, H. et al. (2022). Knowledge-graph-based cell-cell communication inference for spatially resolved transcriptomic data with SpaTalk. Nat. Commun. 13, 4429.
 ### Key features and functions of SpaTalk include:
 - Spatially Informed Communication Analysis
 - Integration of Spatial and scRNA-seq Data

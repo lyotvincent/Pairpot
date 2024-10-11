@@ -7,8 +7,8 @@ import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 var Rcode = 
 `
 ### CellChat
-CellChat is a bioinformatics tool designed to analyze cell-cell communication, particularly using single-cell transcriptomic data.
-
+**Source:** https://github.com/sqjin/CellChat\n
+**Citation:** Jin, S., Guerrero-Juarez, C.F., Zhang, L., Chang, I., Ramos, R., Kuan, C., Myung, P., Plikus, M.V., and Nie, Q. (2021). Inference and analysis of cell-cell communication using CellChat. Nat. Commun. 12, 1088. 
 ### Key functions of CellChat include:
 - Identifying Ligand-Receptor Interactions
 - Inferring Cell Communication Networks 

@@ -6,8 +6,9 @@ import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 var Rcode =
   `
-### Card
-CARD (conditional autoregressive-based deconvolution) is a tool used for spatially informed cell-type deconvolution for spatial transcriptomics.
+### CARD
+**Source:** https://github.com/YMa-lab/CARD\n
+**Citation:** Ma, Y. and Zhou, X. (2022). Spatially informed cell-type deconvolution for spatial transcript-omics. Nat Biotechnol 40, 1349–1359.
 
 ### Key features and functions of CARD include:
 - Cell-type Deconvolution

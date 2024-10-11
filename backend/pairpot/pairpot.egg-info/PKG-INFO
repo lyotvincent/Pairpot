@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: pairpot
-Version: 0.0.2
+Version: 0.0.3
 Summary: Pairpot: a database with real-time lasso-based analysis tailored for paired single-cell and spatial transcriptomics.
 Home-page: https://github.com/lyotvincent/Pairpot
 Author: Zhihan Ruan, Zhenjie Zhang, and Jian Liu.

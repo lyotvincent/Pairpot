@@ -5,7 +5,7 @@ print("packages:",find_packages())
 
 setup(
     name="pairpot",
-    version="0.0.2",
+    version="0.0.3",
     author="Zhihan Ruan, Zhenjie Zhang, and Jian Liu.",
     author_email="rrrzhan@mail.nankai.edu.cn",
     description="Pairpot: a database with real-time lasso-based analysis tailored for paired single-cell and spatial transcriptomics.",
@@ -19,14 +19,12 @@ setup(
         '':['pairpot/resources/PanglaoDB_markers_27_Mar_2020.tsv'],
     },
     install_requires=[
-        'pairpotlpa',
         'h5py',
         'numpy',
         'pandas',
         'anndata',
         'scanpy',
         'pkg_resources',
-        'os',
         'scipy',
         ],
     classifiers=[

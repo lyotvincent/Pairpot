@@ -7,7 +7,8 @@ import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 var Rcode = 
 `
 ### CellTrek
-CellTrek is a tool designed for spatial transcriptomics analysis, particularly focused on mapping cells from single-cell RNA sequencing (scRNA-seq) data to spatial coordinates.
+**Source:** https://github.com/navinlabcode/CellTrek\n
+**Citation:** Wei, R., He, S., Bai, S., Sei, E., Hu, M., Thompson, A., Chen, K., Krishnamurthy, S., and Navin, N.E. (2022). Spatial charting of single-cell transcriptomes in tissues. Nat. Biotechnol. 40, 1190-1199. 
 
 ### Key features and functions of CellTrek include:
 - Mapping scRNA-seq data to spatial coordinates

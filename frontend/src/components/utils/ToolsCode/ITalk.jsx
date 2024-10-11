@@ -7,8 +7,11 @@ import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 var Rcode = 
 `
 ### iTALK
-iTALK is a computational tool designed to analyze and visualize intercellular communication, particularly focusing on interactions between cells through ligand-receptor pairs.
-
+iTALK is a computational tool designed to analyze and visualize intercellular communication, particularly focusing on interactions between cells through ligand-receptor pairs.\n
+**Source:** https://github.com/Coolgenome/iTALK\n
+**Citation:** iTALK: an R Package to Characterize and Illustrate Intercellular Communication
+Wang Y., Wang R., Zhang S., Song S., Jiang C., Han G., Wang M., Ajani J., Futreal A, Wang L.
+bioRxiv 507871; doi: https://doi.org/10.1101/507871
 ### Key features and functions of iTALK include:
 - Identifying Ligand-Receptor Interactions
 - Visualizing Cell-Cell Communication

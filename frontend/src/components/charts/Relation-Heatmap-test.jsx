@@ -52,7 +52,7 @@ const RelHeat = ({ spfile, scfile, setCompLoad, onRef, title, height, width, mar
 
   const [scHeatmap, setScHeatmap] = useState({})
   const [spHeatmap, setSpHeatmap] = useState({})
-  const [key, setKey] = useState(true)
+  const [key, setKey] = useState(false)
   const [currTip, setCurrTip] = useState(loadingTips[0])
 
   const [tourOpen, setTourOpen] = useState(false)
@@ -128,10 +128,6 @@ const RelHeat = ({ spfile, scfile, setCompLoad, onRef, title, height, width, mar
         })
         ScH5adLoader(scfile).then((h5info) => {
           setScHeatmap(h5info)
-        })
-        ScH5adLoader(spfile).then((h5info) => {
-          console.log("All data reloaded in CPDB.")
-          setSpHeatmap(h5info)
           setMethods(h5info.methods)
           setCurrMethod(h5info.methods[0])
           setCurrCluster(h5info.cellType[0])
@@ -144,6 +140,10 @@ const RelHeat = ({ spfile, scfile, setCompLoad, onRef, title, height, width, mar
           setCurrentInt(h5info.intArray[h5info.cellType[0]])
           setCurrentCell(h5info.cellArray[h5info.cellType[0]])
           toggleAnno("Upload")
+        })
+        ScH5adLoader(spfile).then((h5info) => {
+          console.log("All data reloaded in CPDB.")
+          setSpHeatmap(h5info)
         }).catch(error => {
           console.error('Error fetching blob in LayerView:', error)
         })
@@ -567,11 +567,11 @@ const RelHeat = ({ spfile, scfile, setCompLoad, onRef, title, height, width, mar
               setCurrentInt(h5info.intArray[h5info.cellType[0]])
               setCurrentCell(h5info.cellArray[h5info.cellType[0]])
               toggleAnno("Upload")
-            }} 
-            ref = {switchRef}
-            />
+            }}
+            ref={switchRef}
+          />
           <div
-            ref = {clusterRef}
+            ref={clusterRef}
           >
             <span>Cluster: </span>
             <Select
@@ -593,7 +593,7 @@ const RelHeat = ({ spfile, scfile, setCompLoad, onRef, title, height, width, mar
             />
           </div>
           <div
-            ref = {methodRef}
+            ref={methodRef}
           >
             <span>Method: </span>
             <Select

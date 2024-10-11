@@ -7,7 +7,8 @@ import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 var Rcode = 
 `
 ### Seurat
-SeuratDeconv is a deconvolution tool used within the Seurat framework, helping researchers infer cell type composition from bulk RNA-seq data or spatial transcriptomics.
+**Source:** https://github.com/satijalab/seurat\n
+**Citation:** Butler, A., Hoffman, P., Smibert, P., Papalexi, E., and Satija, R. (2018). Integrating single-cell transcriptomic data across different conditions, technologies, and species. Nat. Biotechnol. 36, 411-420.
 
 ### Key features and functions of SeuratDeconv include:
 - Bulk RNA-seq Deconvolution

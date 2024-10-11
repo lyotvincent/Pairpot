@@ -6,8 +6,9 @@ import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 var Rcode = 
 `
-### Spacexr
-spacexr is a computational tool designed for spatial transcriptomics analysis, allowing users to infer cell type composition from spatial gene expression data.
+### RCTD
+**Source:** https://github.com/dmcable/spacexr\n
+**Citation:** Cable, D.M., Murray, E., Zou, L.S., Goeva, A., Macosko, E.Z., Chen, F., and Irizarry, R.A. (2022). Robust decomposition of cell type mixtures in spatial transcriptomics. Nat. Biotechnol. 40, 517-526.
 
 ### Key features and functions of spacexr include:
 - Deconvolution of Spatial Data
