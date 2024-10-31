@@ -8,6 +8,7 @@ import scanpy as sc
 import pandas as pd
 import anndata as ad
 import numpy as np
+from collections import Counter
 from normalize import Cell2Location_run
 from commot_cci import LegRec_commot
 import os
@@ -139,7 +140,10 @@ def add_heatmap_cellchat(cellchat_path:str, adata_in: ad.AnnData, groupby: str):
     df_cellchat['neglog10p'] = -np.log10(df_cellchat['pval']+1e-3)
     df_cellchat['significant'] = ['yes' if df_cellchat['pval'][i] < 0.05 else 'nan' for i in df_cellchat.index ]
     # df_cellchat = df_cellchat[['interaction_group','celltype_group','scaled_means','pvals', 'neglog10p','significant']]
-
+    # add a filter
+    df_cellchat = df_cellchat[df_cellchat['scaled_means'] > 1e-5]
+    if len(df_cellchat) > 3000:
+        df_cellchat = df_cellchat.sort_values(by='scaled_means', ascending=False)[:3000]
     cc_res = {}
     cc_res['dataArray'] = {}
     cc_res['cellArray'] = {}
@@ -150,23 +154,27 @@ def add_heatmap_cellchat(cellchat_path:str, adata_in: ad.AnnData, groupby: str):
     for temp_cell1 in cell_types:
         df_heat = df_cellchat.loc[np.array(df_cellchat['source'] == temp_cell1) + 
                                 np.array(df_cellchat['target'] == temp_cell1),: ]
-        df_heat = df_cellchat[['interaction_group',
+        df_heat = df_heat[['interaction_group',
                                 'celltype_group',
                                 'scaled_means',
                                 'pvals', 
                                 'neglog10p',
                                 'significant']]
-        if min(df_heat['pvals']) < 0.05:
-            cc_res['dataArray'][temp_cell1]=df_heat
-            y = df_heat['interaction_group'].unique()
-            cc_res['intArray'][temp_cell1] = y.T
-
-            x = df_heat['celltype_group'].unique()
-            cc_res['cellArray'][temp_cell1]=x.T
-            print(temp_cell1,"heatmap if OK")
-        else: 
+        if len(df_heat) == 0:
             _ct.remove(temp_cell1)
             print(f"{temp_cell1} has no L-R pairs.")
+        else:
+            if min(df_heat['pvals']) < 0.05:
+                cc_res['dataArray'][temp_cell1]=df_heat
+                y = df_heat['interaction_group'].unique()
+                cc_res['intArray'][temp_cell1] = y.T
+
+                x = df_heat['celltype_group'].unique()
+                cc_res['cellArray'][temp_cell1]=x.T
+                print(temp_cell1,"heatmap if OK")
+            else: 
+                _ct.remove(temp_cell1)
+                print(f"{temp_cell1} has no L-R pairs.")
     cc_res['cellType'] = _ct
     return cc_res
 
@@ -179,7 +187,10 @@ def add_heatmap_iTALK(iTALK_path:str, adata_in: ad.AnnData, groupby: str):
     df_iTALK['pvals'] = 1
     df_iTALK['neglog10p'] = 0
     df_iTALK['significant'] = 'nan'
-
+    # add a filter
+    df_iTALK = df_iTALK[df_iTALK['scaled_means'] > 1e-3]
+    if len(df_iTALK) > 3000:
+        df_iTALK = df_iTALK.sort_values(by='scaled_means', ascending=False)[:3000]
     cc_res = {}
     cc_res['dataArray'] = {}
     cc_res['cellArray'] = {}
@@ -253,13 +264,10 @@ def save_delete(adata, loc, column):
     del adata.obsm[column]
   if loc == 'varm' and column in adata.varm.keys():
     del adata.varm[column]
-  print(f"deleted adta.{loc}['{column}']")
+  print(f"deleted adata.{loc}['{column}']")
 
 def run_cpdb(adata_inFile, adata_outPath, type='sc', use_hvg=True, cpdbTime=None):
-    if type == 'sp':
-        groupby = 'leiden-1'  # adata.obs['mender'] for sp data
-    else:
-        groupby = 'annotation'  # adata.obs['annotation'] for sc data
+    groupby = 'annotation'  # adata.obs['annotation'] for sc data
     adata_in = sc.read_h5ad(adata_inFile) 
     # make obs unique, or error occurs in cpdb
     adata_in.obs_names_make_unique()
@@ -301,7 +309,9 @@ def run_cpdb(adata_inFile, adata_outPath, type='sc', use_hvg=True, cpdbTime=None
     adata_out1.obs.columns = [s.replace('/', ' or ') for s in adata_in.obs.columns]
     adata_out1.uns['CellPhoneDB_pvalues'] = cpdb_res['pvalues'].fillna("")
     adata_out1.uns['CellPhoneDB_means'] =  cpdb_res['means'].fillna("")
-    sc.tl.rank_genes_groups(adata_out1, groupby=groupby,method='wilcoxon')
+    groupsDict=Counter(adata_out1.obs[groupby])
+    groups = [item for item, count in groupsDict.items() if count > 1]
+    sc.tl.rank_genes_groups(adata_out1, groupby=groupby, groups=groups)
     sc.tl.dendrogram(adata_out1, groupby=groupby)
     if type == 'sc': 
         adata_out1.write_h5ad(f"{adata_outPath}/{type}_sampled.h5ad")
@@ -310,7 +320,7 @@ def run_cpdb(adata_inFile, adata_outPath, type='sc', use_hvg=True, cpdbTime=None
     # generate adata_out2(meta, without X, interface data with frontend)
     adata_out2 = ad.AnnData(obs=adata_out1.obs, obsm=adata_out1.obsm, var=adata_out1.var)
     adata_out2.uns['dendrogram'] = adata_out1.uns[f'dendrogram_{groupby}']
-    cell_types = adata_out1.obs[groupby].cat.categories
+    cell_types = groups
     nameRank = pd.DataFrame(adata_out1.uns['rank_genes_groups']['names'], columns=cell_types)
     expr_df = pd.DataFrame(columns=cell_types)
     for ct in cell_types:
@@ -368,32 +378,42 @@ def run_deconv(adata_scFile, adata_spFile, adata_outPath):
     print(f"Write dcv results to {adata_outPath}/sp_deconv.h5ad")
 
 
-def append_cellchat(adata_inFile, adata_outPath, type='sc', species="Mouse"):
-    print("**Enter ./Rsrc")
-    os.chdir("./Rsrc")
-    os.system(f"Rscript _CellChat.R -p {adata_inFile} -o {adata_outPath} -s {species}")
-    os.chdir("../")
-    print("**Quit ./Rsrc")
-    if type == 'sc':
-        adata_outFile = f"{adata_outPath}/sc_meta.h5ad"
+def append_cellchat(adata_inFile, adata_outPath, adata_outPath1, type='sc', species="Mouse", run_cellchat=True):
+    if run_cellchat:
+        print("**Running CellChat...")
+        print("**Enter ./Rsrc")
+        os.chdir("./Rsrc")
+        os.system(f"Rscript _CellChat.R -p {adata_inFile} -o {adata_outPath} -s {species}")
+        os.chdir("../")
+        print("**Quit ./Rsrc")
     else:
-        adata_outFile = f"{adata_outPath}/sp_meta.h5ad"
+        print("##Running without CellChat, asserting CellChat is finished.")
+    print("**Writing CellChat results to output file...")
+    if type == 'sc':
+        adata_outFile = f"{adata_outPath1}/sc_meta.h5ad"
+    else:
+        adata_outFile = f"{adata_outPath1}/sp_meta.h5ad"
     adata_out = sc.read_h5ad(adata_outFile)
     cc_res = add_heatmap_cellchat(f"{adata_outPath}/CellChat_heatmap.tsv", adata_out, groupby="annotation")
     write_heat(adata_out, cc_res, "CellChat")
     adata_out.write_h5ad(adata_outFile)
     print(f"**Finished, CellChat is in {adata_outFile}")
 
-def append_iTALK(adata_inFile, adata_outPath, type='sc'):
-    print("**Enter ./Rsrc")
-    os.chdir("./Rsrc")
-    os.system(f"Rscript _iTALK.R -p {adata_inFile} -o {adata_outPath}")
-    os.chdir("../")
-    print("**Quit ./Rsrc")
-    if type == 'sc':
-        adata_outFile = f"{adata_outPath}/sc_meta.h5ad"
+def append_iTALK(adata_inFile, adata_outPath,adata_outPath1, type='sc', run_iTALK=True):
+    if run_iTALK:
+        print("**Running iTALK...")
+        print("**Enter ./Rsrc")
+        os.chdir("./Rsrc")
+        os.system(f"Rscript _iTALK.R -p {adata_inFile} -o {adata_outPath}")
+        os.chdir("../")
+        print("**Quit ./Rsrc")
     else:
-        adata_outFile = f"{adata_outPath}/sp_meta.h5ad"
+        print("##Running without iTALK, asserting iTALK is finished.")
+    print("**Writing iTALK results to output file...")
+    if type == 'sc':
+        adata_outFile = f"{adata_outPath1}/sc_meta.h5ad"
+    else:
+        adata_outFile = f"{adata_outPath1}/sp_meta.h5ad"
     adata_out = sc.read_h5ad(adata_outFile)
     it_res = add_heatmap_iTALK(f"{adata_outPath}/iTALK_heatmap.tsv", adata_out, groupby="annotation")
     write_heat(adata_out, it_res, "iTALK")
@@ -471,17 +491,55 @@ def append_SpaTalk_deconv(adata_scFile, adata_spFile, adata_outPath, species="Mo
     print("**Quit ./Rsrc")
 
 if __name__ == '__main__':
-    dataset_id = '121'
-    scdata_id = '039'
-    adata_spFile = f"/data/rzh/RawUrls/{dataset_id}/STDS0000{dataset_id}/New_{dataset_id}.h5ad"
-    adata_scFile = f"/data/rzh/RawUrls/{dataset_id}/SCDS0000{scdata_id}/New_{scdata_id}.h5ad"
-    adata_outPath = f"/data/rzh/RawUrls/{dataset_id}"
-    print(f"running in {adata_outPath}")
-    # run_deconv(adata_scFile, adata_spFile, adata_outPath)
-    # run_cpdb(f"{adata_outPath}/sp_deconv.h5ad", adata_outPath, type="sp")
-    # run_cpdb(adata_scFile, adata_outPath, type="sc")
-    append_deconv(adata_scFile, adata_spFile, adata_outPath)
-    append_cci(adata_scFile, adata_spFile, adata_outPath, species="Mouse", run_commot=False)
-    append_commot(adata_spFile, adata_outPath)
-    
-    # rzh run 221 219 212 204(lack COMMOT) 
+    rawPath = f"/data/rzh/RawUrls"
+    res = []
+    for root, dirs, files in os.walk(rawPath):
+        if root.count(os.sep) - rawPath.count(os.sep) == 1:
+            for dir in dirs:
+                temp_res = os.path.join(root,dir)
+                if temp_res[-11:-8] == 'SCD':
+                    res.append(temp_res)
+    resourcePath = f"/home/rzh/stpair/backend/resources"
+    for root, dirs, files in os.walk(resourcePath):
+        dataset_ids = dirs
+        break
+    dataset_ids.remove("cpdb")
+    dataset_ids.remove("057")
+    dataset_ids.remove("227")
+    dataset_ids.remove("212")
+    # dataset_ids.remove("007")
+    # dataset_ids.remove("121")
+    for item in res:
+        # print(item)
+        dataset_id = item[-15:-12]
+        if dataset_id not in dataset_ids:
+            continue
+        scdata_id = item[-3:]
+        # print(dataset_id,scdata_id)
+        # dataset_id = '027'
+        # scdata_id = '018'
+        adata_spFile = f"/data/rzh/RawUrls/{dataset_id}/STDS0000{dataset_id}/New_{dataset_id}.h5ad"
+        adata_scFile = f"/data/rzh/RawUrls/{dataset_id}/SCDS0000{scdata_id}/New_{scdata_id}.h5ad"
+        adata_outPath = f"/data/rzh/RawUrls/{dataset_id}" 
+        adata_outPath1 = f"/home/rzh/stpair/backend/resources/{dataset_id}"
+
+        sc_meta_path = f"/data/rzh/RawUrls/{dataset_id}//sc_meta.h5ad"
+        if os.path.exists(adata_outPath1+"/success.txt"):
+            continue
+        if os.path.exists(adata_scFile)==False or  os.path.exists(adata_spFile)==False:
+            continue
+        if os.path.exists(sc_meta_path)==False:
+            continue
+        print(f"running in {adata_outPath}")
+        # run_deconv(adata_scFile, adata_spFile, adata_outPath)
+        # run_cpdb(adata_scFile, adata_outPath, type="sc")
+        # run_cpdb(f"{adata_outPath}/sp_deconv.h5ad", adata_outPath, type="sp", cpdbTime='10_23_2024_102715')
+        append_cellchat(adata_scFile, adata_outPath,adata_outPath1, run_cellchat=False)
+        append_iTALK(adata_scFile, adata_outPath,adata_outPath1,run_iTALK=False)
+        # append_cci(adata_scFile, adata_spFile, adata_outPath, species="Mouse", run_commot=False)
+        # append_commot(adata_spFile, adata_outPath)
+        success_path = adata_outPath1+"/success.txt"
+        with open(success_path, 'w') as file:
+                file.write("Success!")
+        
+        # rzh run 221 219 212 204(lack COMMOT) 
