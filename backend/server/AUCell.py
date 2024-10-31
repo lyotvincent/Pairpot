@@ -31,7 +31,11 @@ def naive_topK(matrix, K, axis=1):
 
 def AUCell_buildRankings(adata:ad.AnnData, top=0.05):
   k = int(len(adata.var_names)*top)
-  adata.obsm['AUCell_rankings'] = pd.DataFrame(naive_topK(adata.X.todense(), k), index=adata.obs_names)
+  if (type(adata.X) == np.ndarray):
+    X = adata.X
+  else:
+    X = adata.X.todense()
+  adata.obsm['AUCell_rankings'] = pd.DataFrame(naive_topK(X, k), index=adata.obs_names)
   adata.obsm['AUCell_rankings'].columns = np.array(adata.obsm['AUCell_rankings'].columns, dtype=str)
   return adata
 

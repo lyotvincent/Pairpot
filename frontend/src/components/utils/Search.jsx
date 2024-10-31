@@ -84,6 +84,7 @@ const options = [
     renderItem("Adult Mouse Kidney (FFPE)", 'STDS0000051'),
     renderItem("Adult Mouse Brain (FFPE)", 'STDS0000052'),
     renderItem("Spatial maps of prostate cancer transcriptomes reveal an unexplored landscape of heterogeneity", 'STDS0000053'),
+    renderItem("ZESTA: Zebrafish Embryogenesis Spatiotemporal Transcriptomic Atlas", 'STDS0000057'),
     renderItem("10x Visium Spatial transcriptomics of murine colon at d14 (mucosa healing) in B cell sufficient/deficient mice", 'STDS0000063'),
     renderItem("A new epithelial cell subpopulation predicts response to surgery, chemotherapy, and immunotherapy in bladder cancer", 'STDS0000067'),
     renderItem("Integrating microarray-based spatial transcriptomics and single-cell RNA-seq reveals tissue architecture in pancreatic ductal adenocarcinomas 9606", 'STDS0000073'),
