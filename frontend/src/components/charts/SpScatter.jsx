@@ -134,7 +134,11 @@ adata = pt.download("${dataset_id}", type='${type}', file='complete')
   const setLayerCode = (batch, cluster) => (
     `
 # Using Layer-View in Python offline. (The appearance of charts may be different with the online ones)
-adata = pt.layerView(adata, batch="${batch}", cluster="${cluster}")
+# show the figure
+pt.layerView(adata, batch="${batch}", cluster="${cluster}", show=True)
+
+# return the axes object
+axes = pt.layerView(adata, batch="${batch}", cluster="${cluster}", show=False)
 `
   )
 
@@ -598,7 +602,7 @@ adata = pt.layerView(adata, batch="${batch}", cluster="${cluster}")
         })
 
         setTotalCode(CodeHeader + setDownloadCode(meta?.st.dataset_id, "sp"))
-        setCurrCode(setLayerCode(batchName, clusterCur.label))
+        setCurrCode(setLayerCode(batchName, 'annotation'))
         quitLoading(0, setLoading)
       }
       else if (commandRef.current === "Setting") {
