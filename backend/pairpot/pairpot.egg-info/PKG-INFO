@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: pairpot
-Version: 0.0.3
+Version: 0.0.4
 Summary: Pairpot: a database with real-time lasso-based analysis tailored for paired single-cell and spatial transcriptomics.
 Home-page: https://github.com/lyotvincent/Pairpot
 Author: Zhihan Ruan, Zhenjie Zhang, and Jian Liu.
@@ -17,9 +17,7 @@ License-File: LICENSE
 # Usage of Pairpot Library
 `pairpot` library provides some powerful tools to analyze single-cell data and spatial transcriptomics data.
 
-`pairpotlpa` library provides support of `lassoView` function of `pairpot`.
-
-Run in console to install `pairpot` and `pairpotlpa`.
+Run in console to install `pairpot`.
 
 ```bash
 pip install pairpot
@@ -31,7 +29,17 @@ import pairpot as pt
 ```
 
 You can also find our library code in https://github.com/lyotvincent/Pairpot/tree/master/backend/pairpot.
+
+`pairpotlpa` library provides support of `lassoView` function of `pairpot`. You can download the library file in __RELEASE-PAGE__ and run pairpotlpa-install.sh to install the library automatically. Or you can also run the following code to build `pairpotlpa` library manually and use `pip` to install it.
+
+```bash
+python setup.py sdist bdist_wheel
+pip install $WHL_FILE
+```
+
+Here, `$WHL_FILE` needs to be replaced by the `.whl` file built in `./dist` library.
 <!-- import pairpotlpa as LPA -->
+
 ## Download Dataset from Pairpot
 
 Corresponding adata can be downloaded in MetaInfo or use the code as following.
@@ -153,5 +161,21 @@ Following code shows the usage of `pt.pairProc`.
 adata=ad.read_h5ad('sample.h5ad')
 organs=['Brain','Blood']
 proc_adata=pt.pairProc(adata,organs)
+```
+
+## 3D Hierarchical Layouts Display
+`pt.layerView` function can dynamically display gene expressions and annotations of multiple slices in 3D hierachical layouts.
+
+`pt.layerView` accepts parameters: `adata`, `batch`, `cluster`,`color_key`. `adata` denotes an anndata format data to be processed, `batch` denotes which data in `obs` of `adata` will be treated as the value of the `Z` coordinate. `cluster` denotes the basis for being colored in `obs` or `obsm` of `adata` and `color_key` denotes the color scheme of picture in `seaborn` library. `pt.layerView` will return an picture object for further use.
+
+In default, `batch` and `cluster` are seperatedly set to `"batch"` and `"leiden-1"`, and `color_key` is set to `"Pastel1"`.
+
+Following code shows the usage of `pt.layerView`.
+```python
+import matplotlib.pyplot as plt
+
+adata=ad.read_h5ad('sample.h5ad')
+fig=pt.layerView(adata=adata)
+plt.show()
 ```
 

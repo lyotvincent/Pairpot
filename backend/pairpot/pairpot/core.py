@@ -3,6 +3,7 @@ from .pairview import NNLSDeconvolution
 from .pairPotProc import process_files
 from .normalize import rank
 from .download import downLd
+from .layerview import layerView
 import pandas as pd
 import anndata as ad
 
@@ -29,4 +30,8 @@ def pairProc(adata:ad.AnnData, organs, top=0.05, alpha=10e-40, n_jobs=16, clu_ke
 
 def downLd(dataset_id,type,file):
     result=downLd(dataset_id=dataset_id,type=type,file=file)
-    return dataset_id
+    return result
+
+def layerView(adata, batch="batch", cluster="leiden-1",color_key='Pastel1'):
+    result=layerView(adata=adata,batch=batch,cluster=cluster,color_key=color_key)
+    return result

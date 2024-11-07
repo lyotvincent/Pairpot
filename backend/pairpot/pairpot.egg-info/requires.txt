@@ -3,5 +3,4 @@ numpy
 pandas
 anndata
 scanpy
-pkg_resources
 scipy

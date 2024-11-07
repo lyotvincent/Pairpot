@@ -7,6 +7,7 @@ pairpot/core.py
 pairpot/db.py
 pairpot/download.py
 pairpot/lassoview.py
+pairpot/layerview.py
 pairpot/normalize.py
 pairpot/pairPotProc.py
 pairpot/pairview.py
