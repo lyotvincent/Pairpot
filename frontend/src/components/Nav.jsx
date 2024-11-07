@@ -8,6 +8,7 @@ import {
   DatabaseOutlined,
   CloudUploadOutlined,
   CloudDownloadOutlined,
+  PaperClipOutlined,
 } from '@ant-design/icons'
 import { Menu, ConfigProvider, Layout, Radio, theme, Space, Divider, Card } from 'antd'
 import { NavLink } from 'react-router-dom'
@@ -101,6 +102,15 @@ const Nav = () => {
       key: '/help',
       icon: <QuestionCircleOutlined />,
     },
+    // {
+    //   label: (
+    //     <NavLink to={`/news`} style={{ textDecorationLine: 'none' }}>
+    //       News
+    //     </NavLink>
+    //   ),
+    //   key: '/News',
+    //   icon: <PaperClipOutlined />,
+    // },
   ]
 
   useEffect(() => {

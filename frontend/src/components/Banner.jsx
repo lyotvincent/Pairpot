@@ -7,7 +7,7 @@ import netImg from "../assets/img/browse/network.svg"
 import heatImg from "../assets/img/browse/heatmap.svg"
 import coverImg from "../assets/img/cover-figure.png"
 import axios from 'axios'
-import { Button, ConfigProvider, Layout, Space, Statistic } from 'antd'
+import { Button, ConfigProvider, Divider, Layout, Space, Statistic } from 'antd'
 import { ArrowRightCircle } from 'react-bootstrap-icons'
 import 'animate.css'
 import TrackVisibility from 'react-on-screen'
@@ -503,6 +503,35 @@ const Help = () => {
                     "Explore L-R pairs, single-cell marker genes and spatial variable genes via heatmap in versatile format."
                   }></Card.Meta>
               </Card>
+            </Row>
+
+            <br />
+            <Row gutter={16}>
+              <div className='headline'>
+                <h2>
+                  {"News"}
+                </h2>
+                <Divider/>
+                  <p>
+                <span style={{color:'gray'}}>2024.11.4&nbsp;&nbsp;</span>
+                Pairpot has been published online with citation:
+                Ruan Z., Lin F., Zhang Z., et al. (2024) Pairpot: a database with real-time lasso-based analysis tailored for paired single-cell and spatial transcriptomics. Nucleic Acids Research, gkae986, &nbsp;
+                        <a href="https://doi.org/10.1093/nar/gkae986"target='_blank'
+                            style={{
+                            color: 'rgba(0, 0, 0, 0.6)',
+                            textDecoration: 'none',
+                            // fontSize: 24
+                            }}>
+                            https://doi.org/10.1093/nar/gkae986
+                        </a>
+                </p>
+                <br/>
+                <p>
+                <span style={{color:'gray'}}>2024.10.15&nbsp;&nbsp;</span>
+                  Pairpot has been accepted by Nucleic Acids Research.
+                </p>
+
+              </div>
             </Row>
 
 

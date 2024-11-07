@@ -96,7 +96,7 @@ const ScScatter = ({ scfile, spfile, setCompLoad, meta, onRef, height, width, ma
   const [action, setAction] = useState(0)
   const [deleteValue, setDeleteValue] = useState([])
   const [deleteOpen, setDeleteOpen] = useState(false)
-  const [refineValue, setRefineValue] = useState([])
+  const [refineValue, setRefineValue] = useState({ value: 2, label: 'LabelPropagation' })
   const [refineOpen, setRefineOpen] = useState(false)
   const [saveOpen, setSaveOpen] = useState(false)
   const itemGroupRef = useRef([])
@@ -1560,7 +1560,6 @@ refined_index = pt.lassoView(lassoed_index, adata)
                   <Space direction="vertical">
                     <Select
                       labelInValue
-                      placeholder="Select a Refiner"
                       style={{
                         width: '100%',
                       }}

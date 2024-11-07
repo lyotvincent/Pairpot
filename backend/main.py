@@ -230,7 +230,8 @@ def get_global_wordcloud():
 
     custom_stop_words = [
         'none','we','were',
-        'nan','homo','sapiens','mus','musculus',
+        'nan',
+        'homo','sapiens','mus','musculus',
         'and', 'if', 'or', 'the', 'to', 'in', 'of', 'a', 'an', 'is', 'was', 'for', 'on', 'with', 'at', 'by', 'from', 'as', 'that', 'which', 'it', 'are', 'has', 'have', 'had', 'be', 'will', 'would', 'can', 'could', 'may', 'might', 'should'
     ]
 
@@ -273,7 +274,18 @@ def get_filted_wordcloud():
         query_content = full_content
         cursor.execute(query_content)
     elif label is not None and item is not None:
-        query_content = f"SELECT title, summary, overall_design, species,organ_parts, cell_types FROM datasets where {label} like '%{item}%'"
+        tech_bin = {
+            "10μm": ["Seq-Scope","HDST","Stereo-Seq" ],
+            "25μm": ["Slide-seqV2","Slide-seq","DBiT-seq"],
+            "50μm": ["10x Visium","Spatial Transcriptomics","sciMAP-ATAC-seq"],
+            "single-cell SRT":["GeoMx DSP","MERFISH","ClampFISH","EASI-FISH","seqFish","seqFISH+","STARmap",],
+        }
+        if label == 'technologies' and item in tech_bin.keys():
+            tech_list = tech_bin[item]
+            query_content = f"SELECT title, summary, overall_design, species,organ_parts, cell_types FROM datasets where "
+            query_content = query_content + " OR ".join([f"{label} LIKE '%{tech}%'" for tech in tech_list])
+        else:
+            query_content = f"SELECT title, summary, overall_design, species,organ_parts, cell_types FROM datasets where {label} like '%{item}%'"
         cursor.execute(query_content)
     elif len(src) > 0:  # using src 
         cursor.execute(f"SELECT COUNT(*) FROM datasets")  # fetch the data length
