@@ -378,7 +378,7 @@ def run_deconv(adata_scFile, adata_spFile, adata_outPath):
     print(f"Write dcv results to {adata_outPath}/sp_deconv.h5ad")
 
 
-def append_cellchat(adata_inFile, adata_outPath, adata_outPath1, type='sc', species="Mouse", run_cellchat=True):
+def append_cellchat(adata_inFile, adata_outPath, type='sc', species="Mouse", run_cellchat=True):
     if run_cellchat:
         print("**Running CellChat...")
         print("**Enter ./Rsrc")
@@ -390,16 +390,16 @@ def append_cellchat(adata_inFile, adata_outPath, adata_outPath1, type='sc', spec
         print("##Running without CellChat, asserting CellChat is finished.")
     print("**Writing CellChat results to output file...")
     if type == 'sc':
-        adata_outFile = f"{adata_outPath1}/sc_meta.h5ad"
+        adata_outFile = f"{adata_outPath}/sc_meta.h5ad"
     else:
-        adata_outFile = f"{adata_outPath1}/sp_meta.h5ad"
+        adata_outFile = f"{adata_outPath}/sp_meta.h5ad"
     adata_out = sc.read_h5ad(adata_outFile)
     cc_res = add_heatmap_cellchat(f"{adata_outPath}/CellChat_heatmap.tsv", adata_out, groupby="annotation")
     write_heat(adata_out, cc_res, "CellChat")
     adata_out.write_h5ad(adata_outFile)
     print(f"**Finished, CellChat is in {adata_outFile}")
 
-def append_iTALK(adata_inFile, adata_outPath,adata_outPath1, type='sc', run_iTALK=True):
+def append_iTALK(adata_inFile, adata_outPath, type='sc', run_iTALK=True):
     if run_iTALK:
         print("**Running iTALK...")
         print("**Enter ./Rsrc")
@@ -411,9 +411,9 @@ def append_iTALK(adata_inFile, adata_outPath,adata_outPath1, type='sc', run_iTAL
         print("##Running without iTALK, asserting iTALK is finished.")
     print("**Writing iTALK results to output file...")
     if type == 'sc':
-        adata_outFile = f"{adata_outPath1}/sc_meta.h5ad"
+        adata_outFile = f"{adata_outPath}/sc_meta.h5ad"
     else:
-        adata_outFile = f"{adata_outPath1}/sp_meta.h5ad"
+        adata_outFile = f"{adata_outPath}/sp_meta.h5ad"
     adata_out = sc.read_h5ad(adata_outFile)
     it_res = add_heatmap_iTALK(f"{adata_outPath}/iTALK_heatmap.tsv", adata_out, groupby="annotation")
     write_heat(adata_out, it_res, "iTALK")
@@ -491,55 +491,18 @@ def append_SpaTalk_deconv(adata_scFile, adata_spFile, adata_outPath, species="Mo
     print("**Quit ./Rsrc")
 
 if __name__ == '__main__':
-    rawPath = f"/data/rzh/RawUrls"
-    res = []
-    for root, dirs, files in os.walk(rawPath):
-        if root.count(os.sep) - rawPath.count(os.sep) == 1:
-            for dir in dirs:
-                temp_res = os.path.join(root,dir)
-                if temp_res[-11:-8] == 'SCD':
-                    res.append(temp_res)
-    resourcePath = f"/home/rzh/stpair/backend/resources"
-    for root, dirs, files in os.walk(resourcePath):
-        dataset_ids = dirs
-        break
-    dataset_ids.remove("cpdb")
-    dataset_ids.remove("057")
-    dataset_ids.remove("227")
-    dataset_ids.remove("212")
-    # dataset_ids.remove("007")
-    # dataset_ids.remove("121")
-    for item in res:
-        # print(item)
-        dataset_id = item[-15:-12]
-        if dataset_id not in dataset_ids:
-            continue
-        scdata_id = item[-3:]
-        # print(dataset_id,scdata_id)
-        # dataset_id = '027'
-        # scdata_id = '018'
-        adata_spFile = f"/data/rzh/RawUrls/{dataset_id}/STDS0000{dataset_id}/New_{dataset_id}.h5ad"
-        adata_scFile = f"/data/rzh/RawUrls/{dataset_id}/SCDS0000{scdata_id}/New_{scdata_id}.h5ad"
-        adata_outPath = f"/data/rzh/RawUrls/{dataset_id}" 
-        adata_outPath1 = f"/home/rzh/stpair/backend/resources/{dataset_id}"
+    dataset_id = '245'
+    scdata_id = '022'
+    adata_spFile = f"/data/rzh/RawUrls/{dataset_id}/STDS0000{dataset_id}/New_{dataset_id}.h5ad"
+    adata_scFile = f"/data/rzh/RawUrls/{dataset_id}/SCDS0000{scdata_id}/New_{scdata_id}.h5ad"
+    adata_outPath = f"/data/rzh/RawUrls/{dataset_id}" 
+    sc_meta_path = f"/data/rzh/RawUrls/{dataset_id}//sc_meta.h5ad"
 
-        sc_meta_path = f"/data/rzh/RawUrls/{dataset_id}//sc_meta.h5ad"
-        if os.path.exists(adata_outPath1+"/success.txt"):
-            continue
-        if os.path.exists(adata_scFile)==False or  os.path.exists(adata_spFile)==False:
-            continue
-        if os.path.exists(sc_meta_path)==False:
-            continue
-        print(f"running in {adata_outPath}")
-        # run_deconv(adata_scFile, adata_spFile, adata_outPath)
-        # run_cpdb(adata_scFile, adata_outPath, type="sc")
-        # run_cpdb(f"{adata_outPath}/sp_deconv.h5ad", adata_outPath, type="sp", cpdbTime='10_23_2024_102715')
-        append_cellchat(adata_scFile, adata_outPath,adata_outPath1, run_cellchat=False)
-        append_iTALK(adata_scFile, adata_outPath,adata_outPath1,run_iTALK=False)
-        # append_cci(adata_scFile, adata_spFile, adata_outPath, species="Mouse", run_commot=False)
-        # append_commot(adata_spFile, adata_outPath)
-        success_path = adata_outPath1+"/success.txt"
-        with open(success_path, 'w') as file:
-                file.write("Success!")
-        
-        # rzh run 221 219 212 204(lack COMMOT) 
+    # print(f"running in {adata_outPath}")
+    # run_deconv(adata_scFile, adata_spFile, adata_outPath)
+    # run_cpdb(adata_scFile, adata_outPath, type="sc")
+    # run_cpdb(f"{adata_outPath}/sp_deconv.h5ad", adata_outPath, type="sp")
+    # append_cellchat(adata_scFile, adata_outPath, run_cellchat=False)
+    # append_iTALK(adata_scFile, adata_outPath, run_iTALK=False)
+    # append_cci(adata_scFile, adata_spFile, adata_outPath, species="Mouse", run_commot=True)
+    append_commot(adata_spFile, adata_outPath)

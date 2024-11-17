@@ -16,6 +16,7 @@ import TagCollapse from './utils/TagCollapse'
 // import loadingTips from './charts/LoadingTip'
 import Loading from './charts/Loading'
 import contactImg from "../assets/img/contact.png"
+import githubLogo from "../assets/img/github.svg"
 import {
   DatabaseOutlined,
   ProfileOutlined,
@@ -353,6 +354,11 @@ export const Database = () => {
                 }}>
                 津ICP备2024022781号-1
               </a>
+            </Col>
+            <Col>
+            <a href="https://github.com/lyotvincent/Pairpot">
+                <img src={githubLogo} alt="GitHub Logo" />
+            </a>
             </Col>
             <Col offset={1}>
               <p>

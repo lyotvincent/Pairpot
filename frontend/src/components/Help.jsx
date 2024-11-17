@@ -8,6 +8,7 @@ import { Card, Row, Col } from 'antd'
 import HelpTab from "./utils/HelpTab"
 import HelpTab1 from "./utils/HelpTab1"
 import HelpTab0 from "./utils/HelpTab0"
+import githubLogo from "../assets/img/github.svg"
 
 // steps:
 import browser1Img from "../assets/img/steps/browser1.png"
@@ -436,6 +437,11 @@ const Help = () => {
                 }}>
                 津ICP备2024022781号-1
               </a>
+            </Col>
+            <Col>
+            <a href="https://github.com/lyotvincent/Pairpot">
+                <img src={githubLogo} alt="GitHub Logo" />
+            </a>
             </Col>
             <Col offset={1}>
               <p>

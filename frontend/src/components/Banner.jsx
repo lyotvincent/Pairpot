@@ -6,9 +6,15 @@ import lassoImg from "../assets/img/browse/lasso-view.png"
 import netImg from "../assets/img/browse/network.svg"
 import heatImg from "../assets/img/browse/heatmap.svg"
 import coverImg from "../assets/img/cover-figure.png"
+import githubLogo from "../assets/img/github.svg"
+import folderLogo from "../assets/img/folder.svg"
+import locationLogo from "../assets/img/location.svg"
+import personLogo from "../assets/img/person.svg"
+import emailLogo from "../assets/img/email.svg"
+import { Circle } from 'react-bootstrap-icons'
 import axios from 'axios'
 import { Button, ConfigProvider, Divider, Layout, Space, Statistic } from 'antd'
-import { ArrowRightCircle } from 'react-bootstrap-icons'
+import { ArrowRightCircle, Cpu } from 'react-bootstrap-icons'
 import 'animate.css'
 import TrackVisibility from 'react-on-screen'
 import { Card, Row, Col } from 'antd'
@@ -511,23 +517,23 @@ const Help = () => {
                 <h2>
                   {"News"}
                 </h2>
-                <Divider/>
-                  <p>
-                <span style={{color:'gray'}}>2024.11.4&nbsp;&nbsp;</span>
-                Pairpot has been published online with citation:
-                Ruan Z., Lin F., Zhang Z., et al. (2024) Pairpot: a database with real-time lasso-based analysis tailored for paired single-cell and spatial transcriptomics. Nucleic Acids Research, gkae986, &nbsp;
-                        <a href="https://doi.org/10.1093/nar/gkae986"target='_blank'
-                            style={{
-                            color: 'rgba(0, 0, 0, 0.6)',
-                            textDecoration: 'none',
-                            // fontSize: 24
-                            }}>
-                            https://doi.org/10.1093/nar/gkae986
-                        </a>
-                </p>
-                <br/>
+                <Divider />
                 <p>
-                <span style={{color:'gray'}}>2024.10.15&nbsp;&nbsp;</span>
+                  <span style={{ color: 'gray' }}>2024.11.4&nbsp;&nbsp;</span>
+                  Pairpot has been published online with citation:
+                  Ruan Z., Lin F., Zhang Z., et al. (2024) Pairpot: a database with real-time lasso-based analysis tailored for paired single-cell and spatial transcriptomics. Nucleic Acids Research, gkae986, &nbsp;
+                  <a href="https://doi.org/10.1093/nar/gkae986" target='_blank'
+                    style={{
+                      color: 'rgba(0, 0, 0, 0.6)',
+                      textDecoration: 'none',
+                      // fontSize: 24
+                    }}>
+                    https://doi.org/10.1093/nar/gkae986
+                  </a>
+                </p>
+                <br />
+                <p>
+                  <span style={{ color: 'gray' }}>2024.10.15&nbsp;&nbsp;</span>
                   Pairpot has been accepted by Nucleic Acids Research.
                 </p>
 
@@ -541,33 +547,181 @@ const Help = () => {
         <Footer>
           <Row>
 
-          </Row>
-          <Row>
-            <Col span={4}>
-              <Space direction='horizontal'>
+
+            {/* <Row>
+              <Space direction='horizontal' style={{display: 'flex', justifyContent: 'center'}}>
                 <h3>Contact us
                   {' '}
-                  <img src={contactImg} style={{ width: '20%', height: '20%' }}></img>
+                  <img src={contactImg} style={{ width: '5%', height: '5%' }}></img>
                 </h3>
               </Space>
               <a href="https://beian.miit.gov.cn" target='_blank'
                 style={{
                   color: 'rgba(0, 0, 0, 0.6)',
                   textDecoration: 'none',
-                  fontSize: 13
+                  fontSize: 16
                 }}>
                 津ICP备2024022781号-1
               </a>
+            </Row> */}
+
+
+            <Col span={10} style={{ marginBottom: '1rem' }}>
+              <Row>
+                {/* <h3>About Pairpot</h3>
+              <a href="https://github.com/lyotvincent/Pairpot">
+                <img src={githubLogo} alt="GitHub Logo"  style={{ width: '3rem', height: '3rem' }}/>
+              </a>
+              <a href="src.bioxai.cn">
+                  <img src={folderLogo} alt="Folder Logo" style={{ width: '2.5rem', height: '2.5rem' }}/>
+              </a> */}
+
+                <Col style={{ marginTop: '0.3rem' }}>
+                  <h3>About Pairpot</h3>
+                </Col>
+                <Col style={{ display: 'flex', alignItems: 'center' }}>
+                  <a href="https://github.com/lyotvincent/Pairpot">
+                    <img src={githubLogo} alt="GitHub Logo" style={{ width: '3rem', height: '3rem', marginRight: '1rem', marginLeft: '1rem' }} />
+                  </a>
+                  <a href="src.bioxai.cn">
+                    <img src={folderLogo} alt="Folder Logo" style={{ width: '2.5rem', height: '2.5rem', marginRight: '1rem' }} />
+                  </a>
+                  <a href="http://bio.nankai.edu.cn/">
+                    <img src={locationLogo} alt="Location Logo" style={{ width: '2.5rem', height: '2.5rem' }} />
+                  </a>
+                </Col>
+                <p style={{ fontSize: '15px' }}>
+
+                  Developed by Bioinformatics and Intelligent Medicine, Nankai University
+                </p>
+              </Row>
+
+
+              <Row style={{ marginTop: '-0.3rem' }}>
+
+                <Col>
+                  {/* <h3>Contact us</h3> */}
+                  <Space align="start" style={{ marginBottom: '0.3rem' }}>
+                    <h3>Contact us</h3>
+                    <img src={contactImg} alt="Contact Icon" style={{ width: '3rem', height: '1.5rem', marginLeft: '0.5rem', marginTop: '0.5rem' }} />
+                  </Space>
+
+                  <Row>
+                    <Col>
+                      <img src={emailLogo} style={{ width: '2rem', height: '2rem' }} />
+                    </Col>
+                    <Col>
+                      <p style={{ marginTop: '0.3rem', fontSize: '20px' }}>
+                        &nbsp;&nbsp;Zhihan Ruan, rrrzhan@mail.nankai.edu.cn
+                      </p>
+                    </Col>
+                  </Row>
+
+                  <Row style={{ marginTop: '-0.5rem' }}>
+                    <Col>
+                      <img src={emailLogo} style={{ width: '2rem', height: '2rem' }} />
+                    </Col>
+                    <Col>
+                      <p style={{ marginTop: '0.3rem', fontSize: '20px' }}>
+                        &nbsp;&nbsp;Jian Liu, jianliu@mail.nankai.edu.cn
+                      </p>
+                    </Col>
+                  </Row>
+
+                  {/* <Row>
+                <a href="https://beian.miit.gov.cn" target='_blank'
+                  style={{
+                    color: 'rgba(0, 0, 0, 0.6)',
+                    textDecoration: 'none',
+                    fontSize: 16,
+                    textAlign: 'center'
+                  }}>
+                  津ICP备2024022781号-1
+              </a>
+              </Row> */}
+
+                </Col>
+
+              </Row>
             </Col>
-            <Col offset={1}>
-              <p>
-                *Zhihan Ruan, Centre for Bioinformatics and Intelligent
-                Medicine, Nankai University, rrrzhan@mail.nankai.edu.cn
-              </p>
-              <p>
-                *Jian Liu, State Key Laboratory of Medical Chemical Biology, College of Computer Science, Nankai University, jianliu@mail.nankai.edu.cn
-              </p>
+
+            <Col span={6} style={{ marginTop: '0.3rem' }}>
+              <h3>Other Works</h3>
+
+
+              <a href="http://neotcrdb.bioxai.cn/home" style={{ color: 'black', textDecoration: 'none', marginTop: '0.3rem' }}>
+                <p style={{ fontSize: '18px' }}>
+                  &nbsp;
+                  {"NeoTCR"}
+                </p>
+              </a>
+
+              <a href="https://dupscan.sysumeg.com" style={{ color: 'black', textDecoration: 'none', }}>
+                <p style={{ fontSize: '18px' }}>
+                  &nbsp;
+                  {"DupScan"}
+                </p>
+              </a>
+
+              <a href="https://hic.bioaimed.com/" style={{ color: 'black', textDecoration: 'none', }}>
+                <p style={{ fontSize: '18px' }}>
+                  &nbsp;
+                  {"HiBrowser"}
+                </p>
+              </a>
+              {/* 
+              <Row>
+
+                <Col>
+                  <Col>
+                    <img src={locationLogo} style={{ width:'2rem',height:'2rem'}}/>
+                  </Col>
+                </Col>
+
+                <Col>
+                <a href="http://bio.nankai.edu.cn"  style={{ color:'gray',textDecoration: 'none',}}>
+                  <p style={{marginTop:'0.5rem'}}>More Information...</p>
+                </a>
+                </Col>
+              </Row> */}
             </Col>
+
+
+            <Col span={8}>
+              <h3>Visitors</h3>
+              <a href="https://www.revolvermaps.com/livestats/5v61plwc2pd/"><img src="//rf.revolvermaps.com/h/m/a/5/00ff6c/128/25/5v61plwc2pd.png" alt="Map" style={{ border: "0", width: "256px", height: "128px" }} /></a>
+              <Row>
+                <a href="https://beian.miit.gov.cn" target='_blank'
+                  style={{
+                    color: 'rgba(0, 0, 0, 0.6)',
+                    textDecoration: 'none',
+                    fontSize: 16,
+                    textAlign: 'center',
+                  }}>
+                  津ICP备2024022781号-1
+                </a>
+              </Row>
+            </Col>
+
+            {/* <Col  offset={1}>
+            <h3>Other Works</h3>
+              <a href="http://neotcrdb.bioxai.cn/home"  style={{color:'black', textDecoration: 'none'}}>
+                  <p style={{marginTop:'2rem'}}>
+                    {"neotcrdb"}</p>
+              </a>
+              
+              <a href="https://dupscan.sysumeg.com" style={{color:'black', textDecoration: 'none',}}>
+                  <p>
+                    {"dupscan"}
+                  </p>
+              </a>
+            </Col>
+
+
+            <Col  offset={1}>
+            <h3>Visitors</h3>
+            <a href="https://www.revolvermaps.com/livestats/5v61plwc2pd/"><img src="//rf.revolvermaps.com/h/m/a/5/00ff6c/128/25/5v61plwc2pd.png"  alt="Map" style={{border:"0" ,width:"256px",height:"128px"}}/></a>            
+            </Col> */}
           </Row>
         </Footer>
       </Layout>

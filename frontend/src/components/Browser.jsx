@@ -2,6 +2,7 @@ import { DotChartOutlined, FileDoneOutlined, FileSearchOutlined, FileTextOutline
 import React, { useState, useEffect, lazy, Suspense, useRef, memo } from 'react'
 import { ZipReader, BlobReader, BlobWriter } from "@zip.js/zip.js"
 import logoFig from "../assets/img/mylogo.png"
+import githubLogo from "../assets/img/github.svg"
 import {
   Menu,
   Button,
@@ -824,6 +825,11 @@ const Browser = () => {
                   }}>
                   津ICP备2024022781号-1
                 </a>
+              </Col>
+              <Col>
+              <a href="https://github.com/lyotvincent/Pairpot">
+                  <img src={githubLogo} alt="GitHub Logo" />
+              </a>
               </Col>
               <Col offset={1}>
                 <p>

@@ -4,6 +4,7 @@ import { ConfigProvider, Divider, Layout, Space } from 'antd'
 import { Card, Row, Col } from 'antd'
 import { List } from 'echarts'
 const { Content, Footer } = Layout
+import githubLogo from "../assets/img/github.svg"
 
 const News = () => {
     return (
@@ -87,6 +88,11 @@ const News = () => {
                     }}>
                     津ICP备2024022781号-1
                   </a>
+                </Col>
+                <Col>
+                <a href="https://github.com/lyotvincent/Pairpot">
+                    <img src={githubLogo} alt="GitHub Logo" />
+                </a>
                 </Col>
                 <Col offset={1}>
                   <p>
