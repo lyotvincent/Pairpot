@@ -9,6 +9,7 @@ import coverImg from "../assets/img/cover-figure.png"
 import githubLogo from "../assets/img/github.svg"
 import folderLogo from "../assets/img/folder.svg"
 import locationLogo from "../assets/img/location.svg"
+import zenodoLogo from '../assets/img/zenodo.svg'
 import personLogo from "../assets/img/person.svg"
 import emailLogo from "../assets/img/email.svg"
 import { Circle } from 'react-bootstrap-icons'
@@ -546,165 +547,88 @@ const Help = () => {
 
         <Footer>
           <Row align={'stretch'}>
-
-
-            <Col span={11} style={{ marginBottom: '1rem' }} offset={1}>
+            <Col span={10} style={{ marginBottom: '1rem' }} offset={0}>
               <Row>
-                {/* <h3>About Pairpot</h3>
-              <a href="https://github.com/lyotvincent/Pairpot">
-                <img src={githubLogo} alt="GitHub Logo"  style={{ width: '3rem', height: '3rem' }}/>
-              </a>
-              <a href="src.bioxai.cn">
-                  <img src={folderLogo} alt="Folder Logo" style={{ width: '2.5rem', height: '2.5rem' }}/>
-              </a> */}
-
                 <Col style={{ marginTop: '0.3rem' }}>
                   <h3>About Pairpot</h3>
                 </Col>
                 <Col style={{ display: 'flex', alignItems: 'center' }}>
                   <a href="https://github.com/lyotvincent/Pairpot">
-                    <img src={githubLogo} alt="GitHub Logo" style={{ width: '3rem', height: '3rem', marginRight: '0.9rem', marginLeft: '0.9rem' }} />
+                    <img src={githubLogo} alt="GitHub Logo" style={{ height: '2.5rem', marginRight: '0.9rem' }} />
                   </a>
                   <a href="src.bioxai.cn">
-                    <img src={folderLogo} alt="Folder Logo" style={{ width: '2.3rem', height: '2.3rem', marginRight: '1rem' }} />
+                    <img src={folderLogo} alt="Folder Logo" style={{ height: '2rem', marginRight: '1rem' }} />
                   </a>
                   <a href="http://bio.nankai.edu.cn/">
-                    <img src={locationLogo} alt="Location Logo" style={{ width: '2rem', height: '2rem' }} />
+                    <img src={locationLogo} alt="Location Logo" style={{ height: '1.6rem' }} />
+                  </a>
+                  <a href="https://zenodo.org/records/13919102">
+                    <img src={zenodoLogo} alt="Zenodo Logo" style={{ height: '1.5rem', marginRight: '1.3rem' }} />
                   </a>
                 </Col>
                 <p style={{ fontSize: '16px' }}>
-
-                  Developed by Bioinformatics and Intelligent Medicine, Nankai University
+                  Pairpot's data resources are available at <a href='http://src.bioxai.cn'>src</a> in bulk.
+                  Any issues can be reported at <a href='https://github.com/lyotvincent/Pairpot/issues'>GitHub Issue</a>.
+                  Any feedback will be appreciated. <b>Please contact:</b>
+                </p>
+                <p style={{ marginTop: '0rem', fontSize: '16px' }}>
+                  Zhihan Ruan{'  '} <img src={emailLogo} style={{ width: '16px', height: '16px', marginTop: 0 }} />{' '}<i>rrrzhan@mail.nankai.edu.cn</i><br />
+                  Jian Liu{'  '} <img src={emailLogo} style={{ width: '16px', height: '16px', marginTop: 0 }} />{' '}<i>jianliu@nankai.edu.cn</i>
                 </p>
               </Row>
+            </Col>
 
-
-              <Row style={{ marginTop: '-0.3rem' }}>
-
-                <Col>
-                  {/* <h3>Contact us</h3> */}
-                  <Space align="start" style={{ marginBottom: '0.3rem', marginTop: '0.3rem'}}>
-                    <h3>Contact us</h3>
-                    <img src={contactImg} alt="Contact Icon" style={{ width: '3rem', height: '1.5rem', marginLeft: '0.5rem', marginTop: '0.5rem' }} />
-                  </Space>
-
-                  <Row>
-                    <Col>
-                      <img src={emailLogo} style={{ width: '16px', height: '16px', marginTop:-8 }} />
-                    </Col>
-                    <Col>
-                      <p style={{ marginTop: '-0.3rem', fontSize: '16px' }}>
-                        &nbsp;Zhihan Ruan, rrrzhan@mail.nankai.edu.cn
-                      </p>
-                    </Col>
-                  </Row>
-
-                  <Row style={{ marginTop: '-0.5rem' }}>
-                    <Col>
-                      <img src={emailLogo} style={{ width: '16px', height: '16px', marginTop:-8  }} />
-                    </Col>
-                    <Col>
-                      <p style={{ marginTop: '-0.3rem', fontSize: '16px' }}>
-                        &nbsp;Jian Liu, jianliu@nankai.edu.cn
-                      </p>
-                    </Col>
-                  </Row>
-
-                  {/* <Row>
-                <a href="https://beian.miit.gov.cn" target='_blank'
-                  style={{
-                    color: 'rgba(0, 0, 0, 0.6)',
-                    textDecoration: 'none',
-                    fontSize: 16,
-                    textAlign: 'center'
-                  }}>
-                  津ICP备2024022781号-1
-              </a>
-              </Row> */}
-
-                </Col>
-
+            <Col span={4} style={{ marginBottom: '1rem' }} offset={1}>
+              <Col style={{ marginTop: '0.3rem' }}>
+                <h3>Other Works</h3>
+              </Col>
+              <Row>
+                <Button href='http://neotcrdb.bioxai.cn/home'
+                  style={{ backgroundColor: 'transparent', boxShadow: 'none', borderColor: 'transparent', textDecoration: 'none', marginTop: '0.5rem' }}>
+                  {"> NeoTCR"}
+                </Button>
+              </Row>
+              <Row>
+                <Button href='https://dupscan.sysumeg.com'
+                  style={{ backgroundColor: 'transparent', boxShadow: 'none', borderColor: 'transparent', textDecoration: 'none' }}>
+                  {"> DupScan"}
+                </Button>
+              </Row>
+              <Row>
+                <Button href='https://hic.bioaimed.com/'
+                  style={{ backgroundColor: 'transparent', boxShadow: 'none', borderColor: 'transparent', textDecoration: 'none' }}>
+                  {"> HiBrowser"}
+                </Button>
+              </Row>
+              <Row>
+                <Button href='https://www.neopetide.cn/'
+                  style={{ backgroundColor: 'transparent', boxShadow: 'none', borderColor: 'transparent', textDecoration: 'none' }}>
+                  {"> NeoPetide"}
+                </Button>
               </Row>
             </Col>
 
-            <Col span={5} style={{ marginBottom: '1rem' }}>
-            <Col style={{ marginTop: '0.3rem' }}>
-                  <h3>Other Works</h3>
-                </Col>
-              <Row>
-              <Button href='http://neotcrdb.bioxai.cn/home'
-                style={{backgroundColor:'transparent', borderColor:'transparent',  marginTop: '0.5rem'}}>
-                {"> NeoTCR"}
-              </Button>
-              </Row>
-              <Row>
-              <Button href='https://dupscan.sysumeg.com'
-                style={{backgroundColor:'transparent', borderColor:'transparent'}}>
-                {"> DupScan"}
-              </Button>
-              </Row>
-              <Row>
-              <Button href='https://hic.bioaimed.com/'
-               style={{backgroundColor:'transparent', borderColor:'transparent'}}>
-                {"> HiBrowser"}
-              </Button>
-              </Row>
-              {/* 
-              <Row>
 
-                <Col>
-                  <Col>
-                    <img src={locationLogo} style={{ width:'2rem',height:'2rem'}}/>
-                  </Col>
-                </Col>
-
-                <Col>
-                <a href="http://bio.nankai.edu.cn"  style={{ color:'gray',textDecoration: 'none',}}>
-                  <p style={{marginTop:'0.5rem'}}>More Information...</p>
-                </a>
-                </Col>
-              </Row> */}
-            </Col>
-
-
-            <Col span={7}>
-            <Col style={{ marginTop: '0.3rem' }}>
-                  <h3>Visitors</h3>
-                </Col>
+            <Col span={7} style={{ marginBottom: '1rem' }} offset={1}>
+              <Col style={{ marginTop: '0.3rem' }}>
+                <h3>Visitors</h3>
+              </Col>
               <a href="https://www.revolvermaps.com/livestats/5v61plwc2pd/"><img src="//rf.revolvermaps.com/h/m/a/5/00ff6c/128/25/5v61plwc2pd.png" alt="Map" style={{ border: "0", width: "256px", height: "128px" }} /></a>
             </Col>
-
-            {/* <Col  offset={1}>
-            <h3>Other Works</h3>
-              <a href="http://neotcrdb.bioxai.cn/home"  style={{color:'black', textDecoration: 'none'}}>
-                  <p style={{marginTop:'2rem'}}>
-                    {"neotcrdb"}</p>
+            <p style={{ marginTop: '-1rem', fontSize: '14px', marginLeft: '-0.3rem' }}>
+              <img src={locationLogo} alt="Location Logo" style={{ width: '16px', height: '16px', marginTop: -5 }} />{' '}<i>State Key Laboratory of Medicinal Chemical Biology, Centre for Bioinformatics and <br /> Intelligent Medicine, College of Computer Science, Nankai University</i>
+              <br />
+              <a href="https://beian.miit.gov.cn" target='_blank'
+                style={{
+                  color: 'rgba(0, 0, 0, 0.6)',
+                  textDecoration: 'none',
+                  fontSize: 13,
+                  textAlign: 'center',
+                }}>
+                津ICP备2024022781号-1
               </a>
-              
-              <a href="https://dupscan.sysumeg.com" style={{color:'black', textDecoration: 'none',}}>
-                  <p>
-                    {"dupscan"}
-                  </p>
-              </a>
-            </Col>
-
-
-            <Col  offset={1}>
-            <h3>Visitors</h3>
-            <a href="https://www.revolvermaps.com/livestats/5v61plwc2pd/"><img src="//rf.revolvermaps.com/h/m/a/5/00ff6c/128/25/5v61plwc2pd.png"  alt="Map" style={{border:"0" ,width:"256px",height:"128px"}}/></a>            
-            </Col> */}
+            </p>
           </Row>
-          <Row align={'center'} style={{marginBottom:0}}>
-                <a href="https://beian.miit.gov.cn" target='_blank'
-                  style={{
-                    color: 'rgba(0, 0, 0, 0.6)',
-                    textDecoration: 'none',
-                    fontSize: 14,
-                    textAlign: 'center',
-                  }}>
-                  津ICP备2024022781号-1
-                </a>
-              </Row>
         </Footer>
       </Layout>
     </ConfigProvider>
