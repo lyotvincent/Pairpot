@@ -2,13 +2,12 @@
 import contactImg from "../assets/img/contact.png"
 import { ConfigProvider, Divider, Layout, Space } from 'antd'
 import 'animate.css'
-import { Card, Row, Col } from 'antd'
+import { Card, Row, Col, Button } from 'antd'
 // import { useLocation, useNavigate } from 'react-router-dom'
 // import Loading from './charts/Loading'
 import HelpTab from "./utils/HelpTab"
 import HelpTab1 from "./utils/HelpTab1"
 import HelpTab0 from "./utils/HelpTab0"
-import githubLogo from "../assets/img/github.svg"
 
 // steps:
 import browser1Img from "../assets/img/steps/browser1.png"
@@ -41,8 +40,7 @@ import tool22 from "../assets/img/tool2/1.jpg"
 import tool23 from "../assets/img/tool2/2.jpg"
 import tool24 from "../assets/img/tool2/3.jpg"
 
-
-
+import PairpotFooter from './Footer'
 
 
 
@@ -416,44 +414,7 @@ const Help = () => {
             </Col>
           </section>
         </Content>
-
-        <Footer>
-          <Row>
-
-          </Row>
-          <Row>
-            <Col span={4}>
-              <Space direction='horizontal'>
-                <h3>Contact us
-                  {' '}
-                  <img src={contactImg} style={{ width: '20%', height: '20%' }} alt="contact"></img>
-                </h3>
-              </Space>
-              <a href="https://beian.miit.gov.cn" target='_blank'
-                style={{
-                  color: 'rgba(0, 0, 0, 0.6)',
-                  textDecoration: 'none',
-                  fontSize: 13
-                }}>
-                津ICP备2024022781号-1
-              </a>
-            </Col>
-            <Col>
-            <a href="https://github.com/lyotvincent/Pairpot">
-                <img src={githubLogo} alt="GitHub Logo" />
-            </a>
-            </Col>
-            <Col offset={1}>
-              <p>
-                *Zhihan Ruan, Centre for Bioinformatics and Intelligent
-                Medicine, Nankai University, rrrzhan@nankai.edu.cn
-              </p>
-              <p>
-                *Jian Liu, State Key Laboratory of Medical Chemical Biology, College of Computer Science, Nankai University, jianliu@nankai.edu.cn
-              </p>
-            </Col>
-          </Row>
-        </Footer>
+        <PairpotFooter/>
       </Layout>
     </ConfigProvider>
   )

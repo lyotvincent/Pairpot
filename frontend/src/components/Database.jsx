@@ -1,5 +1,4 @@
 import React, { useState, useEffect, View } from 'react'
-// import TrackVisibility from 'react-on-screen'
 import 'bootstrap/dist/css/bootstrap.min.css'
 // import { ReactComponent as Female } from '../assets/img/female.svg'
 // import { ReactComponent as FemaleOrgans } from '../assets/img/female-organs.svg'
@@ -10,13 +9,14 @@ import Tissues from './metas/Tissues'
 import Topics from './metas/Topics'
 import axios from 'axios'
 import { useQuery } from 'react-query'
-import { Card, Layout, theme, Tag, Row, Col, Space, Divider, ConfigProvider } from 'antd'
+import { Card, Layout, theme, Tag, Row, Col, Space, Divider, Button } from 'antd'
 import logoFig from "../assets/img/mylogo.png"
 import TagCollapse from './utils/TagCollapse'
 // import loadingTips from './charts/LoadingTip'
 import Loading from './charts/Loading'
-import contactImg from "../assets/img/contact.png"
-import githubLogo from "../assets/img/github.svg"
+import PairpotFotter from './Footer'
+//import contactImg from "../assets/img/contact.png"
+
 import {
   DatabaseOutlined,
   ProfileOutlined,
@@ -24,8 +24,7 @@ import {
 } from '@ant-design/icons'
 import DatasetTab from './utils/DatasetTab'
 import Search from './utils/SearchEngine'
-import SampleTab from './utils/SampleTab'
-const { Content, Footer } = Layout
+const { Content } = Layout
 const { enterLoading } = Loading
 
 export const Database = () => {
@@ -337,41 +336,8 @@ export const Database = () => {
           </Card>
           {/* <div>{JSON.stringify(Array.from(new Set(src.data?.data.map((item) => item[4]))))}</div> */}
         </Content>
-        <Footer>
-          <Row>
-            <Col span={4}>
-              <Space direction='horizontal'>
-                <h3>Contact us
-                  {' '}
-                  <img src={contactImg} style={{ width: '20%', height: '20%' }}></img>
-                </h3>
-              </Space>
-              <a href="https://beian.miit.gov.cn" target='_blank'
-                style={{
-                  color: 'rgba(0, 0, 0, 0.6)',
-                  textDecoration: 'none',
-                  fontSize: 13
-                }}>
-                津ICP备2024022781号-1
-              </a>
-            </Col>
-            <Col>
-            <a href="https://github.com/lyotvincent/Pairpot">
-                <img src={githubLogo} alt="GitHub Logo" />
-            </a>
-            </Col>
-            <Col offset={1}>
-              <p>
-                *Zhihan Ruan, Centre for Bioinformatics and Intelligent
-                Medicine, Nankai University, rrrzhan@nankai.edu.cn
-              </p>
-              <p>
-                *Jian Liu, State Key Laboratory of Medical Chemical Biology, College of Computer Science, Nankai University, jianliu@nankai.edu.cn
-              </p>
-            </Col>
-          </Row>
-        </Footer>
       </Layout>
+      <PairpotFotter/>
     </Layout>
   )
 }
