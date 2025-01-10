@@ -53,7 +53,7 @@ const DatasetTab = (props) => {
           List
         </span>
       ),
-      children: <DatasetList src={dataSrc} col={dataCol} />,
+      children: <DatasetList oriSrc={OriginResponse.data?.data} src={dataSrc} col={dataCol} />,
     },
     {
       key: '2',

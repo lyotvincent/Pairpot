@@ -253,10 +253,10 @@ const PairView = ({ spfile, scfile, setCompLoad, onRef, height, width, margin, m
   const [yInv, setyInv] = useState(false)
   const [cellNum, setCellNum] = useState(0)
   const [refineOption, setRefineOption] = useState([
-    { value: 0, label: 'Eager Refiner' },
-    { value: 1, label: 'Lazy Refiner' },
+    // { value: 0, label: 'Eager Refiner' },
+    // { value: 1, label: 'Lazy Refiner' },
     { value: 2, label: 'LabelPropagation' },
-    { value: 3, label: 'LabelSpreading' },
+    // { value: 3, label: 'LabelSpreading' },
   ])
   const { token } = useToken()
 

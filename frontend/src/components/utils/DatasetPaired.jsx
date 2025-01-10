@@ -15,7 +15,7 @@ import './bg.scss'
 
 const DatasetPaired = ({ descCol, descInfo, text, placement, scInfo }) => {
   const [modal1Open, setModal1Open] = useState(false)
-  // console.log(scInfo)
+  console.log(scInfo)
 
   const Columns = [
     {

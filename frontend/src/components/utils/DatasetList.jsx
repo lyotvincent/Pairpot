@@ -47,7 +47,9 @@ const AddCommas = (num) => {
   return num.toLocaleString().replace(/^0+/, '')
 }
 
-const DatasetList = ({ src, col }) => {
+const DatasetList = ({ oriSrc, src, col }) => {
+  console.log(oriSrc)
+  console.log(src)
   const navigate = useNavigate()
   const [dataSrc, setDataSrc] = useState([])
   const [attr, setAttr] = useState([])
@@ -65,6 +67,8 @@ const DatasetList = ({ src, col }) => {
     retry: false,
     refetchOnWindowFocus: false,
   })
+
+  console.log(OriginResponse.data?.data)
 
   const GetscItem = (scid) => {
     return OriginResponse.data?.data.find((item) => item[1] === scid)
@@ -191,7 +195,7 @@ const DatasetList = ({ src, col }) => {
                 placement={'left'}
                 // scInfo={item}
                 scInfo={
-                  src.find(s => s[1] === item[26])
+                  oriSrc.find(s => s[1] === item[26])
                   // src.find(s => s[1] === item[26])
                   // Array.isArray(src) && item.length > 26
                   //   ? src.find(s => Array.isArray(s) && s[1] === item[26]) || item

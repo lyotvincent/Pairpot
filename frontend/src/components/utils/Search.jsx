@@ -100,7 +100,17 @@ const options = [
     renderItem("Characterizing Neonatal Heart Maturation, Regeneration, and Scar Resolution Using Spatial Transcriptomics [spatial]", 'STDS0000124'),
     renderItem("Human Prostate Cancer, Acinar Cell Carcinoma (FFPE)", 'STDS0000131'),
 
-    renderItem("Spatial transcriptomics: The effect of consecutive slices data integration on accurate cell type annotation and clustering", 'STDS0000224')
+    renderItem("Spatial transcriptomics: The effect of consecutive slices data integration on accurate cell type annotation and clustering", 'STDS0000224'),
+    renderItem("Single cell transcriptomics analysis of bone marrow mesenchymal lineage cells", 'STDS0000242'),
+    renderItem("Single cell RNA-sequencing of human brain metastasis-infiltrating T cells", 'STDS0000244'),
+    renderItem("Single cell RNA sequencing of adult regenerating mouse digit tips", 'STDS0000245'),
+    renderItem("Defining the Activated Fibroblast Population in Lung Fibrosis Using Single Cell Sequencing", 'STDS0000247'),
+    renderItem("Single-cell RNA sequencing reveals tissue architecture during human high-grade serous ovarian cancer progression", 'STDS0000248'),
+    renderItem("The role of Fgf9 in mouse pancreas development [scRNA-seq]", 'STDS0000264'),
+    renderItem("Visium Spatial Transcriptomics expression profiles from IPMN samples of the pancreas", 'STDS0000265'),
+
+
+
 
     ],
   },
