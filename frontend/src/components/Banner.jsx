@@ -520,8 +520,8 @@ const Help = () => {
                 </p>
 
                 <p>
-                  <span style={{ color: 'gray' }}>2025.1.8&nbsp;&nbsp;</span>
-                  We have updated some sc-sp paired dataset,eg:STDS0000242, STDS0000244...
+                  <span style={{ color: 'gray' }}>2025.1.16&nbsp;&nbsp;</span>
+                  Pairpot has been officially published in Nucleic Acids Research, Volume 53, Issue D1, on January 6, 2025, with pages D1087–D1098.
                 </p>
 
               </div>
