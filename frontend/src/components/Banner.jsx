@@ -521,8 +521,8 @@ const Help = () => {
 
                 <p>
                   <span style={{ color: 'gray' }}>2025.1.16&nbsp;&nbsp;</span>
-                  Pairpot has been officially published in Nucleic Acids Research, Volume 53, Issue D1, on January 6, 2025, with pages D1087–D1098.
-                </p>
+                  Pairpot has updated some new sc-sp paired dataset: 
+                  STDS0000242-SCDS0000020, STDS0000244-SCDS0000021,  STDS0000245-SCDS0000022,STDS0000247-SCDS0000023,STDS0000248-SCDS0000024,STDS0000264-SCDS0000033,STDS0000265-SCDS0000034.         </p>
 
               </div>
             </Row>
