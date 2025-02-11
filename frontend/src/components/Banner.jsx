@@ -519,10 +519,10 @@ const Help = () => {
                   Pairpot has been published on Nucleic Acids Research online.
                 </p>
 
-                <p>
+                {/* <p>
                   <span style={{ color: 'gray' }}>2025.1.16&nbsp;&nbsp;</span>
                   Pairpot has updated some new sc-sp paired dataset: 
-                  STDS0000242-SCDS0000020, STDS0000244-SCDS0000021,  STDS0000245-SCDS0000022,STDS0000247-SCDS0000023,STDS0000248-SCDS0000024,STDS0000264-SCDS0000033,STDS0000265-SCDS0000034.         </p>
+                  STDS0000242-SCDS0000020, STDS0000244-SCDS0000021,  STDS0000245-SCDS0000022,STDS0000247-SCDS0000023,STDS0000248-SCDS0000024,STDS0000264-SCDS0000033,STDS0000265-SCDS0000034.         </p> */}
 
               </div>
             </Row>
