@@ -86,7 +86,7 @@ export const PairpotFooter = () => {
         {/* <a href="https://www.revolvermaps.com/livestats/5v61plwc2pd/"><img src="//rf.revolvermaps.com/h/m/a/5/00ff6c/128/25/5v61plwc2pd.png" alt="Map" style={{ border: "0", width: "256px", height: "128px" }} /></a> */}
       {/* </Col> */}
       <Col style={{ marginBottom: '1rem' }} span={21} offset={1}>
-      <b>Citation:</b> Ruan Z., Lin F., Zhang Z., Cao J., Xiang W., Wei X. and Liu J. (2024) Pairpot: a database with real-time lasso-based analysis tailored for paired single-cell and spatial transcriptomics. Nucleic Acids Research, Volume 53, Issue D1, 6 January 2025, Pages D1087–D1098, &nbsp;
+      <b>Citation:</b> Ruan Z., Lin F., Zhang Z., Cao J., Xiang W., Wei X. and Liu J. (2025) Pairpot: a database with real-time lasso-based analysis tailored for paired single-cell and spatial transcriptomics. Nucleic Acids Research, Volume 53, Issue D1, 6 January 2025, Pages D1087–D1098, &nbsp;
             <a href="https://doi.org/10.1093/nar/gkae986" target='_blank'
               style={{
                 color: 'rgba(0, 0, 0, 0.6)',
